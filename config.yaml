@@ -1,0 +1,104 @@
+# 管理后台配置
+admin:
+  # 服务配置
+  server:
+    host: "0.0.0.0"
+    port: 8081
+  # 刷新令牌有效期（秒），默认24小时
+  refresh_token_ttl: 86400
+  # 访问令牌有效期（秒），默认1小时
+  access_token_ttl: 3600
+  # JWT签名密钥
+  hmac_secret: "your-secret-key-change-in-production"
+  # 超级管理员ID
+  super_user_id: 1001
+  # 跨域配置
+  cors:
+    allow_origins:
+      - "http://localhost:3000"
+      - "http://localhost:8080"
+    allow_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "OPTIONS"
+    allow_headers:
+      - "Content-Type"
+      - "Authorization"
+      - "X-Requested-With"
+    allow_credentials: true
+
+# API模块配置
+api:
+  # 服务配置
+  server:
+    host: "0.0.0.0"
+    port: 8082
+  # 刷新令牌有效期（秒）
+  refresh_token_ttl: 604800
+  # 访问令牌有效期（秒）
+  access_token_ttl: 7200
+  # JWT签名密钥
+  hmac_secret: "api-secret-key-change-in-production"
+  # 跨域配置
+  cors:
+    allow_origins:
+      - "*"
+    allow_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "OPTIONS"
+    allow_headers:
+      - "Content-Type"
+      - "Authorization"
+    allow_credentials: false
+
+# 日志配置
+logger:
+  # 日志级别: debug, info, warn, error
+  level: "debug"
+  # 输出方式: console, file
+  writers:
+    - "console"
+    - "file"
+    - "mongodb"
+
+  # 文件日志配置
+  file:
+    # 日志文件路径
+    path: "runtime/logs"
+    # 日志文件名
+    filename: "app.log"
+    # 单文件最大大小（MB）
+    max_size: 100
+    # 最大保留天数
+    max_age: 30
+    # 最大备份数量
+    max_backups: 3
+    # 是否压缩日志文件
+    compress: true
+    # 是否使用本地时间
+    local_time: true
+
+# MySQL配置
+mysql:
+  # 数据源名称
+  dsn: "root:root@tcp(127.0.0.1:3306)/admin?charset=utf8mb4&parseTime=True&loc=Local"
+  # 表前缀
+  prefix: "gaz_"
+
+# Redis配置
+redis:
+  host: "127.0.0.1"
+  port: 6379
+  password: ""
+  db: 0
+
+# MongoDB配置
+mongodb:
+  uri: "mongodb://127.0.0.1:27017"
+  database: "admin"
+  enabled: false
