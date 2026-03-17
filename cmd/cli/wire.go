@@ -19,5 +19,4 @@ func wireCLIContext() *cli.Context {
 		providers.MongoDBProviderSet,
 		cli.NewContext,
 	))
-	return nil
 }
