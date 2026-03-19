@@ -1,13 +1,9 @@
 package main
 
-import (
-	"zero-backend/modules/cli/command"
-)
-
 func main() {
-	ctx := wireCLIContext()
+	cmd := wireRootCommand()
 
-	if err := command.Execute(ctx); err != nil {
+	if err := cmd.Execute(); err != nil {
 		panic(err)
 	}
 }

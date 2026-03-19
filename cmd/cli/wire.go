@@ -5,18 +5,24 @@ package main
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/modules/cli"
+	"zero-backend/modules/cli/command"
 	"zero-backend/providers"
 
 	"github.com/google/wire"
 )
 
-func wireCLIContext() *cli.Context {
+func wireRootCommand() *command.RootCommand {
 	panic(wire.Build(
 		config.New,
 		providers.LoggerProviderSet,
-		providers.MySQLProviderSet,
 		providers.MongoDBProviderSet,
-		cli.NewContext,
+		providers.ServiceProviderSet,
+		providers.RepositoryProviderSet,
+		providers.MySQLProviderSet,
+		command.NewRootCommand,
+		command.NewUserCommand,
+		command.NewUserListCommand,
+		command.NewMigrateCommand,
+		command.NewMigrateUpCommand,
 	))
 }

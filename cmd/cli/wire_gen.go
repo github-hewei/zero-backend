@@ -8,21 +8,30 @@ package main
 
 import (
 	"zero-backend/internal/config"
+	"zero-backend/internal/repository"
+	"zero-backend/internal/service"
 	"zero-backend/internal/storage/mongodb"
 	"zero-backend/internal/storage/mysql"
-	"zero-backend/modules/cli"
+	"zero-backend/modules/cli/command"
 	"zero-backend/providers"
 )
 
 // Injectors from wire.go:
 
-func wireCLIContext() *cli.Context {
+func wireRootCommand() *command.RootCommand {
 	configConfig := config.New()
 	conn := mongodb.NewConn(configConfig)
 	database := conn.DB
 	logger := providers.ProvideLogger(configConfig, database)
 	mysqlLogger := mysql.NewLogger(logger)
 	db := mysql.NewDB(configConfig, mysqlLogger)
-	context := cli.NewContext(configConfig, logger, db)
-	return context
+	userRepository := repository.NewUserRepository(db)
+	userPointsLogRepository := repository.NewUserPointsLogRepository(db)
+	userService := service.NewUserService(db, userRepository, userPointsLogRepository)
+	userListCommand := command.NewUserListCommand(logger, userService)
+	userCommand := command.NewUserCommand(logger, userListCommand)
+	migrateUpCommand := command.NewMigrateUpCommand(logger, db)
+	migrateCommand := command.NewMigrateCommand(logger, migrateUpCommand)
+	rootCommand := command.NewRootCommand(logger, userCommand, migrateCommand)
+	return rootCommand
 }
