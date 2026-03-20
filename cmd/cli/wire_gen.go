@@ -28,10 +28,10 @@ func wireRootCommand() *command.RootCommand {
 	userRepository := repository.NewUserRepository(db)
 	userPointsLogRepository := repository.NewUserPointsLogRepository(db)
 	userService := service.NewUserService(db, userRepository, userPointsLogRepository)
-	userListCommand := command.NewUserListCommand(logger, userService)
-	userCommand := command.NewUserCommand(logger, userListCommand)
-	migrateUpCommand := command.NewMigrateUpCommand(logger, db)
-	migrateCommand := command.NewMigrateCommand(logger, migrateUpCommand)
+	userListCommand := command.NewUserListCommand(userService)
+	userCommand := command.NewUserCommand(userListCommand)
+	migrateUpCommand := command.NewMigrateUpCommand(db)
+	migrateCommand := command.NewMigrateCommand(migrateUpCommand)
 	rootCommand := command.NewRootCommand(logger, userCommand, migrateCommand)
 	return rootCommand
 }

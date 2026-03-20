@@ -19,10 +19,6 @@ func wireRootCommand() *command.RootCommand {
 		providers.ServiceProviderSet,
 		providers.RepositoryProviderSet,
 		providers.MySQLProviderSet,
-		command.NewRootCommand,
-		command.NewUserCommand,
-		command.NewUserListCommand,
-		command.NewMigrateCommand,
-		command.NewMigrateUpCommand,
+		providers.CliCommandProviderSet,
 	))
 }

@@ -120,10 +120,8 @@ func loadConfig() *Config {
 	}
 
 	// 使用 godotenv 加载 .env 文件并设置环境变量
-	if err := godotenv.Load(); err == nil {
-		log.Println("[INFO] loaded .env file")
-	} else {
-		log.Printf("[INFO] .env file not found, skipping\n")
+	if err := godotenv.Load(); err != nil {
+		log.Printf("[WARN] .env file not found, skipping\n")
 	}
 
 	// 反序列化配置到结构体
