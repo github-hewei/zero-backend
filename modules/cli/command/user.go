@@ -1,7 +1,6 @@
 package command
 
 import (
-	"time"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/logger"
 	"zero-backend/internal/model"
@@ -56,7 +55,6 @@ func (c *UserListCommand) Configure() {
 		logger := logger.Ctx(cmd.Context())
 		logger.Info("列出所有用户")
 
-		time.Sleep(time.Second * 10)
 		result, err := c.svc.List(cmd.Context(), &dto.UserListRequest{Page: 1, Limit: 10})
 		if err != nil {
 			return err

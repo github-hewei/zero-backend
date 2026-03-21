@@ -69,8 +69,8 @@ func (c *RootCommand) Configure(logger logger.Logger) {
 	}
 }
 
-// CurrentCmd 获取当前执行的命令
-func (c *RootCommand) CurrentCmd() *cobra.Command {
+// Cmd 获取当前执行的命令
+func (c *RootCommand) Cmd() *cobra.Command {
 	if c.curCmd != nil {
 		return c.curCmd
 	}
@@ -101,10 +101,10 @@ func (c *RootCommand) Run() {
 
 	select {
 	case <-sigChan:
-		logger := logger2.Ctx(c.CurrentCmd().Context())
+		logger := logger2.Ctx(c.Cmd().Context())
 		logger.Info("Exiting manually...")
 		cancel()
-		timeout := time.NewTimer(5 * time.Second)
+		timeout := time.NewTimer(10 * time.Second)
 		defer timeout.Stop()
 		select {
 		case <-done:
@@ -117,7 +117,7 @@ func (c *RootCommand) Run() {
 
 // handleError 处理错误
 func (c *RootCommand) handleError(err error) {
-	ctx := c.CurrentCmd().Context()
+	ctx := c.Cmd().Context()
 
 	var cost time.Duration
 	if val := ctx.Value(ctxkeys.BeginTimeKey{}); val != nil {

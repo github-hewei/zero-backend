@@ -32,7 +32,7 @@ func NewMigrateCommand(db *gorm.DB) *MigrateCommand {
 // Configure 配置命令
 func (c *MigrateCommand) Configure() {
 	var filePath string
-	c.Flags().StringVarP(&filePath, "file", "f", "", "SQL 文件路径 （默认 data/database.sql）")
+	c.Flags().StringVarP(&filePath, "file", "f", "", "SQL 文件路径 (默认 data/database.sql)")
 
 	c.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		ctx := cmd.Context()
