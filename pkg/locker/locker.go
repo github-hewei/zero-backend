@@ -18,19 +18,15 @@ type LockOption func(*LockOptions)
 
 // LockOptions 锁配置选项
 type LockOptions struct {
-	TTL        time.Duration // 锁过期时间
-	RetryTimes int           // 重试次数
-	RetryDelay time.Duration // 重试间隔
-	WatchDog   bool          // 是否启用看门狗自动续期
+	TTL      time.Duration // 锁过期时间
+	WatchDog bool          // 是否启用看门狗自动续期
 }
 
 // defaultLockOptions 默认选项
 func defaultLockOptions() *LockOptions {
 	return &LockOptions{
-		TTL:        30 * time.Second,
-		RetryTimes: 3,
-		RetryDelay: 100 * time.Millisecond,
-		WatchDog:   false,
+		TTL:      30 * time.Second,
+		WatchDog: false,
 	}
 }
 
@@ -38,14 +34,6 @@ func defaultLockOptions() *LockOptions {
 func WithTTL(ttl time.Duration) LockOption {
 	return func(o *LockOptions) {
 		o.TTL = ttl
-	}
-}
-
-// WithRetry 设置重试次数和间隔
-func WithRetry(times int, delay time.Duration) LockOption {
-	return func(o *LockOptions) {
-		o.RetryTimes = times
-		o.RetryDelay = delay
 	}
 }
 

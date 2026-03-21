@@ -198,17 +198,12 @@ func TestGenerateToken(t *testing.T) {
 func TestLockOptions(t *testing.T) {
 	opts := defaultLockOptions()
 	assert.Equal(t, 30*time.Second, opts.TTL)
-	assert.Equal(t, 3, opts.RetryTimes)
-	assert.Equal(t, 100*time.Millisecond, opts.RetryDelay)
 	assert.False(t, opts.WatchDog)
 
 	// 应用自定义选项
 	WithTTL(60 * time.Second)(opts)
-	WithRetry(5, 200*time.Millisecond)(opts)
 	WithWatchDog()(opts)
 
 	assert.Equal(t, 60*time.Second, opts.TTL)
-	assert.Equal(t, 5, opts.RetryTimes)
-	assert.Equal(t, 200*time.Millisecond, opts.RetryDelay)
 	assert.True(t, opts.WatchDog)
 }

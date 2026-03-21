@@ -12,7 +12,9 @@ import (
 	"zero-backend/internal/service"
 	"zero-backend/internal/storage/mongodb"
 	"zero-backend/internal/storage/mysql"
+	"zero-backend/internal/storage/redis"
 	"zero-backend/modules/cli/command"
+	"zero-backend/pkg/locker"
 	"zero-backend/providers"
 )
 
@@ -23,6 +25,8 @@ func wireApp() *command.RootCommand {
 	conn := mongodb.NewConn(configConfig)
 	database := conn.DB
 	logger := providers.ProvideLogger(configConfig, database)
+	client := redis.New(configConfig)
+	redisLocker := locker.NewRedisLocker(client)
 	mysqlLogger := mysql.NewLogger(logger)
 	db := mysql.NewDB(configConfig, mysqlLogger)
 	userRepository := repository.NewUserRepository(db)
@@ -31,6 +35,6 @@ func wireApp() *command.RootCommand {
 	userListCommand := command.NewUserListCommand(userService)
 	userCommand := command.NewUserCommand(userListCommand)
 	migrateCommand := command.NewMigrateCommand(db)
-	rootCommand := command.NewRootCommand(logger, userCommand, migrateCommand)
+	rootCommand := command.NewRootCommand(logger, redisLocker, userCommand, migrateCommand)
 	return rootCommand
 }

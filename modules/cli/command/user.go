@@ -1,6 +1,7 @@
 package command
 
 import (
+	"time"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/logger"
 	"zero-backend/internal/model"
@@ -60,6 +61,7 @@ func (c *UserListCommand) Configure() {
 			return err
 		}
 
+		time.Sleep(time.Second * 120)
 		users, _ := result.List.([]*model.User)
 		for _, item := range users {
 			cmd.Printf("%d: %s\n", item.ID, item.NickName)

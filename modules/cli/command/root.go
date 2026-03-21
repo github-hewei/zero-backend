@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 	"zero-backend/internal/ctxkeys"
 	logger2 "zero-backend/internal/logger"
+	"zero-backend/pkg/locker"
 	"zero-backend/pkg/logger"
 
 	"github.com/google/uuid"
@@ -19,11 +21,13 @@ import (
 type RootCommand struct {
 	*cobra.Command
 	curCmd *cobra.Command
+	lock   locker.Lock
 }
 
 // NewRootCommand 创建根命令
 func NewRootCommand(
 	logger logger.Logger,
+	locker *locker.RedisLocker,
 	user *UserCommand,
 	migrate *MigrateCommand,
 ) *RootCommand {
@@ -35,26 +39,43 @@ func NewRootCommand(
 		},
 	}
 
-	cmd.Configure(logger)
+	cmd.Configure(logger, locker)
 	cmd.AddCommand(user.Command)
 	cmd.AddCommand(migrate.Command)
 	return cmd
 }
 
 // Configure 配置命令
-func (c *RootCommand) Configure(logger logger.Logger) {
+func (c *RootCommand) Configure(logger logger.Logger, redisLocker *locker.RedisLocker) {
+	c.Command.PersistentFlags().IntP("instance-id", "i", 0, "实例编号, 防止并发执行")
+
 	// 命令执行之前
 	// 注意： c.Command 与 cmd 不是同一个实例，cmd 是实际执行的子命令的实例
-	c.Command.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+	c.Command.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		c.curCmd = cmd
+
+		// 设置 traceID 追踪日志
 		traceId := uuid.New().String()
 		logger := logger.With("traceId", traceId)
 		logger.Info("Start Command")
 
+		// 将日志组件注入上下文
 		ctx := logger.WithContext(cmd.Context())
 		ctx = context.WithValue(ctx, ctxkeys.TraceIDKey{}, traceId)
 		ctx = context.WithValue(ctx, ctxkeys.BeginTimeKey{}, time.Now())
+
+		// 为进程加锁逻辑
+		id, _ := cmd.Flags().GetInt("instance-id")
+		key := fmt.Sprintf("%s:%d", strings.ReplaceAll(cmd.CommandPath(), " ", "-"), id)
+		lock, err := redisLocker.Lock(ctx, key, locker.WithTTL(time.Minute), locker.WithWatchDog())
+		if err != nil {
+			return err
+		}
+		c.lock = lock
+		logger.Info("Locked Command", "key", key)
+
 		cmd.SetContext(ctx)
+		return nil
 	}
 
 	// 命令执行结束
@@ -93,6 +114,8 @@ func (c *RootCommand) Run() {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
+		defer c.unlock()
+
 		err := c.Command.ExecuteContext(ctx)
 		if err != nil {
 			c.handleError(err)
@@ -126,4 +149,16 @@ func (c *RootCommand) handleError(err error) {
 
 	logger := logger2.Ctx(ctx)
 	logger.Err(err, "Error Command", "cost", cost)
+}
+
+// unlock 解锁
+func (c *RootCommand) unlock() {
+	if c.lock == nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	c.lock.Unlock(ctx)
+	logger := logger2.Ctx(c.Cmd().Context())
+	logger.Info("Unlocked Command")
 }
