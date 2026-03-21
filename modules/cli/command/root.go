@@ -3,6 +3,9 @@ package command
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 	"zero-backend/internal/ctxkeys"
 	logger2 "zero-backend/internal/logger"
@@ -66,26 +69,61 @@ func (c *RootCommand) Configure(logger logger.Logger) {
 	}
 }
 
+// CurrentCmd 获取当前执行的命令
+func (c *RootCommand) CurrentCmd() *cobra.Command {
+	if c.curCmd != nil {
+		return c.curCmd
+	}
+
+	return c.Command
+}
+
 // Run 执行命令
 func (c *RootCommand) Run() {
-	err := c.Command.Execute()
-	if err != nil {
-		c.handleError(err)
+	sigChan := make(chan os.Signal, 1)
+	// 监听退出信号
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	defer signal.Stop(sigChan)
+
+	// 通过上下文控制取消
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// 监听命令执行完成信号
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		err := c.Command.ExecuteContext(ctx)
+		if err != nil {
+			c.handleError(err)
+		}
+	}()
+
+	select {
+	case <-sigChan:
+		logger := logger2.Ctx(c.CurrentCmd().Context())
+		logger.Info("Exiting manually...")
+		cancel()
+		timeout := time.NewTimer(5 * time.Second)
+		defer timeout.Stop()
+		select {
+		case <-done:
+		case <-timeout.C:
+			logger.Warn("Timeout exit")
+		}
+	case <-done:
 	}
 }
 
 // handleError 处理错误
 func (c *RootCommand) handleError(err error) {
-	cmd := c.Command
-	if c.curCmd != nil {
-		cmd = c.curCmd
-	}
+	ctx := c.CurrentCmd().Context()
 
 	var cost time.Duration
-	if val := cmd.Context().Value(ctxkeys.BeginTimeKey{}); val != nil {
+	if val := ctx.Value(ctxkeys.BeginTimeKey{}); val != nil {
 		cost = time.Since(val.(time.Time))
 	}
 
-	logger := logger2.Ctx(cmd.Context())
+	logger := logger2.Ctx(ctx)
 	logger.Err(err, "Error Command", "cost", cost)
 }

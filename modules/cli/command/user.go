@@ -1,8 +1,7 @@
 package command
 
 import (
-	"fmt"
-
+	"time"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/logger"
 	"zero-backend/internal/model"
@@ -57,6 +56,7 @@ func (c *UserListCommand) Configure() {
 		logger := logger.Ctx(cmd.Context())
 		logger.Info("列出所有用户")
 
+		time.Sleep(time.Second * 10)
 		result, err := c.svc.List(cmd.Context(), &dto.UserListRequest{Page: 1, Limit: 10})
 		if err != nil {
 			return err
@@ -64,7 +64,7 @@ func (c *UserListCommand) Configure() {
 
 		users, _ := result.List.([]*model.User)
 		for _, item := range users {
-			fmt.Printf("%d: %s\n", item.ID, item.NickName)
+			cmd.Printf("%d: %s\n", item.ID, item.NickName)
 		}
 		return nil
 	}

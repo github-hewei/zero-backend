@@ -198,6 +198,9 @@ func (l *Logger) WithContext(ctx context.Context) context.Context {
 
 // Ctx 从上下文中获取日志实例
 func Ctx(ctx context.Context) *Logger {
+	if ctx == nil {
+		return Nop()
+	}
 	if l, ok := ctx.Value(ctxKey{}).(*Logger); ok {
 		return l
 	}
