@@ -1,6 +1,9 @@
 package command
 
 import (
+	"zero-backend/internal/logger"
+	"zero-backend/modules/cli/runner"
+
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 )
@@ -8,34 +11,15 @@ import (
 // MigrateCommand 数据迁移命令
 type MigrateCommand struct {
 	*cobra.Command
+	db *gorm.DB
 }
 
 // NewMigrateCommand 创建数据迁移命令
-func NewMigrateCommand(up *MigrateUpCommand) *MigrateCommand {
+func NewMigrateCommand(db *gorm.DB) *MigrateCommand {
 	cmd := &MigrateCommand{
 		Command: &cobra.Command{
 			Use:   "migrate",
 			Short: "数据迁移命令",
-			Long:  `数据库迁移操作，执行 SQL 脚本进行数据库初始化`,
-		},
-	}
-
-	cmd.AddCommand(up.Command)
-	return cmd
-}
-
-// MigrateUpCommand 创建向上迁移命令
-type MigrateUpCommand struct {
-	*cobra.Command
-	db *gorm.DB
-}
-
-// NewMigrateUpCommand 创建向上迁移命令
-func NewMigrateUpCommand(db *gorm.DB) *MigrateUpCommand {
-	cmd := &MigrateUpCommand{
-		Command: &cobra.Command{
-			Use:   "up",
-			Short: "执行数据库迁移",
 			Long:  `执行 SQL 脚本进行数据库迁移，从上次的进度继续执行`,
 		},
 		db: db,
@@ -46,16 +30,13 @@ func NewMigrateUpCommand(db *gorm.DB) *MigrateUpCommand {
 }
 
 // Configure 配置命令
-func (c *MigrateUpCommand) Configure() {
+func (c *MigrateCommand) Configure() {
 	var filePath string
-	c.Flags().StringVarP(&filePath, "file", "f", "", "SQL 文件路径")
+	c.Flags().StringVarP(&filePath, "file", "f", "", "SQL 文件路径 （默认 data/database.sql）")
 
 	c.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		cmd.PrintErrln("测试错误")
-		cmd.Println("测试成功")
-		// return apperror.NewUserError("测试错误")
-		return nil
-		// migrateRunner := runner.NewMigrateRunner(logger.Ctx(cmd.Context()), c.db)
-		// return migrateRunner.Up(filePath)
+		ctx := cmd.Context()
+		migrateRunner := runner.NewMigrateRunner(logger.Ctx(ctx), c.db)
+		return migrateRunner.Up(ctx, filePath)
 	}
 }

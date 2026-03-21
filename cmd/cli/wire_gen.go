@@ -18,7 +18,7 @@ import (
 
 // Injectors from wire.go:
 
-func wireRootCommand() *command.RootCommand {
+func wireApp() *command.RootCommand {
 	configConfig := config.New()
 	conn := mongodb.NewConn(configConfig)
 	database := conn.DB
@@ -30,8 +30,7 @@ func wireRootCommand() *command.RootCommand {
 	userService := service.NewUserService(db, userRepository, userPointsLogRepository)
 	userListCommand := command.NewUserListCommand(userService)
 	userCommand := command.NewUserCommand(userListCommand)
-	migrateUpCommand := command.NewMigrateUpCommand(db)
-	migrateCommand := command.NewMigrateCommand(migrateUpCommand)
+	migrateCommand := command.NewMigrateCommand(db)
 	rootCommand := command.NewRootCommand(logger, userCommand, migrateCommand)
 	return rootCommand
 }

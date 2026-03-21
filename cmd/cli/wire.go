@@ -11,7 +11,7 @@ import (
 	"github.com/google/wire"
 )
 
-func wireRootCommand() *command.RootCommand {
+func wireApp() *command.RootCommand {
 	panic(wire.Build(
 		config.New,
 		providers.LoggerProviderSet,

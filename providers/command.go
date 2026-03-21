@@ -12,5 +12,4 @@ var CliCommandProviderSet = wire.NewSet(
 	command.NewUserCommand,
 	command.NewUserListCommand,
 	command.NewMigrateCommand,
-	command.NewMigrateUpCommand,
 )
