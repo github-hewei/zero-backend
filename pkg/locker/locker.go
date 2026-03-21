@@ -1,0 +1,84 @@
+package locker
+
+import (
+	"context"
+	"errors"
+	"time"
+)
+
+// 错误定义
+var (
+	ErrLockAcquired = errors.New("lock is already acquired")
+	ErrLockNotHeld  = errors.New("lock is not held")
+	ErrInvalidToken = errors.New("invalid token")
+)
+
+// LockOption 锁选项函数类型
+type LockOption func(*LockOptions)
+
+// LockOptions 锁配置选项
+type LockOptions struct {
+	TTL        time.Duration // 锁过期时间
+	RetryTimes int           // 重试次数
+	RetryDelay time.Duration // 重试间隔
+	WatchDog   bool          // 是否启用看门狗自动续期
+}
+
+// defaultLockOptions 默认选项
+func defaultLockOptions() *LockOptions {
+	return &LockOptions{
+		TTL:        30 * time.Second,
+		RetryTimes: 3,
+		RetryDelay: 100 * time.Millisecond,
+		WatchDog:   false,
+	}
+}
+
+// WithTTL 设置锁的过期时间
+func WithTTL(ttl time.Duration) LockOption {
+	return func(o *LockOptions) {
+		o.TTL = ttl
+	}
+}
+
+// WithRetry 设置重试次数和间隔
+func WithRetry(times int, delay time.Duration) LockOption {
+	return func(o *LockOptions) {
+		o.RetryTimes = times
+		o.RetryDelay = delay
+	}
+}
+
+// WithWatchDog 启用看门狗自动续期
+func WithWatchDog() LockOption {
+	return func(o *LockOptions) {
+		o.WatchDog = true
+	}
+}
+
+// Locker 分布式锁接口
+type Locker interface {
+	// Lock 获取锁，返回锁对象和错误
+	Lock(ctx context.Context, key string, opts ...LockOption) (Lock, error)
+
+	// Unlock 释放锁（根据 key）
+	Unlock(ctx context.Context, key string) error
+
+	// Extend 延长锁的过期时间
+	Extend(ctx context.Context, key string, ttl time.Duration) error
+}
+
+// Lock 单个锁实例接口
+type Lock interface {
+	// Key 获取锁的 key
+	Key() string
+
+	// Token 获取锁的唯一令牌（用于安全释放）
+	Token() string
+
+	// Unlock 释放锁
+	Unlock(ctx context.Context) error
+
+	// Extend 延长锁的过期时间
+	Extend(ctx context.Context, ttl time.Duration) error
+}
