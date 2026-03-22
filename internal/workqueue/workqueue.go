@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	"zero-backend/pkg/logger"
+	"zero-backend/internal/logger"
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
@@ -50,7 +50,6 @@ type Worker struct {
 
 	domain             string
 	rdb                *redis.Client
-	logger             logger.Logger
 	redisTimeout       time.Duration
 	delayScanInterval  time.Duration
 	backOffMinDuration time.Duration
@@ -60,13 +59,6 @@ type Worker struct {
 
 // Option 配置项
 type Option func(*Worker)
-
-// WithLogger 设置日志记录器
-func WithLogger(logger logger.Logger) Option {
-	return func(w *Worker) {
-		w.logger = logger
-	}
-}
 
 // WithDomain 设置队列名称前缀
 func WithDomain(domain string) Option {
@@ -110,7 +102,6 @@ func NewWorker(ctx context.Context, rdb *redis.Client, opts ...Option) *Worker {
 		stopped:            false,
 		domain:             "workqueue",
 		rdb:                rdb,
-		logger:             logger.Nop(),
 		redisTimeout:       3 * time.Second,
 		delayScanInterval:  5 * time.Second,
 		backOffMinDuration: 100 * time.Millisecond,
@@ -300,7 +291,7 @@ func (q *Queue) processDueTasks() {
 		ByScore: true,
 	}).Result()
 	if err != nil {
-		q.w.logger.Err(err, "fetch delay tasks error")
+		logger.Ctx(q.ctx).Err(err, "fetch delay tasks error")
 		return
 	}
 
@@ -317,11 +308,11 @@ func (q *Queue) processDueTasks() {
 		pipe.LPush(ctx, q.redisKey(rdbReadyQueueKey), tasks)
 		return nil
 	}); err != nil {
-		q.w.logger.Err(err, "move tasks to ready queue error")
+		logger.Ctx(q.ctx).Err(err, "move tasks to ready queue error")
 		return
 	}
 
-	q.w.logger.Info("moved tasks to ready queue", map[string]any{"count": len(tasks)})
+	logger.Ctx(q.ctx).Info("moved tasks to ready queue", "count", len(tasks))
 }
 
 // workerProcess 处理任务
@@ -348,7 +339,7 @@ func (q *Queue) workerProcess(id int) {
 					continue
 				}
 
-				q.w.logger.Err(err, "fetch task error")
+				logger.Ctx(q.ctx).Err(err, "fetch task error")
 				backoff.Wait()
 				continue
 			}
@@ -380,7 +371,7 @@ func (q *Queue) processTask(taskStr string, tempQueueKey string) {
 	if err != nil || task == nil {
 		// 解析失败，删除任务
 		q.removeTask(taskStr, tempQueueKey)
-		q.w.logger.Err(err, "parse task error, task removed")
+		logger.Ctx(q.ctx).Err(err, "parse task error, task removed")
 		return
 	}
 
@@ -391,7 +382,7 @@ func (q *Queue) processTask(taskStr string, tempQueueKey string) {
 
 	locked, err := q.w.rdb.SetNX(ctx, lockKey, "1", 30*time.Second).Result()
 	if err != nil {
-		q.w.logger.Err(err, "acquire lock error")
+		logger.Ctx(q.ctx).Err(err, "acquire lock error")
 		// 获取锁失败，重新入队
 		q.requeueTask(tempQueueKey)
 		return
@@ -399,7 +390,7 @@ func (q *Queue) processTask(taskStr string, tempQueueKey string) {
 	if !locked {
 		// 已被其他消费者处理，删除任务
 		q.removeTask(taskStr, tempQueueKey)
-		q.w.logger.Info("task already processed by another worker", map[string]any{"task_id": task.ID})
+		logger.Ctx(q.ctx).Info("task already processed by another worker", "task_id", task.ID)
 		return
 	}
 
@@ -414,29 +405,29 @@ func (q *Queue) processTask(taskStr string, tempQueueKey string) {
 		if task.ProcessedCount >= q.maxRetries {
 			// 达到最大处理次数，添加到死信队列
 			if err := q.enqueueDeadTask(task); err != nil {
-				q.w.logger.Err(err, "enqueue dead task error")
+				logger.Ctx(q.ctx).Err(err, "enqueue dead task error")
 				// 死信队列写入失败，记录日志但不丢失任务
 			}
-			q.w.logger.Info("task moved to dead queue", map[string]any{
-				"task_id":         task.ID,
-				"processed_count": task.ProcessedCount,
-			})
+			logger.Ctx(q.ctx).Info("task moved to dead queue",
+				"task_id", task.ID,
+				"processed_count", task.ProcessedCount,
+			)
 		} else {
 			// 任务重新写入队列重新处理
 			if err := q.enqueueTask(task); err != nil {
-				q.w.logger.Err(err, "enqueue task error")
+				logger.Ctx(q.ctx).Err(err, "enqueue task error")
 				// 入队失败，任务可能丢失，记录错误
 			}
-			q.w.logger.Info("task requeued for retry", map[string]any{
-				"task_id":         task.ID,
-				"processed_count": task.ProcessedCount,
-				"next_retry_at":   task.ExecuteAt,
-			})
+			logger.Ctx(q.ctx).Info("task requeued for retry",
+				"task_id", task.ID,
+				"processed_count", task.ProcessedCount,
+				"next_retry_at", task.ExecuteAt,
+			)
 		}
 	} else {
 		// 任务处理成功，删除任务
 		q.removeTask(taskStr, tempQueueKey)
-		q.w.logger.Info("task processed successfully", map[string]any{"task_id": task.ID})
+		logger.Ctx(q.ctx).Info("task processed successfully", "task_id", task.ID)
 	}
 
 	// 释放锁
@@ -450,7 +441,7 @@ func (q *Queue) requeueTask(tempQueueKey string) {
 
 	_, err := q.w.rdb.LMove(ctx, tempQueueKey, q.redisKey(rdbReadyQueueKey), "RIGHT", "LEFT").Result()
 	if err != nil && !errors.Is(err, redis.Nil) {
-		q.w.logger.Err(err, "requeue task error")
+		logger.Ctx(q.ctx).Err(err, "requeue task error")
 	}
 }
 
@@ -465,7 +456,7 @@ func (q *Queue) removeTask(task string, queueName string) {
 			return
 		}
 
-		q.w.logger.Err(err, "remove task error")
+		logger.Ctx(q.ctx).Err(err, "remove task error")
 		return
 	}
 }
@@ -501,7 +492,7 @@ func (q *Queue) reclaimTempQueueTasks(tempQueueKey string) {
 		_, err := q.w.rdb.LMove(ctx, tempQueueKey, q.redisKey(rdbReadyQueueKey), "RIGHT", "LEFT").Result()
 		if err != nil {
 			if !errors.Is(err, redis.Nil) {
-				q.w.logger.Err(err, "reclaim temp queue task error")
+				logger.Ctx(q.ctx).Err(err, "reclaim temp queue task error")
 			}
 			break
 		}
@@ -509,7 +500,7 @@ func (q *Queue) reclaimTempQueueTasks(tempQueueKey string) {
 	}
 
 	if count > 0 {
-		q.w.logger.Info("reclaimed tasks from temp queue", map[string]any{"count": count})
+		logger.Ctx(q.ctx).Info("reclaimed tasks from temp queue", "count", count)
 	}
 }
 
@@ -585,18 +576,16 @@ func (q *Queue) enqueueTask(task *Task) error {
 		}).Err(); err != nil {
 			return fmt.Errorf("failed to add to delay queue: %w", err)
 		}
-		q.w.logger.Info("task enqueued to delay queue", map[string]any{
-			"task_id":    task.ID,
-			"execute_at": task.ExecuteAt,
-		})
+		logger.Ctx(q.ctx).Info("task enqueued to delay queue",
+			"task_id", task.ID,
+			"execute_at", task.ExecuteAt,
+		)
 	} else {
 		// 写入就绪队列
 		if err := q.w.rdb.LPush(ctx, q.redisKey(rdbReadyQueueKey), taskStr).Err(); err != nil {
 			return fmt.Errorf("failed to add to ready queue: %w", err)
 		}
-		q.w.logger.Info("task enqueued to ready queue", map[string]any{
-			"task_id": task.ID,
-		})
+		logger.Ctx(q.ctx).Info("task enqueued to ready queue", "task_id", task.ID)
 	}
 
 	return nil
