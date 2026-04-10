@@ -3,9 +3,11 @@ package queue
 import (
 	"context"
 	"errors"
-	"fmt"
+	"strconv"
 	"sync"
 	"time"
+
+	"zero-backend/pkg/logger"
 )
 
 // Worker 从队列消费任务并交给 Handler 处理
@@ -13,6 +15,7 @@ type Worker struct {
 	id      string
 	queue   Queue
 	handler Handler
+	logger  logger.Logger
 	ctx     context.Context
 	cancel  context.CancelFunc
 	wg      sync.WaitGroup
@@ -24,7 +27,14 @@ func NewWorker(id string, queue Queue, handler Handler) *Worker {
 		id:      id,
 		queue:   queue,
 		handler: handler,
+		logger:  logger.Nop(),
 	}
+}
+
+// WithLogger 设置工作线程的日志实例
+func (w *Worker) WithLogger(log logger.Logger) *Worker {
+	w.logger = log
+	return w
 }
 
 // Start 启动工作线程
@@ -80,11 +90,11 @@ func (w *Worker) processOne() bool {
 
 	if processErr := w.handler.Handle(ctx, task); processErr != nil {
 		if nackErr := w.queue.Nack(ctx, task.ID, processErr); nackErr != nil {
-			fmt.Printf("Worker %s: nack task %s failed: %v\n", w.id, task.ID, nackErr)
+			w.logger.Error("worker nack task failed", "worker_id", w.id, "task_id", task.ID, "error", nackErr)
 		}
 	} else {
 		if ackErr := w.queue.Ack(ctx, task.ID); ackErr != nil {
-			fmt.Printf("Worker %s: ack task %s failed: %v\n", w.id, task.ID, ackErr)
+			w.logger.Error("worker ack task failed", "worker_id", w.id, "task_id", task.ID, "error", ackErr)
 		}
 	}
 
@@ -96,6 +106,7 @@ type WorkerPoolImpl struct {
 	queue   Queue
 	handler Handler
 	config  QueueConfig
+	logger  logger.Logger
 	workers []*Worker
 	running bool
 	mutex   sync.RWMutex
@@ -107,8 +118,15 @@ func NewWorkerPool(queue Queue, handler Handler, config QueueConfig) *WorkerPool
 		queue:   queue,
 		handler: handler,
 		config:  config,
+		logger:  logger.Nop(),
 		workers: make([]*Worker, 0, config.MaxConcurrency),
 	}
+}
+
+// WithLogger 设置工作线程池的日志实例
+func (p *WorkerPoolImpl) WithLogger(log logger.Logger) *WorkerPoolImpl {
+	p.logger = log
+	return p
 }
 
 // Start 启动工作线程池，创建 config.MaxConcurrency 个工作线程
@@ -121,12 +139,15 @@ func (p *WorkerPoolImpl) Start(ctx context.Context) error {
 	}
 
 	for i := 0; i < p.config.MaxConcurrency; i++ {
-		worker := NewWorker(fmt.Sprintf("%s-worker-%d", p.config.Name, i), p.queue, p.handler)
+		workerID := p.config.Name + "-worker-" + strconv.Itoa(i)
+		worker := NewWorker(workerID, p.queue, p.handler)
+		worker.WithLogger(p.logger)
 		if err := worker.Start(ctx); err != nil {
+			p.logger.Error("start worker failed", "worker_id", workerID, "pool", p.config.Name, "error", err)
 			for _, w := range p.workers {
 				w.Stop()
 			}
-			return fmt.Errorf("start worker %d failed: %w", i, err)
+			return errors.New("start worker " + strconv.Itoa(i) + " failed: " + err.Error())
 		}
 		p.workers = append(p.workers, worker)
 	}
