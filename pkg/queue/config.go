@@ -6,32 +6,15 @@ import (
 
 // QueueConfig 队列配置
 type QueueConfig struct {
-	// 队列名称
-	Name string
-
-	// 最大并发工作线程数
-	MaxConcurrency int
-
-	// 任务可见性超时（秒）
-	VisibilityTimeout int
-
-	// 最大重试次数
-	MaxRetries int
-
-	// 重试延迟策略
-	RetryDelay RetryDelayStrategy
-
-	// 是否启用死信队列
-	EnableDeadLetter bool
-
-	// 死信队列最大重试次数
-	DeadLetterMaxRetries int
-
-	// 延迟队列扫描间隔
-	DelayQueueScanInterval time.Duration
-
-	// 处理中任务清理间隔
-	ProcessingCleanupInterval time.Duration
+	Name                      string             // 队列名称
+	MaxConcurrency            int                // 最大并发工作线程数
+	VisibilityTimeout         int                // 任务可见性超时（秒）
+	MaxRetries                int                // 最大重试次数
+	RetryDelay                RetryDelayStrategy // 重试延迟策略
+	EnableDeadLetter          bool               // 是否启用死信队列
+	DeadLetterMaxRetries      int                // 死信队列最大重试次数
+	DelayQueueScanInterval    time.Duration      // 延迟队列扫描间隔
+	ProcessingCleanupInterval time.Duration      // 处理中任务清理间隔
 }
 
 // RetryDelayStrategy 重试延迟策略

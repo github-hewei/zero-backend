@@ -3,49 +3,9 @@ package queue
 import (
 	"encoding/json"
 	"time"
+
+	"github.com/google/uuid"
 )
-
-// Task 表示一个工作队列任务
-type Task struct {
-	// 任务ID
-	ID string `json:"id"`
-
-	// 队列名称
-	Queue string `json:"queue"`
-
-	// 任务数据
-	Payload []byte `json:"payload"`
-
-	// 任务类型
-	Type string `json:"type"`
-
-	// 最大重试次数
-	MaxRetries int `json:"max_retries"`
-
-	// 当前重试次数
-	RetryCount int `json:"retry_count"`
-
-	// 延迟执行时间（Unix时间戳，秒）
-	DelayUntil int64 `json:"delay_until"`
-
-	// 任务创建时间
-	CreatedAt int64 `json:"created_at"`
-
-	// 任务开始处理时间
-	StartedAt int64 `json:"started_at"`
-
-	// 任务完成时间
-	CompletedAt int64 `json:"completed_at"`
-
-	// 任务状态
-	Status TaskStatus `json:"status"`
-
-	// 错误信息
-	Error string `json:"error"`
-
-	// 元数据
-	Metadata map[string]string `json:"metadata"`
-}
 
 // TaskStatus 任务状态
 type TaskStatus string
@@ -63,10 +23,27 @@ const (
 	TaskStatusDeadLetter TaskStatus = "dead_letter"
 )
 
+// Task 表示一个工作队列任务
+type Task struct {
+	ID          string            `json:"id"`           // 任务ID
+	Queue       string            `json:"queue"`        // 队列名称
+	Payload     []byte            `json:"payload"`      // 任务数据
+	Type        string            `json:"type"`         // 任务类型
+	MaxRetries  int               `json:"max_retries"`  // 最大重试次数
+	RetryCount  int               `json:"retry_count"`  // 当前重试次数
+	DelayUntil  int64             `json:"delay_until"`  // 延迟执行时间（Unix时间戳，秒）
+	CreatedAt   int64             `json:"created_at"`   // 任务创建时间
+	StartedAt   int64             `json:"started_at"`   // 任务开始处理时间
+	CompletedAt int64             `json:"completed_at"` // 任务完成时间
+	Status      TaskStatus        `json:"status"`       // 任务状态
+	Error       string            `json:"error"`        // 错误信息
+	Metadata    map[string]string `json:"metadata"`     // 元数据
+}
+
 // NewTask 创建新任务
 func NewTask(queue, taskType string, payload []byte) *Task {
 	return &Task{
-		ID:         generateTaskID(),
+		ID:         uuid.New().String(),
 		Queue:      queue,
 		Type:       taskType,
 		Payload:    payload,
@@ -112,19 +89,4 @@ func UnmarshalTask(data []byte) (*Task, error) {
 		return nil, err
 	}
 	return &task, nil
-}
-
-// generateTaskID 生成任务ID
-func generateTaskID() string {
-	return time.Now().Format("20060102150405") + "-" + randomString(8)
-}
-
-// randomString 生成随机字符串
-func randomString(length int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[time.Now().UnixNano()%int64(len(charset))]
-	}
-	return string(b)
 }
