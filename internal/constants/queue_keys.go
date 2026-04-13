@@ -1,6 +1,8 @@
 package constants
 
 const (
-	// 测试队列
+	// QueueDefaultKey 默认队列
+	QueueDefaultKey = "default"
+	// QueueTestKey 测试队列
 	QueueTestKey = "test"
 )
