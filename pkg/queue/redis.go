@@ -205,7 +205,7 @@ func (q *RedisQueue) Dequeue(ctx context.Context) (*Task, error) {
 		return nil, nil
 	}
 
-	slice, ok := result.([]interface{})
+	slice, ok := result.([]any)
 	if !ok || len(slice) < 2 {
 		return nil, nil
 	}
@@ -446,11 +446,37 @@ func (q *RedisQueue) deleteKeysByPattern(ctx context.Context, pattern string) er
 	return nil
 }
 
-// Redis 键辅助方法
-func (q *RedisQueue) immediateKey() string        { return q.prefix + "IMMEDIATE" }
-func (q *RedisQueue) delayedKey() string          { return q.prefix + "DELAYED" }
-func (q *RedisQueue) processingKey() string       { return q.prefix + "PROCESSING" }
-func (q *RedisQueue) deadLetterKey() string       { return q.prefix + "DEAD" }
-func (q *RedisQueue) taskKey(id string) string    { return q.prefix + "TASK:" + id }
-func (q *RedisQueue) timeoutKey(id string) string { return q.prefix + "TIMEOUT:" + id }
-func (q *RedisQueue) statsKey() string            { return q.prefix + "STATS" }
+// immediateKey 获取立即执行队列的键名
+func (q *RedisQueue) immediateKey() string {
+	return q.prefix + "IMMEDIATE"
+}
+
+// delayedKey 获取延迟队列的键名
+func (q *RedisQueue) delayedKey() string {
+	return q.prefix + "DELAYED"
+}
+
+// processingKey 获取处理中的队列的键名
+func (q *RedisQueue) processingKey() string {
+	return q.prefix + "PROCESSING"
+}
+
+// deadLetterKey 获取死信队列的键名
+func (q *RedisQueue) deadLetterKey() string {
+	return q.prefix + "DEAD"
+}
+
+// taskKey 获取任务详情的键名
+func (q *RedisQueue) taskKey(id string) string {
+	return q.prefix + "TASK:" + id
+}
+
+// timeoutKey 获取任务超时的键名
+func (q *RedisQueue) timeoutKey(id string) string {
+	return q.prefix + "TIMEOUT:" + id
+}
+
+// statsKey 获取队列统计信息的键名
+func (q *RedisQueue) statsKey() string {
+	return q.prefix + "STATS"
+}

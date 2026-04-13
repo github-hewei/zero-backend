@@ -16,6 +16,7 @@ var (
 
 // Handler 任务处理器接口
 type Handler interface {
+	// Handle 处理任务
 	Handle(ctx context.Context, task *Task) error
 }
 
@@ -70,7 +71,12 @@ type QueueStats struct {
 
 // WorkerPool 工作线程池接口
 type WorkerPool interface {
+	// Start 启动工作线程池
 	Start(ctx context.Context) error
+
+	// Stop 停止工作线程池
 	Stop() error
+
+	// IsRunning 线程池是否正在运行
 	IsRunning() bool
 }
