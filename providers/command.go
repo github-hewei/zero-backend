@@ -2,6 +2,7 @@ package providers
 
 import (
 	"zero-backend/modules/cli/command"
+	"zero-backend/pkg/queue"
 
 	"github.com/google/wire"
 )
@@ -12,4 +13,6 @@ var CliCommandProviderSet = wire.NewSet(
 	command.NewUserCommand,
 	command.NewUserListCommand,
 	command.NewMigrateCommand,
+	command.NewQueueCommand,
+	queue.NewQueueManager,
 )

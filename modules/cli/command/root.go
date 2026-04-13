@@ -30,6 +30,7 @@ func NewRootCommand(
 	locker *locker.RedisLocker,
 	user *UserCommand,
 	migrate *MigrateCommand,
+	queue *QueueCommand,
 ) *RootCommand {
 	cmd := &RootCommand{
 		Command: &cobra.Command{
@@ -42,6 +43,7 @@ func NewRootCommand(
 	cmd.Configure(logger, locker)
 	cmd.AddCommand(user.Command)
 	cmd.AddCommand(migrate.Command)
+	cmd.AddCommand(queue.Command)
 	return cmd
 }
 

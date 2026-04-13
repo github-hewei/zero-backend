@@ -15,6 +15,7 @@ import (
 	"zero-backend/internal/storage/redis"
 	"zero-backend/modules/cli/command"
 	"zero-backend/pkg/locker"
+	"zero-backend/pkg/queue"
 	"zero-backend/providers"
 )
 
@@ -35,6 +36,8 @@ func wireApp() *command.RootCommand {
 	userListCommand := command.NewUserListCommand(userService)
 	userCommand := command.NewUserCommand(userListCommand)
 	migrateCommand := command.NewMigrateCommand(db)
-	rootCommand := command.NewRootCommand(logger, redisLocker, userCommand, migrateCommand)
+	queueManager := queue.NewQueueManager(client)
+	queueCommand := command.NewQueueCommand(queueManager)
+	rootCommand := command.NewRootCommand(logger, redisLocker, userCommand, migrateCommand, queueCommand)
 	return rootCommand
 }
