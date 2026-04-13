@@ -1,6 +1,12 @@
 ---
 name: golang-project-engineering-guide
-description: A collection of concise, practical, and highly consistent engineering best practices for Golang projects, helping teams build maintainable, testable, secure, and modern codebases. This specification must be referenced and followed when developing Golang projects.
+description: >-
+  A collection of concise, practical, and highly consistent engineering best
+  practices for Golang projects, helping teams build maintainable, testable,
+  secure, and modern codebases. This specification must be referenced and
+  followed when developing Golang projects.
+modeSlugs:
+  - orchestrator
 ---
 
 # Golang 项目工程化指南

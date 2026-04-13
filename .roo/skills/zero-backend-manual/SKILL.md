@@ -1,6 +1,8 @@
 ---
 name: zero-backend-manual
 description: zero-backend 项目的手册，当需要熟悉/开发 zero-backend 项目时，请必须阅读此手册。
+modeSlugs:
+  - orchestrator
 ---
 
 # 项目文档
