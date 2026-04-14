@@ -15,8 +15,7 @@ admin:
   # 跨域配置
   cors:
     allow_origins:
-      - "http://localhost:3000"
-      - "http://localhost:8080"
+      - "http://localhost:5173"
     allow_methods:
       - "GET"
       - "POST"
@@ -27,6 +26,9 @@ admin:
       - "Content-Type"
       - "Authorization"
       - "X-Requested-With"
+      - "Accept"
+      - "Referer"
+      - "User-Agent"
     allow_credentials: true
 
 # API模块配置
