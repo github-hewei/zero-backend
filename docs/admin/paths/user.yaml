@@ -1,0 +1,341 @@
+/user/user/list:
+  post:
+    tags:
+      - 用户管理
+    summary: 获取用户列表
+    operationId: getUserList
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - page
+              - limit
+            properties:
+              username:
+                type: string
+                description: 用户名
+              mobile:
+                type: string
+                description: 手机号
+              status:
+                type: integer
+                description: 账号状态 (1正常 2禁用)
+              store_id:
+                type: integer
+                description: 企业ID
+              page:
+                type: integer
+              limit:
+                type: integer
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/User'
+                    total:
+                      type: integer
+
+/user/user/create:
+  post:
+    tags:
+      - 用户管理
+    summary: 创建用户
+    operationId: createUser
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - username
+              - password
+              - mobile
+              - nick_name
+              - gender
+              - status
+            properties:
+              username:
+                type: string
+                description: 用户名
+              password:
+                type: string
+                description: 密码
+              mobile:
+                type: string
+                description: 手机号
+              nick_name:
+                type: string
+                description: 昵称
+              avatar_id:
+                type: integer
+                description: 头像文件ID
+              gender:
+                type: integer
+                description: 性别 (0未知 1男 2女)
+              status:
+                type: integer
+                description: 账号状态 (1正常 2禁用)
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/user/user/update:
+  post:
+    tags:
+      - 用户管理
+    summary: 更新用户
+    operationId: updateUser
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - username
+              - mobile
+              - nick_name
+              - gender
+              - status
+            properties:
+              id:
+                type: integer
+                description: 用户ID
+              username:
+                type: string
+                description: 用户名
+              password:
+                type: string
+                description: 密码
+              mobile:
+                type: string
+                description: 手机号
+              nick_name:
+                type: string
+                description: 昵称
+              avatar_id:
+                type: integer
+                description: 头像文件ID
+              gender:
+                type: integer
+                description: 性别
+              status:
+                type: integer
+                description: 账号状态
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/user/user/delete:
+  post:
+    tags:
+      - 用户管理
+    summary: 删除用户
+    operationId: deleteUser
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 用户ID
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/user/user/detail:
+  post:
+    tags:
+      - 用户管理
+    summary: 获取用户详情
+    operationId: getUserDetail
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 用户ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  $ref: '../schemas.yaml#/schemas/User'
+
+/user/points/logs:
+  post:
+    tags:
+      - 用户积分管理
+    summary: 获取积分记录
+    operationId: getPointsLogs
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - user_id
+              - page
+              - limit
+            properties:
+              user_id:
+                type: integer
+                description: 用户ID
+              store_id:
+                type: integer
+                description: 企业ID
+              start_date:
+                type: string
+                description: 开始日期 (YYYY-MM-DD)
+              end_date:
+                type: string
+                description: 结束日期 (YYYY-MM-DD)
+              change_type:
+                type: integer
+                description: 变更类型 (1增加 2减少)
+              page:
+                type: integer
+              limit:
+                type: integer
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/UserPointsLog'
+                    total:
+                      type: integer
+
+/user/points/change:
+  post:
+    tags:
+      - 用户积分管理
+    summary: 变更积分
+    description: 修改用户积分
+    operationId: changePoints
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - user_id
+              - points
+              - change_type
+            properties:
+              user_id:
+                type: integer
+                description: 用户ID
+              points:
+                type: integer
+                description: 变更积分值
+              change_type:
+                type: integer
+                description: 变更类型 (1增加 2减少)
+              source_type:
+                type: integer
+                description: 来源类型 (10消费 20充值 30活动)
+              source_id:
+                type: string
+                description: 来源ID
+              remark:
+                type: string
+                description: 备注
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'

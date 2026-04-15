@@ -1,0 +1,103 @@
+/login:
+  post:
+    tags:
+      - 认证管理
+    summary: 管理员登录
+    description: 管理员使用用户名密码登录系统，获取JWT令牌
+    operationId: adminLogin
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas.yaml#/schemas/AuthLoginRequest'
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/AuthLoginResponse'
+
+/refresh-token:
+  post:
+    tags:
+      - 认证管理
+    summary: 刷新Token
+    description: 刷新JWT令牌
+    operationId: refreshToken
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/AuthLoginResponse'
+
+/logout:
+  post:
+    tags:
+      - 认证管理
+    summary: 退出登录
+    description: 清除登录状态
+    operationId: logout
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/change-password:
+  post:
+    tags:
+      - 认证管理
+    summary: 修改密码
+    description: 修改当前管理员密码
+    operationId: changePassword
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas.yaml#/schemas/ChangePasswordRequest'
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/permissions:
+  post:
+    tags:
+      - 认证管理
+    summary: 获取权限列表
+    description: 获取当前用户的权限菜单和接口列表
+    operationId: getPermissions
+    security:
+      - BearerAuth: []
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              is_tree:
+                type: boolean
+                description: 是否返回树形结构
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/PermissionsResponse'

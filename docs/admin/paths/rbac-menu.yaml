@@ -1,0 +1,308 @@
+/rbac/menu/list:
+  post:
+    tags:
+      - RBAC-菜单管理
+    summary: 获取菜单列表
+    operationId: getMenuList
+    security:
+      - BearerAuth: []
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: 菜单名称
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/RbacMenu'
+                    total:
+                      type: integer
+
+/rbac/menu/create:
+  post:
+    tags:
+      - RBAC-菜单管理
+    summary: 创建菜单
+    operationId: createMenu
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - type
+              - path
+            properties:
+              name:
+                type: string
+                description: 菜单名称
+              type:
+                type: integer
+                description: 菜单类型 (10页面 20操作)
+              parent_id:
+                type: integer
+                description: 上级菜单ID
+              path:
+                type: string
+                description: 菜单路径
+              is_page:
+                type: integer
+                description: 是否为页面 (1是 0否)
+              module_key:
+                type: string
+                description: 功能模块key
+              action_mark:
+                type: string
+                description: 操作标识
+              sort:
+                type: integer
+                description: 排序
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/menu/update:
+  post:
+    tags:
+      - RBAC-菜单管理
+    summary: 更新菜单
+    operationId: updateMenu
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - name
+              - type
+              - path
+            properties:
+              id:
+                type: integer
+                description: 菜单ID
+              name:
+                type: string
+                description: 菜单名称
+              type:
+                type: integer
+                description: 菜单类型
+              parent_id:
+                type: integer
+                description: 上级菜单ID
+              path:
+                type: string
+                description: 菜单路径
+              is_page:
+                type: integer
+                description: 是否为页面
+              module_key:
+                type: string
+                description: 功能模块key
+              action_mark:
+                type: string
+                description: 操作标识
+              sort:
+                type: integer
+                description: 排序
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/menu/delete:
+  post:
+    tags:
+      - RBAC-菜单管理
+    summary: 删除菜单
+    operationId: deleteMenu
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 菜单ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/menu/sync:
+  post:
+    tags:
+      - RBAC-菜单管理
+    summary: 同步菜单
+    description: 同步菜单结构（包括子菜单）
+    operationId: syncMenu
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - type
+              - path
+            properties:
+              name:
+                type: string
+              type:
+                type: integer
+              parent_id:
+                type: integer
+              path:
+                type: string
+              is_page:
+                type: integer
+              module_key:
+                type: string
+              sort:
+                type: integer
+              children:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    type:
+                      type: integer
+                    parent_id:
+                      type: integer
+                    path:
+                      type: string
+                    is_page:
+                      type: integer
+                    module_key:
+                      type: string
+                    sort:
+                      type: integer
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/menu/api/list:
+  post:
+    tags:
+      - RBAC-菜单管理
+    summary: 获取菜单关联的API列表
+    operationId: getMenuApiList
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - menu_id
+            properties:
+              menu_id:
+                type: integer
+                description: 菜单ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    menu_id:
+                      type: integer
+                    api_ids:
+                      type: array
+                      items:
+                        type: integer
+
+/rbac/menu/api/save:
+  post:
+    tags:
+      - RBAC-菜单管理
+    summary: 保存菜单关联的API
+    operationId: saveMenuApi
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - menu_id
+            properties:
+              menu_id:
+                type: integer
+                description: 菜单ID
+              api_ids:
+                type: array
+                items:
+                  type: integer
+                description: API ID列表
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'

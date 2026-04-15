@@ -1,0 +1,272 @@
+/upload/group/list:
+  post:
+    tags:
+      - 上传分组管理
+    summary: 获取分组列表
+    operationId: getUploadGroupList
+    security:
+      - BearerAuth: []
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/UploadGroup'
+
+/upload/group/create:
+  post:
+    tags:
+      - 上传分组管理
+    summary: 创建分组
+    operationId: createUploadGroup
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                description: 分组名称
+              parent_id:
+                type: integer
+                description: 上级分组ID
+              sort:
+                type: integer
+                description: 排序
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/upload/group/update:
+  post:
+    tags:
+      - 上传分组管理
+    summary: 更新分组
+    operationId: updateUploadGroup
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - name
+            properties:
+              id:
+                type: integer
+                description: 分组ID
+              name:
+                type: string
+                description: 分组名称
+              parent_id:
+                type: integer
+                description: 上级分组ID
+              sort:
+                type: integer
+                description: 排序
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/upload/group/delete:
+  post:
+    tags:
+      - 上传分组管理
+    summary: 删除分组
+    operationId: deleteUploadGroup
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 分组ID
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/upload/file/list:
+  post:
+    tags:
+      - 上传文件管理
+    summary: 获取文件列表
+    operationId: getUploadFileList
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - page
+              - limit
+            properties:
+              group_id:
+                type: string
+                description: 分组ID
+              file_type:
+                type: integer
+                description: 文件类型 (10图片 20附件 30视频)
+              file_name:
+                type: string
+                description: 文件名称
+              store_id:
+                type: integer
+                description: 企业ID
+              page:
+                type: integer
+              limit:
+                type: integer
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/UploadFile'
+                    total:
+                      type: integer
+
+/upload/file/upload:
+  post:
+    tags:
+      - 上传文件管理
+    summary: 上传文件
+    description: 上传文件到服务器（multipart/form-data格式）
+    operationId: uploadFile
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required:
+              - file
+            properties:
+              file:
+                type: string
+                format: binary
+                description: 上传的文件
+              group_id:
+                type: integer
+                description: 文件分组ID
+              store_id:
+                type: integer
+                description: 企业ID
+              uploader_id:
+                type: integer
+                description: 上传者用户ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  $ref: '../schemas.yaml#/schemas/UploadFile'
+
+/upload/file/delete:
+  post:
+    tags:
+      - 上传文件管理
+    summary: 删除文件
+    operationId: deleteUploadFile
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 文件ID
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'

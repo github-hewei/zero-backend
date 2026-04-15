@@ -1,0 +1,540 @@
+schemas:
+  CommonResponse:
+    type: object
+    properties:
+      errcode:
+        type: integer
+        description: 错误码，0表示成功
+        example: 0
+      message:
+        type: string
+        description: 消息
+        example: success
+      cost:
+        type: string
+        description: 请求耗时
+      traceId:
+        type: string
+        description: 追踪ID
+
+  AuthLoginRequest:
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: string
+        description: 用户名
+        example: admin
+      password:
+        type: string
+        description: 密码
+        example: "123456"
+
+  AuthLoginResponse:
+    type: object
+    properties:
+      errcode:
+        type: integer
+        example: 0
+      message:
+        type: string
+        example: success
+      data:
+        $ref: '#/schemas/AdminLoginData'
+      cost:
+        type: string
+      traceId:
+        type: string
+
+  AdminLoginData:
+    type: object
+    properties:
+      token:
+        type: string
+        description: JWT令牌
+      ttl:
+        type: integer
+        description: Token有效期（秒）
+      user:
+        $ref: '#/schemas/RbacUser'
+
+  ChangePasswordRequest:
+    type: object
+    required:
+      - old_password
+      - new_password
+    properties:
+      old_password:
+        type: string
+        description: 旧密码
+      new_password:
+        type: string
+        description: 新密码
+        minLength: 6
+        maxLength: 20
+
+  PermissionsResponse:
+    type: object
+    properties:
+      errcode:
+        type: integer
+        example: 0
+      message:
+        type: string
+        example: success
+      data:
+        type: object
+        properties:
+          menus:
+            type: array
+            items:
+              $ref: '#/schemas/RbacMenu'
+          apis:
+            type: array
+            items:
+              $ref: '#/schemas/RbacApi'
+
+  RbacUser:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 用户ID
+      username:
+        type: string
+        description: 用户名
+      real_name:
+        type: string
+        description: 姓名
+      is_super:
+        type: integer
+        description: 是否为超级管理员（1是 0否）
+      sort:
+        type: integer
+        description: 排序
+      store_id:
+        type: integer
+        description: 企业ID
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+
+  RbacMenu:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 菜单ID
+      type:
+        type: integer
+        description: 菜单类型 (10页面 20操作)
+      name:
+        type: string
+        description: 菜单名称
+      path:
+        type: string
+        description: 菜单路径
+      is_page:
+        type: integer
+        description: 是否为页面 (1是 0否)
+      module_key:
+        type: string
+        description: 功能模块key
+      action_mark:
+        type: string
+        description: 操作标识
+      parent_id:
+        type: integer
+        description: 上级菜单ID
+      sort:
+        type: integer
+        description: 排序
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+      children:
+        type: array
+        items:
+          $ref: '#/schemas/RbacMenu'
+        description: 子菜单
+      actions:
+        type: array
+        items:
+          $ref: '#/schemas/RbacMenu'
+        description: 操作列表
+
+  RbacApi:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 接口ID
+      name:
+        type: string
+        description: 接口名称
+      url:
+        type: string
+        description: 接口URL
+      parent_id:
+        type: integer
+        description: 父级ID
+      sort:
+        type: integer
+        description: 排序
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+      children:
+        type: array
+        items:
+          $ref: '#/schemas/RbacApi'
+
+  RbacRole:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 角色ID
+      role_name:
+        type: string
+        description: 角色名称
+      parent_id:
+        type: integer
+        description: 父级角色ID
+      sort:
+        type: integer
+        description: 排序
+      store_id:
+        type: integer
+        description: 企业ID
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+
+  RbacStore:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 企业ID
+      name:
+        type: string
+        description: 企业名称
+      short_name:
+        type: string
+        description: 企业简称
+      contact:
+        type: string
+        description: 企业联系人
+      contact_phone:
+        type: string
+        description: 联系电话
+      description:
+        type: string
+        description: 简介
+      logo_image_id:
+        type: integer
+        description: LOGO文件ID
+      sort:
+        type: integer
+        description: 排序
+      is_recycle:
+        type: integer
+        description: 是否回收 (0否 1是)
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 用户ID
+      username:
+        type: string
+        description: 用户名
+      mobile:
+        type: string
+        description: 手机号
+      nick_name:
+        type: string
+        description: 昵称
+      avatar_id:
+        type: integer
+        description: 头像文件ID
+      gender:
+        type: integer
+        description: 性别 (0未知 1男 2女)
+      country:
+        type: string
+        description: 国家
+      province:
+        type: string
+        description: 省份
+      city:
+        type: string
+        description: 城市
+      platform:
+        type: string
+        description: 注册来源
+      status:
+        type: integer
+        description: 账号状态 (1正常 2禁用)
+      points:
+        type: integer
+        description: 用户积分
+      last_login_time:
+        type: integer
+        description: 最后登录时间
+      store_id:
+        type: integer
+        description: 企业ID
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+
+  ArticleCategory:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 分类ID
+      name:
+        type: string
+        description: 分类名称
+      status:
+        type: integer
+        description: 状态 (1显示 0隐藏)
+      sort:
+        type: integer
+        description: 排序
+      store_id:
+        type: integer
+        description: 企业ID
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+
+  Article:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 文章ID
+      title:
+        type: string
+        description: 文章标题
+      show_type:
+        type: integer
+        description: 显示方式 (10小图 20大图)
+      category_id:
+        type: integer
+        description: 分类ID
+      image_id:
+        type: integer
+        description: 封面图ID
+      content:
+        type: string
+        description: 文章内容
+      sort:
+        type: integer
+        description: 排序
+      status:
+        type: integer
+        description: 状态 (1显示 0隐藏)
+      virtual_views:
+        type: integer
+        description: 虚拟阅读量
+      actual_views:
+        type: integer
+        description: 实际阅读量
+      store_id:
+        type: integer
+        description: 企业ID
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+
+  UploadGroup:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 分组ID
+      name:
+        type: string
+        description: 分组名称
+      parent_id:
+        type: integer
+        description: 上级分组ID
+      sort:
+        type: integer
+        description: 排序
+      store_id:
+        type: integer
+        description: 企业ID
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+      children:
+        type: array
+        items:
+          $ref: '#/schemas/UploadGroup'
+        description: 子分组
+
+  UploadFile:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 文件ID
+      group_id:
+        type: integer
+        description: 分组ID
+      channel:
+        type: integer
+        description: 上传来源 (10后台 20客户端)
+      storage:
+        type: string
+        description: 存储方式
+      domain:
+        type: string
+        description: 存储域名
+      file_type:
+        type: integer
+        description: 文件类型 (10图片 20附件 30视频)
+      file_name:
+        type: string
+        description: 文件名称
+      file_path:
+        type: string
+        description: 文件路径
+      file_size:
+        type: integer
+        description: 文件大小(字节)
+      file_ext:
+        type: string
+        description: 文件扩展名
+      cover:
+        type: string
+        description: 文件封面
+      uploader_id:
+        type: integer
+        description: 上传者用户ID
+      store_id:
+        type: integer
+        description: 企业ID
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+
+  Setting:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 设置ID
+      setting_key:
+        type: string
+        description: 设置项标识
+      setting_values:
+        type: string
+        description: 设置内容(JSON格式)
+      description:
+        type: string
+        description: 设置项描述
+      store_id:
+        type: integer
+        description: 企业ID
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+
+  SettingDefault:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 设置ID
+      setting_key:
+        type: string
+        description: 设置项标识
+      setting_values:
+        type: string
+        description: 设置内容(JSON格式)
+      description:
+        type: string
+        description: 设置项描述
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+
+  UserPointsLog:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 记录ID
+      store_id:
+        type: integer
+        description: 企业ID
+      user_id:
+        type: integer
+        description: 用户ID
+      points:
+        type: integer
+        description: 变更积分值
+      change_type:
+        type: integer
+        description: 变更类型 (1增加 2减少)
+      source_type:
+        type: integer
+        description: 来源类型 (10消费 20充值 30活动)
+      source_id:
+        type: string
+        description: 来源ID
+      remark:
+        type: string
+        description: 备注
+      created_at:
+        type: integer
+        description: 创建时间

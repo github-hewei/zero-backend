@@ -1,0 +1,191 @@
+openapi: 3.1.0
+info:
+  title: Zero Backend Admin API
+  description: 后台管理接口文档
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8081/api'
+    description: API Base Path
+
+paths:
+  /login:
+    $ref: './paths/auth.yaml#/~1login'
+  /refresh-token:
+    $ref: './paths/auth.yaml#/~1refresh-token'
+  /logout:
+    $ref: './paths/auth.yaml#/~1logout'
+  /change-password:
+    $ref: './paths/auth.yaml#/~1change-password'
+  /permissions:
+    $ref: './paths/auth.yaml#/~1permissions'
+
+  /rbac/menu/list:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1list'
+  /rbac/menu/create:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1create'
+  /rbac/menu/update:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1update'
+  /rbac/menu/delete:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1delete'
+  /rbac/menu/sync:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1sync'
+  /rbac/menu/api/list:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1api~1list'
+  /rbac/menu/api/save:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1api~1save'
+
+  /rbac/api/list:
+    $ref: './paths/rbac-api.yaml#/~1rbac~1api~1list'
+  /rbac/api/create:
+    $ref: './paths/rbac-api.yaml#/~1rbac~1api~1create'
+  /rbac/api/update:
+    $ref: './paths/rbac-api.yaml#/~1rbac~1api~1update'
+  /rbac/api/delete:
+    $ref: './paths/rbac-api.yaml#/~1rbac~1api~1delete'
+
+  /rbac/store/list:
+    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1list'
+  /rbac/store/create:
+    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1create'
+  /rbac/store/update:
+    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1update'
+  /rbac/store/delete:
+    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1delete'
+  /rbac/store/recycle:
+    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1recycle'
+  /rbac/store/restore:
+    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1restore'
+
+  /rbac/role/list:
+    $ref: './paths/rbac-role.yaml#/~1rbac~1role~1list'
+  /rbac/role/create:
+    $ref: './paths/rbac-role.yaml#/~1rbac~1role~1create'
+  /rbac/role/update:
+    $ref: './paths/rbac-role.yaml#/~1rbac~1role~1update'
+  /rbac/role/delete:
+    $ref: './paths/rbac-role.yaml#/~1rbac~1role~1delete'
+  /rbac/role/set-menus:
+    $ref: './paths/rbac-role.yaml#/~1rbac~1role~1set-menus'
+
+  /rbac/user/list:
+    $ref: './paths/rbac-user.yaml#/~1rbac~1user~1list'
+  /rbac/user/create:
+    $ref: './paths/rbac-user.yaml#/~1rbac~1user~1create'
+  /rbac/user/update:
+    $ref: './paths/rbac-user.yaml#/~1rbac~1user~1update'
+  /rbac/user/delete:
+    $ref: './paths/rbac-user.yaml#/~1rbac~1user~1delete'
+  /rbac/user/set-roles:
+    $ref: './paths/rbac-user.yaml#/~1rbac~1user~1set-roles'
+  /rbac/user/reset-password:
+    $ref: './paths/rbac-user.yaml#/~1rbac~1user~1reset-password'
+
+  /setting/list:
+    $ref: './paths/setting.yaml#/~1setting~1list'
+  /setting/create:
+    $ref: './paths/setting.yaml#/~1setting~1create'
+  /setting/update:
+    $ref: './paths/setting.yaml#/~1setting~1update'
+  /setting/delete:
+    $ref: './paths/setting.yaml#/~1setting~1delete'
+  /setting/form-configs:
+    $ref: './paths/setting.yaml#/~1setting~1form-configs'
+  /setting/qiniu-token:
+    $ref: './paths/setting.yaml#/~1setting~1qiniu-token'
+  /setting/default/list:
+    $ref: './paths/setting.yaml#/~1setting~1default~1list'
+  /setting/default/create:
+    $ref: './paths/setting.yaml#/~1setting~1default~1create'
+  /setting/default/update:
+    $ref: './paths/setting.yaml#/~1setting~1default~1update'
+  /setting/default/delete:
+    $ref: './paths/setting.yaml#/~1setting~1default~1delete'
+
+  /article/category/list:
+    $ref: './paths/article.yaml#/~1article~1category~1list'
+  /article/category/create:
+    $ref: './paths/article.yaml#/~1article~1category~1create'
+  /article/category/update:
+    $ref: './paths/article.yaml#/~1article~1category~1update'
+  /article/category/delete:
+    $ref: './paths/article.yaml#/~1article~1category~1delete'
+  /article/article/list:
+    $ref: './paths/article.yaml#/~1article~1article~1list'
+  /article/article/create:
+    $ref: './paths/article.yaml#/~1article~1article~1create'
+  /article/article/update:
+    $ref: './paths/article.yaml#/~1article~1article~1update'
+  /article/article/delete:
+    $ref: './paths/article.yaml#/~1article~1article~1delete'
+
+  /user/user/list:
+    $ref: './paths/user.yaml#/~1user~1user~1list'
+  /user/user/create:
+    $ref: './paths/user.yaml#/~1user~1user~1create'
+  /user/user/update:
+    $ref: './paths/user.yaml#/~1user~1user~1update'
+  /user/user/delete:
+    $ref: './paths/user.yaml#/~1user~1user~1delete'
+  /user/user/detail:
+    $ref: './paths/user.yaml#/~1user~1user~1detail'
+  /user/points/logs:
+    $ref: './paths/user.yaml#/~1user~1points~1logs'
+  /user/points/change:
+    $ref: './paths/user.yaml#/~1user~1points~1change'
+
+  /upload/group/list:
+    $ref: './paths/upload.yaml#/~1upload~1group~1list'
+  /upload/group/create:
+    $ref: './paths/upload.yaml#/~1upload~1group~1create'
+  /upload/group/update:
+    $ref: './paths/upload.yaml#/~1upload~1group~1update'
+  /upload/group/delete:
+    $ref: './paths/upload.yaml#/~1upload~1group~1delete'
+  /upload/file/list:
+    $ref: './paths/upload.yaml#/~1upload~1file~1list'
+  /upload/file/upload:
+    $ref: './paths/upload.yaml#/~1upload~1file~1upload'
+  /upload/file/delete:
+    $ref: './paths/upload.yaml#/~1upload~1file~1delete'
+
+  /region/tree:
+    $ref: './paths/region.yaml#/~1region~1tree'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT令牌认证
+  schemas:
+    CommonResponse:
+      $ref: './schemas.yaml#/schemas/CommonResponse'
+    AuthLoginRequest:
+      $ref: './schemas.yaml#/schemas/AuthLoginRequest'
+    AuthLoginResponse:
+      $ref: './schemas.yaml#/schemas/AuthLoginResponse'
+    RbacUser:
+      $ref: './schemas.yaml#/schemas/RbacUser'
+    RbacMenu:
+      $ref: './schemas.yaml#/schemas/RbacMenu'
+    RbacApi:
+      $ref: './schemas.yaml#/schemas/RbacApi'
+    RbacRole:
+      $ref: './schemas.yaml#/schemas/RbacRole'
+    RbacStore:
+      $ref: './schemas.yaml#/schemas/RbacStore'
+    User:
+      $ref: './schemas.yaml#/schemas/User'
+    ArticleCategory:
+      $ref: './schemas.yaml#/schemas/ArticleCategory'
+    Article:
+      $ref: './schemas.yaml#/schemas/Article'
+    UploadGroup:
+      $ref: './schemas.yaml#/schemas/UploadGroup'
+    UploadFile:
+      $ref: './schemas.yaml#/schemas/UploadFile'
+    Setting:
+      $ref: './schemas.yaml#/schemas/Setting'
+    SettingDefault:
+      $ref: './schemas.yaml#/schemas/SettingDefault'

@@ -1,0 +1,249 @@
+/rbac/user/list:
+  post:
+    tags:
+      - RBAC-管理员管理
+    summary: 获取管理员列表
+    operationId: getRbacUserList
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - page
+              - limit
+            properties:
+              store_id:
+                type: integer
+                description: 企业ID
+              username:
+                type: string
+                description: 用户名
+              real_name:
+                type: string
+                description: 姓名
+              page:
+                type: integer
+                description: 页码
+              limit:
+                type: integer
+                description: 每页数量
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/RbacUser'
+                    total:
+                      type: integer
+
+/rbac/user/create:
+  post:
+    tags:
+      - RBAC-管理员管理
+    summary: 创建管理员
+    operationId: createRbacUser
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - username
+              - password
+              - real_name
+            properties:
+              username:
+                type: string
+                description: 用户名
+                minLength: 5
+                maxLength: 20
+              password:
+                type: string
+                description: 密码
+                minLength: 6
+                maxLength: 20
+              real_name:
+                type: string
+                description: 姓名
+              is_super:
+                type: integer
+                description: 是否超级管理员 (0否 1是)
+              store_id:
+                type: integer
+                description: 企业ID
+              sort:
+                type: integer
+                description: 排序
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/user/update:
+  post:
+    tags:
+      - RBAC-管理员管理
+    summary: 更新管理员
+    operationId: updateRbacUser
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - username
+              - real_name
+              - store_id
+            properties:
+              id:
+                type: integer
+                description: 用户ID
+              username:
+                type: string
+                description: 用户名
+              real_name:
+                type: string
+                description: 姓名
+              is_super:
+                type: integer
+                description: 是否超级管理员
+              store_id:
+                type: integer
+                description: 企业ID
+              sort:
+                type: integer
+                description: 排序
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/user/delete:
+  post:
+    tags:
+      - RBAC-管理员管理
+    summary: 删除管理员
+    operationId: deleteRbacUser
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 用户ID
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/user/set-roles:
+  post:
+    tags:
+      - RBAC-管理员管理
+    summary: 设置管理员角色
+    description: 为管理员分配角色
+    operationId: setUserRoles
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - user_id
+              - role_ids
+            properties:
+              user_id:
+                type: integer
+                description: 用户ID
+              role_ids:
+                type: array
+                items:
+                  type: integer
+                description: 角色ID列表
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/user/reset-password:
+  post:
+    tags:
+      - RBAC-管理员管理
+    summary: 重置管理员密码
+    operationId: resetUserPassword
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 用户ID
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'

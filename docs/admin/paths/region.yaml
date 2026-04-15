@@ -1,0 +1,43 @@
+/region/tree:
+  post:
+    tags:
+      - 区划管理
+    summary: 获取区划树
+    description: 获取省市区三级区划树形结构
+    operationId: getRegionTree
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: 区划ID
+                      name:
+                        type: string
+                        description: 区划名称
+                      parent_id:
+                        type: integer
+                        description: 父级ID
+                      level:
+                        type: integer
+                        description: 层级 (1省 2市 3区)
+                      children:
+                        type: array
+                        description: 子区划
+                        items:
+                          type: object
