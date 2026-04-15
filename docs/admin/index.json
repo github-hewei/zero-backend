@@ -1,0 +1,4775 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Zero Backend Admin API",
+    "description": "后台管理接口文档",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8081/api",
+      "description": "API Base Path"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "tags": [
+          "认证管理"
+        ],
+        "summary": "管理员登录",
+        "description": "管理员使用用户名密码登录系统，获取JWT令牌",
+        "operationId": "adminLogin",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthLoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthLoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/refresh-token": {
+      "post": {
+        "tags": [
+          "认证管理"
+        ],
+        "summary": "刷新Token",
+        "description": "刷新JWT令牌",
+        "operationId": "refreshToken",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthLoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": [
+          "认证管理"
+        ],
+        "summary": "退出登录",
+        "description": "清除登录状态",
+        "operationId": "logout",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/change-password": {
+      "post": {
+        "tags": [
+          "认证管理"
+        ],
+        "summary": "修改密码",
+        "description": "修改当前管理员密码",
+        "operationId": "changePassword",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "old_password",
+                  "new_password"
+                ],
+                "properties": {
+                  "old_password": {
+                    "type": "string",
+                    "description": "旧密码"
+                  },
+                  "new_password": {
+                    "type": "string",
+                    "description": "新密码",
+                    "minLength": 6,
+                    "maxLength": 20
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/permissions": {
+      "post": {
+        "tags": [
+          "认证管理"
+        ],
+        "summary": "获取权限列表",
+        "description": "获取当前用户的权限菜单和接口列表",
+        "operationId": "getPermissions",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "is_tree": {
+                    "type": "boolean",
+                    "description": "是否返回树形结构"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "menus": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/RbacMenu"
+                          }
+                        },
+                        "apis": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/RbacApi"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/menu/list": {
+      "post": {
+        "tags": [
+          "RBAC-菜单管理"
+        ],
+        "summary": "获取菜单列表",
+        "operationId": "getMenuList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "菜单名称"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/RbacMenu"
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/menu/create": {
+      "post": {
+        "tags": [
+          "RBAC-菜单管理"
+        ],
+        "summary": "创建菜单",
+        "operationId": "createMenu",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "type",
+                  "path"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "菜单名称"
+                  },
+                  "type": {
+                    "type": "integer",
+                    "description": "菜单类型 (10页面 20操作)"
+                  },
+                  "parent_id": {
+                    "type": "integer",
+                    "description": "上级菜单ID"
+                  },
+                  "path": {
+                    "type": "string",
+                    "description": "菜单路径"
+                  },
+                  "is_page": {
+                    "type": "integer",
+                    "description": "是否为页面 (1是 0否)"
+                  },
+                  "module_key": {
+                    "type": "string",
+                    "description": "功能模块key"
+                  },
+                  "action_mark": {
+                    "type": "string",
+                    "description": "操作标识"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/menu/update": {
+      "post": {
+        "tags": [
+          "RBAC-菜单管理"
+        ],
+        "summary": "更新菜单",
+        "operationId": "updateMenu",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name",
+                  "type",
+                  "path"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "菜单ID"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "菜单名称"
+                  },
+                  "type": {
+                    "type": "integer",
+                    "description": "菜单类型"
+                  },
+                  "parent_id": {
+                    "type": "integer",
+                    "description": "上级菜单ID"
+                  },
+                  "path": {
+                    "type": "string",
+                    "description": "菜单路径"
+                  },
+                  "is_page": {
+                    "type": "integer",
+                    "description": "是否为页面"
+                  },
+                  "module_key": {
+                    "type": "string",
+                    "description": "功能模块key"
+                  },
+                  "action_mark": {
+                    "type": "string",
+                    "description": "操作标识"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/menu/delete": {
+      "post": {
+        "tags": [
+          "RBAC-菜单管理"
+        ],
+        "summary": "删除菜单",
+        "operationId": "deleteMenu",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "菜单ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/menu/sync": {
+      "post": {
+        "tags": [
+          "RBAC-菜单管理"
+        ],
+        "summary": "同步菜单",
+        "description": "同步菜单结构（包括子菜单）",
+        "operationId": "syncMenu",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "type",
+                  "path"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "integer"
+                  },
+                  "parent_id": {
+                    "type": "integer"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "is_page": {
+                    "type": "integer"
+                  },
+                  "module_key": {
+                    "type": "string"
+                  },
+                  "sort": {
+                    "type": "integer"
+                  },
+                  "children": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "integer"
+                        },
+                        "parent_id": {
+                          "type": "integer"
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "is_page": {
+                          "type": "integer"
+                        },
+                        "module_key": {
+                          "type": "string"
+                        },
+                        "sort": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/menu/api/list": {
+      "post": {
+        "tags": [
+          "RBAC-菜单管理"
+        ],
+        "summary": "获取菜单关联的API列表",
+        "operationId": "getMenuApiList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "menu_id"
+                ],
+                "properties": {
+                  "menu_id": {
+                    "type": "integer",
+                    "description": "菜单ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "menu_id": {
+                          "type": "integer"
+                        },
+                        "api_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/menu/api/save": {
+      "post": {
+        "tags": [
+          "RBAC-菜单管理"
+        ],
+        "summary": "保存菜单关联的API",
+        "operationId": "saveMenuApi",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "menu_id"
+                ],
+                "properties": {
+                  "menu_id": {
+                    "type": "integer",
+                    "description": "菜单ID"
+                  },
+                  "api_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "description": "API ID列表"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/api/list": {
+      "post": {
+        "tags": [
+          "RBAC-接口管理"
+        ],
+        "summary": "获取接口列表",
+        "operationId": "getApiList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/RbacApi"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/api/create": {
+      "post": {
+        "tags": [
+          "RBAC-接口管理"
+        ],
+        "summary": "创建接口",
+        "operationId": "createApi",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "url"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "接口名称"
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "接口URL"
+                  },
+                  "parent_id": {
+                    "type": "integer",
+                    "description": "父级ID"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/api/update": {
+      "post": {
+        "tags": [
+          "RBAC-接口管理"
+        ],
+        "summary": "更新接口",
+        "operationId": "updateApi",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name",
+                  "url"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "接口ID"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "接口名称"
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "接口URL"
+                  },
+                  "parent_id": {
+                    "type": "integer",
+                    "description": "父级ID"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/api/delete": {
+      "post": {
+        "tags": [
+          "RBAC-接口管理"
+        ],
+        "summary": "删除接口",
+        "operationId": "deleteApi",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "接口ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/store/list": {
+      "post": {
+        "tags": [
+          "RBAC-企业管理"
+        ],
+        "summary": "获取企业列表",
+        "operationId": "getStoreList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "page",
+                  "limit"
+                ],
+                "properties": {
+                  "page": {
+                    "type": "integer",
+                    "description": "页码"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "每页数量"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "企业名称"
+                  },
+                  "is_recycle": {
+                    "type": "integer",
+                    "description": "是否回收 (0否 1是 -1全部)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/RbacStore"
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/store/create": {
+      "post": {
+        "tags": [
+          "RBAC-企业管理"
+        ],
+        "summary": "创建企业",
+        "operationId": "createStore",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "short_name",
+                  "contact",
+                  "contact_phone"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "企业名称"
+                  },
+                  "short_name": {
+                    "type": "string",
+                    "description": "企业简称"
+                  },
+                  "contact": {
+                    "type": "string",
+                    "description": "企业联系人"
+                  },
+                  "contact_phone": {
+                    "type": "string",
+                    "description": "联系电话"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "简介"
+                  },
+                  "logo_image_id": {
+                    "type": "integer",
+                    "description": "LOGO文件ID"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/store/update": {
+      "post": {
+        "tags": [
+          "RBAC-企业管理"
+        ],
+        "summary": "更新企业",
+        "operationId": "updateStore",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name",
+                  "short_name",
+                  "contact",
+                  "contact_phone"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "企业名称"
+                  },
+                  "short_name": {
+                    "type": "string",
+                    "description": "企业简称"
+                  },
+                  "contact": {
+                    "type": "string",
+                    "description": "企业联系人"
+                  },
+                  "contact_phone": {
+                    "type": "string",
+                    "description": "联系电话"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "简介"
+                  },
+                  "logo_image_id": {
+                    "type": "integer",
+                    "description": "LOGO文件ID"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/store/delete": {
+      "post": {
+        "tags": [
+          "RBAC-企业管理"
+        ],
+        "summary": "删除企业",
+        "operationId": "deleteStore",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/store/recycle": {
+      "post": {
+        "tags": [
+          "RBAC-企业管理"
+        ],
+        "summary": "回收企业",
+        "operationId": "recycleStore",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/store/restore": {
+      "post": {
+        "tags": [
+          "RBAC-企业管理"
+        ],
+        "summary": "恢复企业",
+        "operationId": "restoreStore",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/role/list": {
+      "post": {
+        "tags": [
+          "RBAC-角色管理"
+        ],
+        "summary": "获取角色列表",
+        "operationId": "getRoleList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "role_name": {
+                    "type": "string",
+                    "description": "角色名称"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/RbacRole"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/role/create": {
+      "post": {
+        "tags": [
+          "RBAC-角色管理"
+        ],
+        "summary": "创建角色",
+        "operationId": "createRole",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "role_name"
+                ],
+                "properties": {
+                  "role_name": {
+                    "type": "string",
+                    "description": "角色名称"
+                  },
+                  "parent_id": {
+                    "type": "integer",
+                    "description": "父级角色ID"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/role/update": {
+      "post": {
+        "tags": [
+          "RBAC-角色管理"
+        ],
+        "summary": "更新角色",
+        "operationId": "updateRole",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "role_name"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "角色ID"
+                  },
+                  "role_name": {
+                    "type": "string",
+                    "description": "角色名称"
+                  },
+                  "parent_id": {
+                    "type": "integer",
+                    "description": "父级角色ID"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/role/delete": {
+      "post": {
+        "tags": [
+          "RBAC-角色管理"
+        ],
+        "summary": "删除角色",
+        "operationId": "deleteRole",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "角色ID"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/role/set-menus": {
+      "post": {
+        "tags": [
+          "RBAC-角色管理"
+        ],
+        "summary": "设置角色菜单",
+        "description": "为角色分配菜单权限",
+        "operationId": "setRoleMenus",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "role_id",
+                  "menu_ids"
+                ],
+                "properties": {
+                  "role_id": {
+                    "type": "integer",
+                    "description": "角色ID"
+                  },
+                  "menu_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "description": "菜单ID列表"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/user/list": {
+      "post": {
+        "tags": [
+          "RBAC-管理员管理"
+        ],
+        "summary": "获取管理员列表",
+        "operationId": "getRbacUserList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "page",
+                  "limit"
+                ],
+                "properties": {
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "用户名"
+                  },
+                  "real_name": {
+                    "type": "string",
+                    "description": "姓名"
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "页码"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "每页数量"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/RbacUser"
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/user/create": {
+      "post": {
+        "tags": [
+          "RBAC-管理员管理"
+        ],
+        "summary": "创建管理员",
+        "operationId": "createRbacUser",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password",
+                  "real_name"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "用户名",
+                    "minLength": 5,
+                    "maxLength": 20
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "密码",
+                    "minLength": 6,
+                    "maxLength": 20
+                  },
+                  "real_name": {
+                    "type": "string",
+                    "description": "姓名"
+                  },
+                  "is_super": {
+                    "type": "integer",
+                    "description": "是否超级管理员 (0否 1是)"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/user/update": {
+      "post": {
+        "tags": [
+          "RBAC-管理员管理"
+        ],
+        "summary": "更新管理员",
+        "operationId": "updateRbacUser",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "username",
+                  "real_name",
+                  "store_id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "用户ID"
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "用户名"
+                  },
+                  "real_name": {
+                    "type": "string",
+                    "description": "姓名"
+                  },
+                  "is_super": {
+                    "type": "integer",
+                    "description": "是否超级管理员"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/user/delete": {
+      "post": {
+        "tags": [
+          "RBAC-管理员管理"
+        ],
+        "summary": "删除管理员",
+        "operationId": "deleteRbacUser",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "用户ID"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/user/set-roles": {
+      "post": {
+        "tags": [
+          "RBAC-管理员管理"
+        ],
+        "summary": "设置管理员角色",
+        "description": "为管理员分配角色",
+        "operationId": "setUserRoles",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_id",
+                  "role_ids"
+                ],
+                "properties": {
+                  "user_id": {
+                    "type": "integer",
+                    "description": "用户ID"
+                  },
+                  "role_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "description": "角色ID列表"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rbac/user/reset-password": {
+      "post": {
+        "tags": [
+          "RBAC-管理员管理"
+        ],
+        "summary": "重置管理员密码",
+        "operationId": "resetUserPassword",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "用户ID"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setting/list": {
+      "post": {
+        "tags": [
+          "设置管理"
+        ],
+        "summary": "获取设置列表",
+        "operationId": "getSettingList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "page",
+                  "limit"
+                ],
+                "properties": {
+                  "page": {
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "type": "integer"
+                  },
+                  "setting_key": {
+                    "type": "string",
+                    "description": "设置项标识"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Setting"
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setting/create": {
+      "post": {
+        "tags": [
+          "设置管理"
+        ],
+        "summary": "创建设置",
+        "operationId": "createSetting",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "setting_key",
+                  "setting_values"
+                ],
+                "properties": {
+                  "setting_key": {
+                    "type": "string",
+                    "description": "设置项标识"
+                  },
+                  "setting_values": {
+                    "type": "string",
+                    "description": "设置内容(JSON格式)"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "设置项描述"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setting/update": {
+      "post": {
+        "tags": [
+          "设置管理"
+        ],
+        "summary": "更新设置",
+        "operationId": "updateSetting",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "setting_key",
+                  "setting_values"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "设置ID"
+                  },
+                  "setting_key": {
+                    "type": "string",
+                    "description": "设置项标识"
+                  },
+                  "setting_values": {
+                    "type": "string",
+                    "description": "设置内容"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "设置项描述"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setting/delete": {
+      "post": {
+        "tags": [
+          "设置管理"
+        ],
+        "summary": "删除设置",
+        "operationId": "deleteSetting",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "设置ID"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setting/form-configs": {
+      "post": {
+        "tags": [
+          "设置管理"
+        ],
+        "summary": "获取表单配置",
+        "operationId": "getFormConfigs",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "only_platform": {
+                    "type": "boolean",
+                    "description": "仅获取平台级配置"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setting/qiniu-token": {
+      "post": {
+        "tags": [
+          "设置管理"
+        ],
+        "summary": "获取七牛上传Token",
+        "operationId": "getQiniuToken",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": {
+                          "type": "string",
+                          "description": "上传Token"
+                        },
+                        "domain": {
+                          "type": "string",
+                          "description": "存储域名"
+                        },
+                        "upload_url": {
+                          "type": "string",
+                          "description": "上传地址"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setting/default/list": {
+      "post": {
+        "tags": [
+          "默认设置管理"
+        ],
+        "summary": "获取默认设置列表",
+        "operationId": "getSettingDefaultList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "page",
+                  "limit"
+                ],
+                "properties": {
+                  "page": {
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "type": "integer"
+                  },
+                  "setting_key": {
+                    "type": "string",
+                    "description": "设置项标识"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/SettingDefault"
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setting/default/create": {
+      "post": {
+        "tags": [
+          "默认设置管理"
+        ],
+        "summary": "创建默认设置",
+        "operationId": "createSettingDefault",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "setting_key",
+                  "setting_values"
+                ],
+                "properties": {
+                  "setting_key": {
+                    "type": "string",
+                    "description": "设置项标识"
+                  },
+                  "setting_values": {
+                    "type": "string",
+                    "description": "设置内容"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "设置项描述"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setting/default/update": {
+      "post": {
+        "tags": [
+          "默认设置管理"
+        ],
+        "summary": "更新默认设置",
+        "operationId": "updateSettingDefault",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "setting_key",
+                  "setting_values"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "设置ID"
+                  },
+                  "setting_key": {
+                    "type": "string",
+                    "description": "设置项标识"
+                  },
+                  "setting_values": {
+                    "type": "string",
+                    "description": "设置内容"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "设置项描述"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setting/default/delete": {
+      "post": {
+        "tags": [
+          "默认设置管理"
+        ],
+        "summary": "删除默认设置",
+        "operationId": "deleteSettingDefault",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "设置ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/article/category/list": {
+      "post": {
+        "tags": [
+          "文章分类管理"
+        ],
+        "summary": "获取文章分类列表",
+        "operationId": "getArticleCategoryList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "page",
+                  "limit"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "分类名称"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "description": "状态 (0隐藏 1显示)"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  },
+                  "page": {
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ArticleCategory"
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/article/category/create": {
+      "post": {
+        "tags": [
+          "文章分类管理"
+        ],
+        "summary": "创建文章分类",
+        "operationId": "createArticleCategory",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "status"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "分类名称"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "description": "状态 (0隐藏 1显示)"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/article/category/update": {
+      "post": {
+        "tags": [
+          "文章分类管理"
+        ],
+        "summary": "更新文章分类",
+        "operationId": "updateArticleCategory",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name",
+                  "status"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "分类ID"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "分类名称"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "description": "状态"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/article/category/delete": {
+      "post": {
+        "tags": [
+          "文章分类管理"
+        ],
+        "summary": "删除文章分类",
+        "operationId": "deleteArticleCategory",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "分类ID"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/article/article/list": {
+      "post": {
+        "tags": [
+          "文章管理"
+        ],
+        "summary": "获取文章列表",
+        "operationId": "getArticleList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "page",
+                  "limit"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "文章标题"
+                  },
+                  "category_id": {
+                    "type": "integer",
+                    "description": "分类ID"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "description": "状态 (0隐藏 1显示)"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  },
+                  "page": {
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Article"
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/article/article/create": {
+      "post": {
+        "tags": [
+          "文章管理"
+        ],
+        "summary": "创建文章",
+        "operationId": "createArticle",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "show_type",
+                  "category_id",
+                  "content",
+                  "sort",
+                  "status"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "文章标题"
+                  },
+                  "show_type": {
+                    "type": "integer",
+                    "description": "显示方式 (10小图 20大图)"
+                  },
+                  "category_id": {
+                    "type": "integer",
+                    "description": "分类ID"
+                  },
+                  "image_id": {
+                    "type": "integer",
+                    "description": "封面图ID"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "文章内容"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "description": "状态 (0隐藏 1显示)"
+                  },
+                  "virtual_views": {
+                    "type": "integer",
+                    "description": "虚拟阅读量"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/article/article/update": {
+      "post": {
+        "tags": [
+          "文章管理"
+        ],
+        "summary": "更新文章",
+        "operationId": "updateArticle",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "title",
+                  "show_type",
+                  "category_id",
+                  "content",
+                  "sort",
+                  "status"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "文章ID"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "文章标题"
+                  },
+                  "show_type": {
+                    "type": "integer",
+                    "description": "显示方式"
+                  },
+                  "category_id": {
+                    "type": "integer",
+                    "description": "分类ID"
+                  },
+                  "image_id": {
+                    "type": "integer",
+                    "description": "封面图ID"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "文章内容"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "description": "状态"
+                  },
+                  "virtual_views": {
+                    "type": "integer",
+                    "description": "虚拟阅读量"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/article/article/delete": {
+      "post": {
+        "tags": [
+          "文章管理"
+        ],
+        "summary": "删除文章",
+        "operationId": "deleteArticle",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "文章ID"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/user/list": {
+      "post": {
+        "tags": [
+          "用户管理"
+        ],
+        "summary": "获取用户列表",
+        "operationId": "getUserList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "page",
+                  "limit"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "用户名"
+                  },
+                  "mobile": {
+                    "type": "string",
+                    "description": "手机号"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "description": "账号状态 (1正常 2禁用)"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  },
+                  "page": {
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/User"
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/user/create": {
+      "post": {
+        "tags": [
+          "用户管理"
+        ],
+        "summary": "创建用户",
+        "operationId": "createUser",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password",
+                  "mobile",
+                  "nick_name",
+                  "gender",
+                  "status"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "用户名"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "密码"
+                  },
+                  "mobile": {
+                    "type": "string",
+                    "description": "手机号"
+                  },
+                  "nick_name": {
+                    "type": "string",
+                    "description": "昵称"
+                  },
+                  "avatar_id": {
+                    "type": "integer",
+                    "description": "头像文件ID"
+                  },
+                  "gender": {
+                    "type": "integer",
+                    "description": "性别 (0未知 1男 2女)"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "description": "账号状态 (1正常 2禁用)"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/user/update": {
+      "post": {
+        "tags": [
+          "用户管理"
+        ],
+        "summary": "更新用户",
+        "operationId": "updateUser",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "username",
+                  "mobile",
+                  "nick_name",
+                  "gender",
+                  "status"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "用户ID"
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "用户名"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "密码"
+                  },
+                  "mobile": {
+                    "type": "string",
+                    "description": "手机号"
+                  },
+                  "nick_name": {
+                    "type": "string",
+                    "description": "昵称"
+                  },
+                  "avatar_id": {
+                    "type": "integer",
+                    "description": "头像文件ID"
+                  },
+                  "gender": {
+                    "type": "integer",
+                    "description": "性别"
+                  },
+                  "status": {
+                    "type": "integer",
+                    "description": "账号状态"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/user/delete": {
+      "post": {
+        "tags": [
+          "用户管理"
+        ],
+        "summary": "删除用户",
+        "operationId": "deleteUser",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "用户ID"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/user/detail": {
+      "post": {
+        "tags": [
+          "用户管理"
+        ],
+        "summary": "获取用户详情",
+        "operationId": "getUserDetail",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "用户ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/points/logs": {
+      "post": {
+        "tags": [
+          "用户积分管理"
+        ],
+        "summary": "获取积分记录",
+        "operationId": "getPointsLogs",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_id",
+                  "page",
+                  "limit"
+                ],
+                "properties": {
+                  "user_id": {
+                    "type": "integer",
+                    "description": "用户ID"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  },
+                  "start_date": {
+                    "type": "string",
+                    "description": "开始日期 (YYYY-MM-DD)"
+                  },
+                  "end_date": {
+                    "type": "string",
+                    "description": "结束日期 (YYYY-MM-DD)"
+                  },
+                  "change_type": {
+                    "type": "integer",
+                    "description": "变更类型 (1增加 2减少)"
+                  },
+                  "page": {
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "description": "记录ID"
+                              },
+                              "store_id": {
+                                "type": "integer",
+                                "description": "企业ID"
+                              },
+                              "user_id": {
+                                "type": "integer",
+                                "description": "用户ID"
+                              },
+                              "points": {
+                                "type": "integer",
+                                "description": "变更积分值"
+                              },
+                              "change_type": {
+                                "type": "integer",
+                                "description": "变更类型 (1增加 2减少)"
+                              },
+                              "source_type": {
+                                "type": "integer",
+                                "description": "来源类型 (10消费 20充值 30活动)"
+                              },
+                              "source_id": {
+                                "type": "string",
+                                "description": "来源ID"
+                              },
+                              "remark": {
+                                "type": "string",
+                                "description": "备注"
+                              },
+                              "created_at": {
+                                "type": "integer",
+                                "description": "创建时间"
+                              }
+                            }
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/points/change": {
+      "post": {
+        "tags": [
+          "用户积分管理"
+        ],
+        "summary": "变更积分",
+        "description": "修改用户积分",
+        "operationId": "changePoints",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_id",
+                  "points",
+                  "change_type"
+                ],
+                "properties": {
+                  "user_id": {
+                    "type": "integer",
+                    "description": "用户ID"
+                  },
+                  "points": {
+                    "type": "integer",
+                    "description": "变更积分值"
+                  },
+                  "change_type": {
+                    "type": "integer",
+                    "description": "变更类型 (1增加 2减少)"
+                  },
+                  "source_type": {
+                    "type": "integer",
+                    "description": "来源类型 (10消费 20充值 30活动)"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "description": "来源ID"
+                  },
+                  "remark": {
+                    "type": "string",
+                    "description": "备注"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/group/list": {
+      "post": {
+        "tags": [
+          "上传分组管理"
+        ],
+        "summary": "获取分组列表",
+        "operationId": "getUploadGroupList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/UploadGroup"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/group/create": {
+      "post": {
+        "tags": [
+          "上传分组管理"
+        ],
+        "summary": "创建分组",
+        "operationId": "createUploadGroup",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "分组名称"
+                  },
+                  "parent_id": {
+                    "type": "integer",
+                    "description": "上级分组ID"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/group/update": {
+      "post": {
+        "tags": [
+          "上传分组管理"
+        ],
+        "summary": "更新分组",
+        "operationId": "updateUploadGroup",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "分组ID"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "分组名称"
+                  },
+                  "parent_id": {
+                    "type": "integer",
+                    "description": "上级分组ID"
+                  },
+                  "sort": {
+                    "type": "integer",
+                    "description": "排序"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/group/delete": {
+      "post": {
+        "tags": [
+          "上传分组管理"
+        ],
+        "summary": "删除分组",
+        "operationId": "deleteUploadGroup",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "分组ID"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/file/list": {
+      "post": {
+        "tags": [
+          "上传文件管理"
+        ],
+        "summary": "获取文件列表",
+        "operationId": "getUploadFileList",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "page",
+                  "limit"
+                ],
+                "properties": {
+                  "group_id": {
+                    "type": "string",
+                    "description": "分组ID"
+                  },
+                  "file_type": {
+                    "type": "integer",
+                    "description": "文件类型 (10图片 20附件 30视频)"
+                  },
+                  "file_name": {
+                    "type": "string",
+                    "description": "文件名称"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  },
+                  "page": {
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/UploadFile"
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/file/upload": {
+      "post": {
+        "tags": [
+          "上传文件管理"
+        ],
+        "summary": "上传文件",
+        "description": "上传文件到服务器（multipart/form-data格式）",
+        "operationId": "uploadFile",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "上传的文件"
+                  },
+                  "group_id": {
+                    "type": "integer",
+                    "description": "文件分组ID"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  },
+                  "uploader_id": {
+                    "type": "integer",
+                    "description": "上传者用户ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UploadFile"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/file/delete": {
+      "post": {
+        "tags": [
+          "上传文件管理"
+        ],
+        "summary": "删除文件",
+        "operationId": "deleteUploadFile",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "文件ID"
+                  },
+                  "store_id": {
+                    "type": "integer",
+                    "description": "企业ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/region/tree": {
+      "post": {
+        "tags": [
+          "区划管理"
+        ],
+        "summary": "获取区划树",
+        "description": "获取省市区三级区划树形结构",
+        "operationId": "getRegionTree",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errcode": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "description": "区划ID"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "区划名称"
+                          },
+                          "parent_id": {
+                            "type": "integer",
+                            "description": "父级ID"
+                          },
+                          "level": {
+                            "type": "integer",
+                            "description": "层级 (1省 2市 3区)"
+                          },
+                          "children": {
+                            "type": "array",
+                            "description": "子区划",
+                            "items": {
+                              "type": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT令牌认证"
+      }
+    },
+    "schemas": {
+      "CommonResponse": {
+        "type": "object",
+        "properties": {
+          "errcode": {
+            "type": "integer",
+            "description": "错误码，0表示成功",
+            "example": 0
+          },
+          "message": {
+            "type": "string",
+            "description": "消息",
+            "example": "success"
+          },
+          "cost": {
+            "type": "string",
+            "description": "请求耗时"
+          },
+          "traceId": {
+            "type": "string",
+            "description": "追踪ID"
+          }
+        }
+      },
+      "AuthLoginRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "用户名",
+            "example": "admin"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码",
+            "example": "123456"
+          }
+        }
+      },
+      "AuthLoginResponse": {
+        "type": "object",
+        "properties": {
+          "errcode": {
+            "type": "integer",
+            "example": 0
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "token": {
+                "type": "string",
+                "description": "JWT令牌"
+              },
+              "ttl": {
+                "type": "integer",
+                "description": "Token有效期（秒）"
+              },
+              "user": {
+                "$ref": "#/components/schemas/RbacUser"
+              }
+            }
+          },
+          "cost": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string"
+          }
+        }
+      },
+      "RbacUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "用户ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "用户名"
+          },
+          "real_name": {
+            "type": "string",
+            "description": "姓名"
+          },
+          "is_super": {
+            "type": "integer",
+            "description": "是否为超级管理员（1是 0否）"
+          },
+          "sort": {
+            "type": "integer",
+            "description": "排序"
+          },
+          "store_id": {
+            "type": "integer",
+            "description": "企业ID"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          }
+        }
+      },
+      "RbacMenu": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "菜单ID"
+          },
+          "type": {
+            "type": "integer",
+            "description": "菜单类型 (10页面 20操作)"
+          },
+          "name": {
+            "type": "string",
+            "description": "菜单名称"
+          },
+          "path": {
+            "type": "string",
+            "description": "菜单路径"
+          },
+          "is_page": {
+            "type": "integer",
+            "description": "是否为页面 (1是 0否)"
+          },
+          "module_key": {
+            "type": "string",
+            "description": "功能模块key"
+          },
+          "action_mark": {
+            "type": "string",
+            "description": "操作标识"
+          },
+          "parent_id": {
+            "type": "integer",
+            "description": "上级菜单ID"
+          },
+          "sort": {
+            "type": "integer",
+            "description": "排序"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RbacMenu"
+            },
+            "description": "子菜单"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RbacMenu"
+            },
+            "description": "操作列表"
+          }
+        }
+      },
+      "RbacApi": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "接口ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "接口名称"
+          },
+          "url": {
+            "type": "string",
+            "description": "接口URL"
+          },
+          "parent_id": {
+            "type": "integer",
+            "description": "父级ID"
+          },
+          "sort": {
+            "type": "integer",
+            "description": "排序"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RbacApi"
+            }
+          }
+        }
+      },
+      "RbacRole": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "角色ID"
+          },
+          "role_name": {
+            "type": "string",
+            "description": "角色名称"
+          },
+          "parent_id": {
+            "type": "integer",
+            "description": "父级角色ID"
+          },
+          "sort": {
+            "type": "integer",
+            "description": "排序"
+          },
+          "store_id": {
+            "type": "integer",
+            "description": "企业ID"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          }
+        }
+      },
+      "RbacStore": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "企业ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "企业名称"
+          },
+          "short_name": {
+            "type": "string",
+            "description": "企业简称"
+          },
+          "contact": {
+            "type": "string",
+            "description": "企业联系人"
+          },
+          "contact_phone": {
+            "type": "string",
+            "description": "联系电话"
+          },
+          "description": {
+            "type": "string",
+            "description": "简介"
+          },
+          "logo_image_id": {
+            "type": "integer",
+            "description": "LOGO文件ID"
+          },
+          "sort": {
+            "type": "integer",
+            "description": "排序"
+          },
+          "is_recycle": {
+            "type": "integer",
+            "description": "是否回收 (0否 1是)"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "用户ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "用户名"
+          },
+          "mobile": {
+            "type": "string",
+            "description": "手机号"
+          },
+          "nick_name": {
+            "type": "string",
+            "description": "昵称"
+          },
+          "avatar_id": {
+            "type": "integer",
+            "description": "头像文件ID"
+          },
+          "gender": {
+            "type": "integer",
+            "description": "性别 (0未知 1男 2女)"
+          },
+          "country": {
+            "type": "string",
+            "description": "国家"
+          },
+          "province": {
+            "type": "string",
+            "description": "省份"
+          },
+          "city": {
+            "type": "string",
+            "description": "城市"
+          },
+          "platform": {
+            "type": "string",
+            "description": "注册来源"
+          },
+          "status": {
+            "type": "integer",
+            "description": "账号状态 (1正常 2禁用)"
+          },
+          "points": {
+            "type": "integer",
+            "description": "用户积分"
+          },
+          "last_login_time": {
+            "type": "integer",
+            "description": "最后登录时间"
+          },
+          "store_id": {
+            "type": "integer",
+            "description": "企业ID"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          }
+        }
+      },
+      "ArticleCategory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "分类ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "分类名称"
+          },
+          "status": {
+            "type": "integer",
+            "description": "状态 (1显示 0隐藏)"
+          },
+          "sort": {
+            "type": "integer",
+            "description": "排序"
+          },
+          "store_id": {
+            "type": "integer",
+            "description": "企业ID"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          }
+        }
+      },
+      "Article": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "文章ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "文章标题"
+          },
+          "show_type": {
+            "type": "integer",
+            "description": "显示方式 (10小图 20大图)"
+          },
+          "category_id": {
+            "type": "integer",
+            "description": "分类ID"
+          },
+          "image_id": {
+            "type": "integer",
+            "description": "封面图ID"
+          },
+          "content": {
+            "type": "string",
+            "description": "文章内容"
+          },
+          "sort": {
+            "type": "integer",
+            "description": "排序"
+          },
+          "status": {
+            "type": "integer",
+            "description": "状态 (1显示 0隐藏)"
+          },
+          "virtual_views": {
+            "type": "integer",
+            "description": "虚拟阅读量"
+          },
+          "actual_views": {
+            "type": "integer",
+            "description": "实际阅读量"
+          },
+          "store_id": {
+            "type": "integer",
+            "description": "企业ID"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          }
+        }
+      },
+      "UploadGroup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "分组ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "分组名称"
+          },
+          "parent_id": {
+            "type": "integer",
+            "description": "上级分组ID"
+          },
+          "sort": {
+            "type": "integer",
+            "description": "排序"
+          },
+          "store_id": {
+            "type": "integer",
+            "description": "企业ID"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UploadGroup"
+            },
+            "description": "子分组"
+          }
+        }
+      },
+      "UploadFile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "文件ID"
+          },
+          "group_id": {
+            "type": "integer",
+            "description": "分组ID"
+          },
+          "channel": {
+            "type": "integer",
+            "description": "上传来源 (10后台 20客户端)"
+          },
+          "storage": {
+            "type": "string",
+            "description": "存储方式"
+          },
+          "domain": {
+            "type": "string",
+            "description": "存储域名"
+          },
+          "file_type": {
+            "type": "integer",
+            "description": "文件类型 (10图片 20附件 30视频)"
+          },
+          "file_name": {
+            "type": "string",
+            "description": "文件名称"
+          },
+          "file_path": {
+            "type": "string",
+            "description": "文件路径"
+          },
+          "file_size": {
+            "type": "integer",
+            "description": "文件大小(字节)"
+          },
+          "file_ext": {
+            "type": "string",
+            "description": "文件扩展名"
+          },
+          "cover": {
+            "type": "string",
+            "description": "文件封面"
+          },
+          "uploader_id": {
+            "type": "integer",
+            "description": "上传者用户ID"
+          },
+          "store_id": {
+            "type": "integer",
+            "description": "企业ID"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          }
+        }
+      },
+      "Setting": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "设置ID"
+          },
+          "setting_key": {
+            "type": "string",
+            "description": "设置项标识"
+          },
+          "setting_values": {
+            "type": "string",
+            "description": "设置内容(JSON格式)"
+          },
+          "description": {
+            "type": "string",
+            "description": "设置项描述"
+          },
+          "store_id": {
+            "type": "integer",
+            "description": "企业ID"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          }
+        }
+      },
+      "SettingDefault": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "设置ID"
+          },
+          "setting_key": {
+            "type": "string",
+            "description": "设置项标识"
+          },
+          "setting_values": {
+            "type": "string",
+            "description": "设置内容(JSON格式)"
+          },
+          "description": {
+            "type": "string",
+            "description": "设置项描述"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          }
+        }
+      }
+    }
+  }
+}

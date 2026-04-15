@@ -14,6 +14,7 @@ import (
 	"zero-backend/internal/storage/mysql"
 	"zero-backend/internal/storage/redis"
 	"zero-backend/modules/cli/command"
+	"zero-backend/modules/cli/runner"
 	"zero-backend/pkg/locker"
 	"zero-backend/pkg/queue"
 	"zero-backend/providers"
@@ -38,6 +39,9 @@ func wireApp() *command.RootCommand {
 	migrateCommand := command.NewMigrateCommand(db)
 	queueManager := queue.NewQueueManager(client)
 	queueCommand := command.NewQueueCommand(queueManager)
-	rootCommand := command.NewRootCommand(logger, redisLocker, userCommand, migrateCommand, queueCommand)
+	rbacApiRepository := repository.NewRbacApiRepository(db)
+	syncApiRunner := runner.NewSyncApiRunner(logger, rbacApiRepository)
+	syncApiCommand := command.NewSyncApiCommand(syncApiRunner)
+	rootCommand := command.NewRootCommand(logger, redisLocker, userCommand, migrateCommand, queueCommand, syncApiCommand)
 	return rootCommand
 }

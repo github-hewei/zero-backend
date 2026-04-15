@@ -31,6 +31,7 @@ func NewRootCommand(
 	user *UserCommand,
 	migrate *MigrateCommand,
 	queue *QueueCommand,
+	syncApi *SyncApiCommand,
 ) *RootCommand {
 	cmd := &RootCommand{
 		Command: &cobra.Command{
@@ -44,6 +45,7 @@ func NewRootCommand(
 	cmd.AddCommand(user.Command)
 	cmd.AddCommand(migrate.Command)
 	cmd.AddCommand(queue.Command)
+	cmd.AddCommand(syncApi.Command)
 	return cmd
 }
 

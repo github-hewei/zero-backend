@@ -41,7 +41,7 @@ func (list RbacMenuList) Tree() []*RbacMenu {
 
 	var roots []*RbacMenu
 	for _, menu := range list {
-		if menu.ParentId == 0 || menu.ParentId == 1 {
+		if menu.ParentId == 0 {
 			roots = append(roots, menu)
 		} else if parent, ok := idMap[menu.ParentId]; ok {
 			switch menu.Type {
@@ -86,7 +86,7 @@ func (list RbacApiList) Tree() []*RbacApi {
 
 	var roots []*RbacApi
 	for _, menu := range list {
-		if menu.ParentId == 0 || menu.ParentId == 1 {
+		if menu.ParentId == 0 {
 			roots = append(roots, menu)
 		} else if parent, ok := idMap[menu.ParentId]; ok {
 			parent.Children = append(parent.Children, menu)

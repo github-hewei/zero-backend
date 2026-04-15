@@ -322,6 +322,18 @@ func (r *RbacApiRepository) GetAPIByPath(ctx context.Context, path string) (*mod
 	return item, nil
 }
 
+// GetAPIByName 根据名称获取API
+func (r *RbacApiRepository) GetAPIByName(ctx context.Context, name string) (*model.RbacApi, error) {
+	item := new(model.RbacApi)
+	err := r.Db.WithContext(ctx).Where("name = ?", name).First(item).Error
+
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+
+	return item, nil
+}
+
 // RbacStoreFilterField 企业表过滤字段
 type RbacStoreFilterField struct {
 	Name      string

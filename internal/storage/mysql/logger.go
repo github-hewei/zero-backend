@@ -2,11 +2,13 @@ package mysql
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"zero-backend/internal/ctxkeys"
 	logger2 "zero-backend/pkg/logger"
 
+	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
@@ -69,10 +71,12 @@ func (l *Logger) Trace(ctx context.Context, begin time.Time, fc func() (string, 
 
 	switch {
 	case err != nil && l.LogLevel >= logger.Error:
-		l.Logger.Error("SQL执行错误", append(fields, "error", err)...)
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			l.Logger.Error("SQL执行错误", append(fields, "error", err)...)
+		}
 	case elapsed > time.Second && l.LogLevel >= logger.Warn:
 		l.Logger.Warn("慢SQL查询", append(fields, "threshold", "1s")...)
 	case l.LogLevel == logger.Info:
-		l.Logger.Info("SQL执行", fields...)
+		l.Logger.Debug("SQL执行", fields...)
 	}
 }
