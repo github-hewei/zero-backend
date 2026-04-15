@@ -3,6 +3,7 @@ package runner
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -61,108 +62,41 @@ type SyncResult struct {
 
 // Run 执行同步
 func (r *SyncApiRunner) Run(ctx context.Context, filePath string, deleteExtra bool) (*SyncResult, error) {
-	openapiFile := filePath
-	if openapiFile == "" {
-		openapiFile = filepath.Join("docs", "admin", "index.json")
+	if filePath == "" {
+		filePath = filepath.Join("docs", "admin", "index.json")
 	}
 
-	// 读取并解析 OpenAPI 文档
-	spec, err := r.parseOpenAPI(openapiFile)
+	spec, err := r.parseOpenAPI(filePath)
 	if err != nil {
 		return nil, err
 	}
 
 	result := &SyncResult{
-		Errors: []string{},
+		Errors: make([]string, 0),
 	}
 
-	// 用于记录文档中存在的URL
-	docURLs := make(map[string]bool)
+	tagToParentID := r.ensureTagCategories(ctx, spec, result)
+	docURLs := make(map[string]struct{})
 
-	tagToParentID := make(map[string]uint32)
-	uniqueTags := r.collectUniqueTags(spec)
-
-	r.logger.Info("发现分组数量", "count", len(uniqueTags))
-
-	for _, tag := range uniqueTags {
-		parentID, err := r.ensureParentCategory(ctx, tag)
-		if err != nil {
-			result.Errors = append(result.Errors, "创建父级目录失败 "+tag+": "+err.Error())
-			continue
-		}
-		tagToParentID[tag] = parentID
-	}
-
-	// 遍历所有路径和方法
 	for path, methods := range spec.Paths {
 		for method, op := range methods {
-			// 当前项目中定义的接口统一使用POST请求，所以过滤掉非POST请求
-			if strings.ToUpper(method) != "POST" {
+			if !strings.EqualFold(method, "POST") {
 				continue
 			}
 
-			// 构建URL
-			url := path
+			result.TotalInDoc++
 
-			// 获取接口名称
-			name := op.Summary
-			if name == "" {
-				name = op.OperationID
-			}
-			if name == "" {
-				name = path
-			}
+			parentID := r.resolveParentID(op, tagToParentID)
+			name := r.resolveAPIName(op, path)
 
-			// 获取父级目录ID
-			var parentID uint32
-			if len(op.Tags) > 0 && op.Tags[0] != "" {
-				parentID = tagToParentID[op.Tags[0]]
-			}
+			docURLs[path] = struct{}{}
 
-			docURLs[url] = true
-
-			// 检查是否已存在
-			existing, err := r.repo.GetAPIByPath(ctx, url)
-			if err != nil {
-				result.Errors = append(result.Errors, "查询API失败 "+url+": "+err.Error())
-				continue
-			}
-
-			if existing != nil && existing.ID > 0 {
-				// 已存在 - 检查是否需要更新
-				needsUpdate := existing.Name != name || existing.ParentId != parentID
-				if needsUpdate {
-					if err := r.updateAPI(ctx, existing.ID, name, parentID); err != nil {
-						result.Errors = append(result.Errors, "更新API失败 "+url+": "+err.Error())
-						continue
-					}
-					result.Updated++
-					r.logger.Info("更新API", "url", url, "name", name, "parent_id", parentID)
-				} else {
-					result.Skipped++
-				}
-			} else {
-				// 不存在 - 新增
-				if err := r.createAPI(ctx, url, name, parentID); err != nil {
-					result.Errors = append(result.Errors, "创建API失败 "+url+": "+err.Error())
-					continue
-				}
-				result.Added++
-				r.logger.Info("新增API", "url", url, "name", name, "parent_id", parentID)
+			if err := r.syncSingleAPI(ctx, path, name, parentID, result); err != nil {
+				result.Errors = append(result.Errors, err.Error())
 			}
 		}
 	}
 
-	// 统计文档中的API数量（只统计POST请求）
-	for _, methods := range spec.Paths {
-		for method := range methods {
-			if strings.ToUpper(method) == "POST" {
-				result.TotalInDoc++
-			}
-		}
-	}
-
-	// 处理删除
 	if deleteExtra {
 		deleted, err := r.deleteExtraAPIs(ctx, docURLs)
 		if err != nil {
@@ -184,13 +118,87 @@ func (r *SyncApiRunner) Run(ctx context.Context, filePath string, deleteExtra bo
 	return result, nil
 }
 
+// ensureTagCategories 确保所有tag对应的父级目录存在
+func (r *SyncApiRunner) ensureTagCategories(ctx context.Context, spec *OpenAPISpec, result *SyncResult) map[string]uint32 {
+	tagToParentID := make(map[string]uint32)
+	uniqueTags := r.collectUniqueTags(spec)
+
+	r.logger.Info("发现分组数量", "count", len(uniqueTags))
+
+	for _, tag := range uniqueTags {
+		parentID, err := r.ensureParentCategory(ctx, tag)
+		if err != nil {
+			result.Errors = append(result.Errors, fmt.Sprintf("创建父级目录失败 %s: %s", tag, err))
+			continue
+		}
+		tagToParentID[tag] = parentID
+	}
+
+	return tagToParentID
+}
+
+// resolveAPIName 解析API名称，按优先级：Summary > OperationID > path
+func (r *SyncApiRunner) resolveAPIName(op Operation, fallbackPath string) string {
+	if op.Summary != "" {
+		return op.Summary
+	}
+	if op.OperationID != "" {
+		return op.OperationID
+	}
+	return fallbackPath
+}
+
+// resolveParentID 解析父级目录ID
+func (r *SyncApiRunner) resolveParentID(op Operation, tagToParentID map[string]uint32) uint32 {
+	if len(op.Tags) > 0 && op.Tags[0] != "" {
+		return tagToParentID[op.Tags[0]]
+	}
+	return 0
+}
+
+// syncSingleAPI 同步单个API（新增或更新）
+func (r *SyncApiRunner) syncSingleAPI(ctx context.Context, url, name string, parentID uint32, result *SyncResult) error {
+	existing, err := r.repo.GetAPIByPath(ctx, url)
+	if err != nil {
+		return fmt.Errorf("查询API失败 %s: %w", url, err)
+	}
+
+	if existing != nil && existing.ID > 0 {
+		return r.updateExistingAPI(ctx, existing, name, parentID, url, result)
+	}
+
+	if err := r.createAPI(ctx, url, name, parentID); err != nil {
+		return fmt.Errorf("创建API失败 %s: %w", url, err)
+	}
+
+	result.Added++
+	r.logger.Info("新增API", "url", url, "name", name, "parent_id", parentID)
+	return nil
+}
+
+// updateExistingAPI 更新已存在的API（如需更新）
+func (r *SyncApiRunner) updateExistingAPI(ctx context.Context, existing *model.RbacApi, name string, parentID uint32, url string, result *SyncResult) error {
+	if existing.Name == name && existing.ParentId == parentID {
+		result.Skipped++
+		return nil
+	}
+
+	if err := r.updateAPI(ctx, existing.ID, name, parentID); err != nil {
+		return fmt.Errorf("更新API失败 %s: %w", url, err)
+	}
+
+	result.Updated++
+	r.logger.Info("更新API", "url", url, "name", name, "parent_id", parentID)
+	return nil
+}
+
 // collectUniqueTags 收集所有唯一的 tag
 func (r *SyncApiRunner) collectUniqueTags(spec *OpenAPISpec) []string {
-	tagSet := make(map[string]bool)
+	tagSet := make(map[string]struct{})
 	for _, methods := range spec.Paths {
 		for _, op := range methods {
 			if len(op.Tags) > 0 && op.Tags[0] != "" {
-				tagSet[op.Tags[0]] = true
+				tagSet[op.Tags[0]] = struct{}{}
 			}
 		}
 	}
@@ -277,7 +285,7 @@ func (r *SyncApiRunner) updateAPI(ctx context.Context, id uint32, name string, p
 }
 
 // deleteExtraAPIs 删除文档中不存在的API
-func (r *SyncApiRunner) deleteExtraAPIs(ctx context.Context, docURLs map[string]bool) (int, error) {
+func (r *SyncApiRunner) deleteExtraAPIs(ctx context.Context, docURLs map[string]struct{}) (int, error) {
 	allAPIs, err := r.repo.FindAll(ctx, nil, nil, nil)
 	if err != nil {
 		return 0, err
@@ -285,7 +293,7 @@ func (r *SyncApiRunner) deleteExtraAPIs(ctx context.Context, docURLs map[string]
 
 	count := 0
 	for _, api := range allAPIs {
-		if !docURLs[api.Url] {
+		if _, exists := docURLs[api.Url]; !exists {
 			r.logger.Info("删除多余API", "url", api.Url, "name", api.Name)
 			if err := r.repo.Delete(ctx, api.ID); err != nil {
 				return count, err
