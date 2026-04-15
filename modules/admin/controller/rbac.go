@@ -545,6 +545,10 @@ func (c *RbacRoleController) SetMenus(ctx *gin.Context) {
 		return
 	}
 
+	if !request.IsSuperUser(ctx) || req.StoreId == 0 {
+		req.StoreId = request.GetStoreId(ctx)
+	}
+
 	if err := c.serv.SetMenus(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
