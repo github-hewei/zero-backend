@@ -28,8 +28,9 @@ func (s *ArticleCategoryService) List(ctx context.Context, req *dto.ArticleCateg
 	}
 
 	filter := &repository.ArticleCategoryFilter{
-		Name:   req.Name,
-		Status: req.Status,
+		StoreId: req.StoreId,
+		Name:    req.Name,
+		Status:  req.Status,
 	}
 
 	total, err := s.repo.Count(ctx, filter)
@@ -79,7 +80,11 @@ func (s *ArticleCategoryService) Create(ctx context.Context, req *dto.ArticleCat
 
 // Update 更新文章分类
 func (s *ArticleCategoryService) Update(ctx context.Context, req *dto.ArticleCategoryUpdateRequest) error {
-	category, err := s.repo.FindOne(ctx, req.Id)
+	filter := &repository.ArticleCategoryFilter{
+		Id:      req.Id,
+		StoreId: req.StoreId,
+	}
+	category, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
 		return apperror.NewSystemError(err, "查询文章分类失败")
 	}
@@ -103,13 +108,17 @@ func (s *ArticleCategoryService) Update(ctx context.Context, req *dto.ArticleCat
 
 // Delete 删除文章分类
 func (s *ArticleCategoryService) Delete(ctx context.Context, req *dto.ArticleCategoryDeleteRequest) error {
-	category, err := s.repo.FindOne(ctx, req.Id)
+	filter := &repository.ArticleCategoryFilter{
+		Id:      req.Id,
+		StoreId: req.StoreId,
+	}
+	category, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
 		return apperror.NewSystemError(err, "查询文章分类失败")
 	}
 
 	if category.ID == 0 {
-		return apperror.NewUserError("文章分类不存在")
+		return apperror.NewUserError("文章分类不存在或无权限访问")
 	}
 
 	if err := s.repo.Delete(ctx, category.ID); err != nil {
@@ -139,6 +148,7 @@ func (s *ArticleService) List(ctx context.Context, req *dto.ArticleListRequest) 
 	}
 
 	filter := &repository.ArticleFilter{
+		StoreId:    req.StoreId,
 		Title:      req.Title,
 		CategoryId: req.CategoryId,
 		Status:     req.Status,
@@ -197,13 +207,17 @@ func (s *ArticleService) Create(ctx context.Context, req *dto.ArticleCreateReque
 
 // Update 更新文章
 func (s *ArticleService) Update(ctx context.Context, req *dto.ArticleUpdateRequest) error {
-	article, err := s.repo.FindOne(ctx, req.Id)
+	filter := &repository.ArticleFilter{
+		Id:      req.Id,
+		StoreId: req.StoreId,
+	}
+	article, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
 		return apperror.NewSystemError(err, "查询文章失败")
 	}
 
 	if article.ID == 0 {
-		return apperror.NewUserError("文章不存在")
+		return apperror.NewUserError("文章不存在或无权限访问")
 	}
 
 	updateData := map[string]any{
@@ -225,13 +239,17 @@ func (s *ArticleService) Update(ctx context.Context, req *dto.ArticleUpdateReque
 
 // Delete 删除文章
 func (s *ArticleService) Delete(ctx context.Context, req *dto.ArticleDeleteRequest) error {
-	article, err := s.repo.FindOne(ctx, req.Id)
+	filter := &repository.ArticleFilter{
+		Id:      req.Id,
+		StoreId: req.StoreId,
+	}
+	article, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
 		return apperror.NewSystemError(err, "查询文章失败")
 	}
 
 	if article.ID == 0 {
-		return apperror.NewUserError("文章不存在")
+		return apperror.NewUserError("文章不存在或无权限访问")
 	}
 
 	if err := s.repo.Delete(ctx, article.ID); err != nil {

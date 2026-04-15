@@ -28,7 +28,8 @@ type ArticleCategoryUpdateRequest struct {
 
 // ArticleCategoryDeleteRequest 删除文章分类请求参数
 type ArticleCategoryDeleteRequest struct {
-	Id uint32 `json:"id" validate:"required"`
+	Id      uint32 `json:"id" validate:"required"`
+	StoreId uint32 `json:"store_id"`
 }
 
 // ArticleListRequest 文章列表请求参数
@@ -70,5 +71,6 @@ type ArticleUpdateRequest struct {
 
 // ArticleDeleteRequest 删除文章请求参数
 type ArticleDeleteRequest struct {
-	Id uint32 `json:"id" validate:"required"`
+	Id      uint32 `json:"id" validate:"required"`
+	StoreId uint32 `json:"store_id"`
 }

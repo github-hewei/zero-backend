@@ -80,6 +80,7 @@ func (c *ArticleCategoryController) Delete(ctx *gin.Context) {
 		return
 	}
 
+	req.StoreId = request.GetStoreId(ctx)
 	if err := c.serv.Delete(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -159,6 +160,7 @@ func (c *ArticleController) Delete(ctx *gin.Context) {
 		return
 	}
 
+	req.StoreId = request.GetStoreId(ctx)
 	if err := c.serv.Delete(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return

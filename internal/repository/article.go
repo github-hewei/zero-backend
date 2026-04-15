@@ -9,14 +9,24 @@ import (
 
 // ArticleCategoryFilter 文章分类过滤条件
 type ArticleCategoryFilter struct {
-	Name   string
-	Status int8
+	Id      uint32
+	StoreId uint32
+	Name    string
+	Status  int8
 }
 
 // Apply 应用筛选条件
 func (f *ArticleCategoryFilter) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
+	}
+
+	if f.Id != 0 {
+		db = db.Where("id = ?", f.Id)
+	}
+
+	if f.StoreId != 0 {
+		db = db.Where("store_id = ?", f.StoreId)
 	}
 
 	if f.Name != "" {
@@ -45,6 +55,8 @@ func NewArticleCategoryRepository(db *gorm.DB) *ArticleCategoryRepository {
 
 // ArticleFilter 文章过滤条件
 type ArticleFilter struct {
+	Id         uint32
+	StoreId    uint32
 	Title      string
 	CategoryId uint32
 	Status     int8
@@ -54,6 +66,14 @@ type ArticleFilter struct {
 func (f *ArticleFilter) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
+	}
+
+	if f.Id != 0 {
+		db = db.Where("id = ?", f.Id)
+	}
+
+	if f.StoreId != 0 {
+		db = db.Where("store_id = ?", f.StoreId)
 	}
 
 	if f.Title != "" {
