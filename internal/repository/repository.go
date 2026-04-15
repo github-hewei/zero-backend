@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"zero-backend/internal/ctxkeys"
 
 	"gorm.io/gorm"
 )
@@ -122,6 +123,19 @@ type DeleteOption func(*DeleteConfig)
 type DeleteConfig struct {
 	TxConfig
 	ForceDelete bool
+}
+
+// WithStoreIdScope 添加store_id筛选
+func WithStoreIdScope(ctx context.Context) func(*gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		if val := ctx.Value(ctxkeys.StoreIdKey{}); val != nil {
+			if storeId, ok := val.(uint32); ok {
+				db.Where("store_id = ?", storeId)
+			}
+		}
+
+		return db
+	}
 }
 
 // WithForceDelete 强制删除选项

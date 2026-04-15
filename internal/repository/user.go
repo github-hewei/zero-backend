@@ -9,6 +9,8 @@ import (
 
 // UserFilterField 用户表过滤字段
 type UserFilterField struct {
+	Id       uint32
+	StoreId  uint32
 	Username string
 	Mobile   string
 	Status   int8
@@ -18,6 +20,14 @@ type UserFilterField struct {
 func (f *UserFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
+	}
+
+	if f.Id != 0 {
+		db = db.Where("id = ?", f.Id)
+	}
+
+	if f.StoreId != 0 {
+		db = db.Where("store_id = ?", f.StoreId)
 	}
 
 	if f.Username != "" {
@@ -63,6 +73,7 @@ func NewUserPointsLogRepository(db *gorm.DB) *UserPointsLogRepository {
 
 // UserPointsLogFilterField 积分记录过滤字段
 type UserPointsLogFilterField struct {
+	StoreId    uint32
 	UserId     uint32
 	StartDate  string
 	EndDate    string
@@ -73,6 +84,10 @@ type UserPointsLogFilterField struct {
 func (f *UserPointsLogFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
+	}
+
+	if f.StoreId != 0 {
+		db = db.Where("store_id = ?", f.StoreId)
 	}
 
 	if f.UserId > 0 {

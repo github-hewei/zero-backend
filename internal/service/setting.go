@@ -73,7 +73,7 @@ func (s *SettingService) FindList(ctx context.Context, req *dto.SettingListReque
 
 // Create 创建设置
 func (s *SettingService) Create(ctx context.Context, req *dto.SettingCreateRequest) error {
-	if err := s.checkSettingKey(ctx, req.SettingKey); err != nil {
+	if err := s.checkSettingKey(ctx, req.SettingKey, req.StoreId); err != nil {
 		return err
 	}
 
@@ -93,16 +93,20 @@ func (s *SettingService) Create(ctx context.Context, req *dto.SettingCreateReque
 
 // Update 更新设置
 func (s *SettingService) Update(ctx context.Context, req *dto.SettingUpdateRequest) error {
-	item, err := s.repo.FindOne(ctx, req.ID)
+	filter := &repository.SettingFilterField{
+		Id:      req.ID,
+		StoreId: req.StoreId,
+	}
+	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
 		return apperror.NewSystemError(err, "查询设置失败")
 	}
 	if item == nil || item.ID == 0 {
-		return apperror.NewUserError("设置不存在")
+		return apperror.NewUserError("设置不存在或无权限访问")
 	}
 
 	if item.SettingKey != req.SettingKey {
-		if err := s.checkSettingKey(ctx, req.SettingKey); err != nil {
+		if err := s.checkSettingKey(ctx, req.SettingKey, req.StoreId); err != nil {
 			return err
 		}
 	}
@@ -123,7 +127,11 @@ func (s *SettingService) Update(ctx context.Context, req *dto.SettingUpdateReque
 
 // Delete 删除设置
 func (s *SettingService) Delete(ctx context.Context, req *dto.SettingDeleteRequest) error {
-	item, err := s.repo.FindOne(ctx, req.ID)
+	filter := &repository.SettingFilterField{
+		Id:      req.ID,
+		StoreId: req.StoreId,
+	}
+	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
 		return apperror.NewSystemError(err, "查询设置失败")
 	}
@@ -140,8 +148,8 @@ func (s *SettingService) Delete(ctx context.Context, req *dto.SettingDeleteReque
 }
 
 // checkSettingKey 检查设置key是否已存在
-func (s *SettingService) checkSettingKey(ctx context.Context, key string) error {
-	filter := repository.SettingFilterField{SettingKey: key}
+func (s *SettingService) checkSettingKey(ctx context.Context, key string, storeId uint32) error {
+	filter := repository.SettingFilterField{SettingKey: key, StoreId: storeId}
 	item, err := s.repo.FindOne(ctx, filter)
 
 	if err != nil {

@@ -27,7 +27,8 @@ type SettingUpdateRequest struct {
 
 // SettingDeleteRequest 删除设置请求参数
 type SettingDeleteRequest struct {
-	ID uint32 `json:"id" validate:"required"`
+	ID      uint32 `json:"id" validate:"required"`
+	StoreId uint32 `json:"store_id"`
 }
 
 // SettingDefaultListRequest 获取默认设置列表请求参数

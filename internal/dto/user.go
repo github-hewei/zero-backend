@@ -37,7 +37,8 @@ type UserUpdateRequest struct {
 
 // UserDeleteRequest 删除用户请求参数
 type UserDeleteRequest struct {
-	Id uint32 `json:"id" validate:"required"`
+	Id      uint32 `json:"id" validate:"required"`
+	StoreId uint32 `json:"store_id"`
 }
 
 // UserPointsLogListRequest 用户积分记录请求参数

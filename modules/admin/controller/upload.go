@@ -24,7 +24,8 @@ func NewUploadGroupController(req *request.Request, serv *service.UploadGroupSer
 
 // List 获取分组列表(树形结构)
 func (c *UploadGroupController) List(ctx *gin.Context) {
-	result, err := c.serv.FindTreeList(ctx.Request.Context())
+	storeId := request.GetStoreId(ctx)
+	result, err := c.serv.FindTreeList(ctx.Request.Context(), storeId)
 	if err != nil {
 		response.Error(ctx, err)
 		return
@@ -58,6 +59,7 @@ func (c *UploadGroupController) Update(ctx *gin.Context) {
 		return
 	}
 
+	req.StoreId = request.GetStoreId(ctx)
 	if err := c.serv.Update(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -74,6 +76,7 @@ func (c *UploadGroupController) Delete(ctx *gin.Context) {
 		return
 	}
 
+	req.StoreId = request.GetStoreId(ctx)
 	if err := c.serv.Delete(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -101,6 +104,7 @@ func (c *UploadFileController) List(ctx *gin.Context) {
 		return
 	}
 
+	req.StoreId = request.GetStoreId(ctx)
 	result, err := c.serv.FindList(ctx.Request.Context(), req)
 	if err != nil {
 		response.Error(ctx, err)
@@ -120,8 +124,10 @@ func (c *UploadFileController) Upload(ctx *gin.Context) {
 
 	groupId, _ := strconv.Atoi(ctx.PostForm("group_id"))
 	req := &dto.UploadFileRequest{
-		File:    file,
-		GroupId: uint32(groupId),
+		File:       file,
+		GroupId:    uint32(groupId),
+		StoreId:    request.GetStoreId(ctx),
+		UploaderId: request.GetUserID(ctx),
 	}
 
 	result, err := c.serv.Upload(ctx.Request.Context(), req)
@@ -141,6 +147,7 @@ func (c *UploadFileController) Delete(ctx *gin.Context) {
 		return
 	}
 
+	req.StoreId = request.GetStoreId(ctx)
 	if err := c.serv.Delete(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return

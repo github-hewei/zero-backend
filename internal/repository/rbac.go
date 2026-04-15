@@ -39,6 +39,7 @@ func (f *RbacUserFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // RbacUserUsernameFilterField 用户名筛选条件
 type RbacUserUsernameFilterField struct {
+	StoreId  uint32
 	Username string
 }
 
@@ -46,6 +47,10 @@ type RbacUserUsernameFilterField struct {
 func (f *RbacUserUsernameFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
+	}
+
+	if f.StoreId != 0 {
+		db = db.Where("store_id = ?", f.StoreId)
 	}
 
 	if f.Username != "" {
@@ -70,13 +75,18 @@ func NewRbacUserRepository(db *gorm.DB) *RbacUserRepository {
 
 // RbacUserRoleFilterField 查询字段
 type RbacUserRoleFilterField struct {
-	UserId uint32
+	StoreId uint32
+	UserId  uint32
 }
 
 // Apply 应用过滤条件
 func (f *RbacUserRoleFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
+	}
+
+	if f.StoreId > 0 {
+		db = db.Where("store_id = ?", f.StoreId)
 	}
 
 	if f.UserId > 0 {
@@ -236,13 +246,18 @@ func (r *RbacRoleRepository) FindByName(ctx context.Context, name string, StoreI
 
 // RbacRoleMenuFilterField 角色菜单过滤字段
 type RbacRoleMenuFilterField struct {
-	RoleId uint32
+	StoreId uint32
+	RoleId  uint32
 }
 
 // Apply 应用筛选条件
 func (f *RbacRoleMenuFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
+	}
+
+	if f.StoreId > 0 {
+		db = db.Where("store_id = ?", f.StoreId)
 	}
 
 	if f.RoleId > 0 {

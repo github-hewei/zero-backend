@@ -36,6 +36,7 @@ func (s *UserService) List(ctx context.Context, req *dto.UserListRequest) (*dto.
 	}
 
 	filter := &repository.UserFilterField{
+		StoreId:  req.StoreId,
 		Username: req.Username,
 		Mobile:   req.Mobile,
 		Status:   req.Status,
@@ -101,13 +102,17 @@ func (s *UserService) Create(ctx context.Context, req *dto.UserCreateRequest) er
 
 // Update 更新用户
 func (s *UserService) Update(ctx context.Context, req *dto.UserUpdateRequest) error {
-	user, err := s.repo.FindOne(ctx, req.Id)
+	filter := &repository.UserFilterField{
+		Id:      req.Id,
+		StoreId: req.StoreId,
+	}
+	user, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
 		return apperror.NewSystemError(err, "查询用户失败")
 	}
 
 	if user.ID == 0 {
-		return apperror.NewUserError("用户不存在")
+		return apperror.NewUserError("用户不存在或无权限访问")
 	}
 
 	if user.Username != req.Username {
@@ -164,7 +169,8 @@ func (s *UserService) GetPointsLogs(ctx context.Context, req *dto.UserPointsLogL
 	}
 
 	filter := &repository.UserPointsLogFilterField{
-		UserId: req.UserId,
+		StoreId: req.StoreId,
+		UserId:  req.UserId,
 	}
 
 	total, err := s.pointsLogRepo.Count(ctx, filter)
@@ -214,7 +220,11 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		// 查询用户
-		user, err := s.repo.FindOne(ctx, req.UserId, repository.WithTx[*repository.QueryConfig](tx))
+		userFilter := &repository.UserFilterField{
+			Id:      req.UserId,
+			StoreId: req.StoreId,
+		}
+		user, err := s.repo.FindOne(ctx, userFilter, repository.WithTx[*repository.QueryConfig](tx))
 		if err != nil {
 			return apperror.NewSystemError(err, "查询用户失败")
 		}
@@ -266,13 +276,17 @@ func (s *UserService) Detail(ctx context.Context, id uint32) (*model.User, error
 
 // Delete 删除用户
 func (s *UserService) Delete(ctx context.Context, req *dto.UserDeleteRequest) error {
-	item, err := s.repo.FindOne(ctx, req.Id)
+	filter := &repository.UserFilterField{
+		Id:      req.Id,
+		StoreId: req.StoreId,
+	}
+	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
 		return apperror.NewSystemError(err, "查询用户失败")
 	}
 
 	if item == nil || item.ID == 0 {
-		return apperror.NewUserError("用户不存在")
+		return apperror.NewUserError("用户不存在或无权限访问")
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {

@@ -9,13 +9,23 @@ import (
 
 // UploadGroupFilterField 文件分组筛选字段
 type UploadGroupFilterField struct {
-	Name string
+	Id      uint32
+	StoreId uint32
+	Name    string
 }
 
 // Apply 应用筛选条件
 func (f *UploadGroupFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
+	}
+
+	if f.Id != 0 {
+		db = db.Where("id = ?", f.Id)
+	}
+
+	if f.StoreId != 0 {
+		db = db.Where("store_id = ?", f.StoreId)
 	}
 
 	if f.Name != "" {
@@ -40,6 +50,8 @@ func NewUploadGroupRepository(db *gorm.DB) *UploadGroupRepository {
 
 // UploadFileFilterField 文件查询过滤字段
 type UploadFileFilterField struct {
+	Id       uint32
+	StoreId  uint32
 	GroupId  string
 	FileType int8
 	FileName string
@@ -49,6 +61,14 @@ type UploadFileFilterField struct {
 func (f *UploadFileFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
+	}
+
+	if f.Id != 0 {
+		db = db.Where("id = ?", f.Id)
+	}
+
+	if f.StoreId != 0 {
+		db = db.Where("store_id = ?", f.StoreId)
 	}
 
 	if f.GroupId != "" && f.GroupId != "all" {

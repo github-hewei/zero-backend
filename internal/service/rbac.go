@@ -77,7 +77,7 @@ func (s *RbacUserService) FindList(ctx context.Context, req *dto.RbacUserListReq
 
 // Create 创建用户
 func (s *RbacUserService) Create(ctx context.Context, req *dto.RbacUserCreateRequest) error {
-	if err := s.checkUsername(ctx, req.Username); err != nil {
+	if err := s.checkUsername(ctx, req.Username, req.StoreId); err != nil {
 		return err
 	}
 
@@ -115,7 +115,7 @@ func (s *RbacUserService) Update(ctx context.Context, req *dto.RbacUserUpdateReq
 	}
 
 	if item.Username != req.Username {
-		if err := s.checkUsername(ctx, req.Username); err != nil {
+		if err := s.checkUsername(ctx, req.Username, req.StoreId); err != nil {
 			return err
 		}
 	}
@@ -221,9 +221,9 @@ func (s *RbacUserService) SetRoles(ctx context.Context, req *dto.RbacUserRoleSet
 }
 
 // checkUsername 检查用户名是否已存在
-func (s *RbacUserService) checkUsername(ctx context.Context, username string) error {
-	filter := &repository.RbacUserUsernameFilterField{Username: username}
-	item, err := s.repo.FindOne(ctx, filter, repository.WithScopes(nil))
+func (s *RbacUserService) checkUsername(ctx context.Context, username string, storeId uint32) error {
+	filter := &repository.RbacUserUsernameFilterField{Username: username, StoreId: storeId}
+	item, err := s.repo.FindOne(ctx, filter)
 
 	if err != nil {
 		return apperror.NewSystemError(err, "查询用户名失败")

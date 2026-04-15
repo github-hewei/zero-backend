@@ -8,14 +8,23 @@ import (
 
 // SettingFilterField 设置表过滤字段
 type SettingFilterField struct {
-	SettingKey string
+	Id         uint32
 	StoreId    uint32
+	SettingKey string
 }
 
 // Apply 应用筛选条件
 func (f *SettingFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
+	}
+
+	if f.Id != 0 {
+		db = db.Where("id = ?", f.Id)
+	}
+
+	if f.StoreId != 0 {
+		db = db.Where("store_id = ?", f.StoreId)
 	}
 
 	if f.SettingKey != "" {

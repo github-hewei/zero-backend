@@ -33,8 +33,11 @@ func NewUploadGroupService(repo *repository.UploadGroupRepository) *UploadGroupS
 }
 
 // FindTreeList 获取分组树形列表
-func (s *UploadGroupService) FindTreeList(ctx context.Context) ([]*model.UploadGroup, error) {
-	list, err := s.repo.FindAll(ctx, nil, nil, nil)
+func (s *UploadGroupService) FindTreeList(ctx context.Context, storeId uint32) ([]*model.UploadGroup, error) {
+	filter := &repository.UploadGroupFilterField{
+		StoreId: storeId,
+	}
+	list, err := s.repo.FindAll(ctx, filter, nil, nil)
 
 	if err != nil {
 		return nil, apperror.NewSystemError(err, "查询分组列表失败")
@@ -53,7 +56,7 @@ func (s *UploadGroupService) FindTreeList(ctx context.Context) ([]*model.UploadG
 
 // Create 创建分组
 func (s *UploadGroupService) Create(ctx context.Context, req *dto.UploadGroupCreateRequest) error {
-	if err := s.checkName(ctx, req.Name); err != nil {
+	if err := s.checkName(ctx, req.Name, req.StoreId); err != nil {
 		return err
 	}
 
@@ -72,8 +75,8 @@ func (s *UploadGroupService) Create(ctx context.Context, req *dto.UploadGroupCre
 }
 
 // checkName 检查分组名称是否已存在
-func (s *UploadGroupService) checkName(ctx context.Context, name string) error {
-	filter := &repository.UploadGroupFilterField{Name: name}
+func (s *UploadGroupService) checkName(ctx context.Context, name string, storeId uint32) error {
+	filter := &repository.UploadGroupFilterField{Name: name, StoreId: storeId}
 	group, err := s.repo.FindOne(ctx, filter)
 
 	if err != nil {
@@ -90,17 +93,21 @@ func (s *UploadGroupService) checkName(ctx context.Context, name string) error {
 // Update 更新分组
 func (s *UploadGroupService) Update(ctx context.Context, req *dto.UploadGroupUpdateRequest) error {
 	// 获取现有分组
-	item, err := s.repo.FindOne(ctx, req.ID)
+	filter := &repository.UploadGroupFilterField{
+		Id:      req.ID,
+		StoreId: req.StoreId,
+	}
+	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
 		return apperror.NewSystemError(err, "查询分组失败")
 	}
 	if item.ID == 0 {
-		return apperror.NewUserError("分组不存在")
+		return apperror.NewUserError("分组不存在或无权限访问")
 	}
 
 	// 检查名称是否重复(排除自身)
 	if item.Name != req.Name {
-		if err := s.checkName(ctx, req.Name); err != nil {
+		if err := s.checkName(ctx, req.Name, req.StoreId); err != nil {
 			return err
 		}
 	}
@@ -123,12 +130,16 @@ func (s *UploadGroupService) Update(ctx context.Context, req *dto.UploadGroupUpd
 // Delete 删除分组
 func (s *UploadGroupService) Delete(ctx context.Context, req *dto.UploadGroupDeleteRequest) error {
 	// 检查分组是否存在
-	item, err := s.repo.FindOne(ctx, req.ID)
+	filter := &repository.UploadGroupFilterField{
+		Id:      req.ID,
+		StoreId: req.StoreId,
+	}
+	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
 		return apperror.NewSystemError(err, "查询分组失败")
 	}
 	if item.ID == 0 {
-		return apperror.NewUserError("分组不存在")
+		return apperror.NewUserError("分组不存在或无权限访问")
 	}
 
 	// 执行删除
@@ -164,6 +175,7 @@ func (s *UploadFileService) FindList(ctx context.Context, req *dto.UploadFileLis
 	}
 
 	filter := &repository.UploadFileFilterField{
+		StoreId:  req.StoreId,
 		GroupId:  req.GroupId,
 		FileType: req.FileType,
 		FileName: req.FileName,
@@ -301,8 +313,6 @@ func (s *UploadFileService) generateFilePath(file *multipart.FileHeader) (string
 
 // Upload 文件上传
 func (s *UploadFileService) Upload(ctx context.Context, req *dto.UploadFileRequest) (*model.UploadFile, error) {
-	user, _ := ctx.Value(ctxkeys.UserKey{}).(*model.RbacUser)
-
 	// 获取上传配置
 	config, err := s.getUploadConfig(ctx)
 	if err != nil {
@@ -370,8 +380,8 @@ func (s *UploadFileService) Upload(ctx context.Context, req *dto.UploadFileReque
 		FileName:   req.File.Filename,
 		FileSize:   uint32(req.File.Size),
 		FileExt:    fileExt,
-		UploaderId: user.ID,
-		StoreId:    user.StoreId,
+		UploaderId: req.UploaderId,
+		StoreId:    req.StoreId,
 	}
 
 	// 如果通过七牛云上传，在上下文中添加七牛配置
@@ -436,7 +446,11 @@ func (s *UploadFileService) checkFileExt(allowedTypes []string, fileExt string) 
 // Delete 删除文件
 func (s *UploadFileService) Delete(ctx context.Context, req *dto.UploadFileDeleteRequest) error {
 	// 检查文件是否存在
-	item, err := s.repo.FindOne(ctx, req.ID)
+	filter := &repository.UploadFileFilterField{
+		Id:      req.ID,
+		StoreId: req.StoreId,
+	}
+	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
 		return apperror.NewSystemError(err, "查询文件失败")
 	}
