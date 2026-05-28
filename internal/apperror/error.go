@@ -9,12 +9,23 @@ const (
 	ErrorCodeSystem       ErrorCode = 5000
 )
 
+// Coded 可提取错误码的错误接口
+type Coded interface {
+	error
+	CodePair() (ErrorCode, string)
+}
+
 // AppError 错误
 type AppError struct {
 	Code    ErrorCode
 	Message string
 	Err     error
 	TraceId string
+}
+
+// CodePair 实现 Coded 接口
+func (e *AppError) CodePair() (ErrorCode, string) {
+	return e.Code, e.Message
 }
 
 // Error 错误接口

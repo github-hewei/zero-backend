@@ -23,35 +23,19 @@ type Response struct {
 
 // Error 输出错误信息
 func Error(c *gin.Context, err error) {
-	var userError *apperror.UserError
-	if errors.As(err, &userError) {
-		output(c, Response{
-			ErrCode: int(userError.Code),
-			Message: userError.Message,
+	var coded apperror.Coded
+	if errors.As(err, &coded) {
+		code, msg := coded.CodePair()
+		output(c, errors.Unwrap(err), Response{
+			ErrCode: int(code),
+			Message: msg,
 		})
 		return
 	}
 
-	var systemError *apperror.SystemError
-	if errors.As(err, &systemError) {
-		output(c, Response{
-			ErrCode: int(systemError.Code),
-			Message: systemError.Message,
-		})
-		return
-	}
-
-	var unauthorizedError *apperror.UnauthorizedError
-	if errors.As(err, &unauthorizedError) {
-		output(c, Response{
-			ErrCode: int(unauthorizedError.Code),
-			Message: unauthorizedError.Message,
-		})
-		return
-	}
-
-	systemError = apperror.NewSystemError(err, "系统异常")
-	output(c, Response{
+	// 未识别的错误统一包装为 SystemError
+	systemError := apperror.NewSystemError(err, "系统异常")
+	output(c, systemError.Err, Response{
 		ErrCode: int(systemError.Code),
 		Message: systemError.Message,
 	})
@@ -63,7 +47,7 @@ func Success(c *gin.Context, message string, data any) {
 		message = "success"
 	}
 
-	output(c, Response{
+	output(c, nil, Response{
 		ErrCode: int(apperror.ErrorCodeNone),
 		Message: message,
 		Data:    data,
@@ -81,7 +65,7 @@ func SetCookie(c *gin.Context, name, value string, maxAge int, path string) {
 }
 
 // output 输出响应JSON
-func output(c *gin.Context, resp Response) {
+func output(c *gin.Context, err error, resp Response) {
 	var traceId string
 	if val := c.Request.Context().Value(ctxkeys.TraceIDKey{}); val != nil {
 		traceId = val.(string)
@@ -94,9 +78,14 @@ func output(c *gin.Context, resp Response) {
 
 	resp.Cost = fmt.Sprintf("%.4f", cost.Seconds())
 	resp.TraceId = traceId
+	l := logger.Ctx(c.Request.Context())
 
-	logger.Ctx(c.Request.Context()).Info("Response",
-		"message", resp.Message,
+	if err != nil {
+		l.Err(err, "Error")
+	}
+
+	l.Info("Response",
+		"msg", resp.Message,
 		"cost", resp.Cost,
 		"data", resp.Data,
 		"errCode", resp.ErrCode)
