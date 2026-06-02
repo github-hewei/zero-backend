@@ -1,13 +1,14 @@
 package migrate_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"sync"
 	"testing"
 
+	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
 	"zero-backend/pkg/logger"
@@ -82,7 +83,7 @@ func TestNewMigrator(t *testing.T) {
 
 	t.Run("自定义选项", func(t *testing.T) {
 		m := migrate.NewMigrator(db, "test.sql",
-			migrate.WithLogger(logger.NewMockLogger()),
+			migrate.WithLogger(logger.Nop()),
 		)
 		assert.NotNil(t, m)
 	})
@@ -91,25 +92,26 @@ func TestNewMigrator(t *testing.T) {
 // TestMigrate_EmptyScript 测试空脚本
 func TestMigrate_EmptyScript(t *testing.T) {
 	db := setupTestDB(t)
-	mockLog := logger.NewMockLogger()
+	var buf bytes.Buffer
+	log := logger.New(logger.WithLevel(logger.InfoLevel), logger.WithWriter(&buf))
 	mockReader := &mockScriptReader{content: ""}
 	mockProgress := &mockProgressStore{}
 
 	m := migrate.NewMigrator(db, "test.sql",
-		migrate.WithLogger(mockLog),
+		migrate.WithLogger(log),
 		migrate.WithScriptReader(mockReader),
 		migrate.WithProgressStore(mockProgress),
 	)
 
 	err := m.Migrate(context.Background())
 	assert.NoError(t, err)
-	assert.True(t, mockLog.HasLog(logger.InfoLevel)) // "No migrations to apply"
+	assert.Contains(t, buf.String(), "No migrations to apply")
 }
 
 // TestMigrate_SingleStatement 测试单条语句
 func TestMigrate_SingleStatement(t *testing.T) {
 	db := setupTestDB(t)
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	mockReader := &mockScriptReader{
 		content: `CREATE TABLE test_table (id INTEGER PRIMARY KEY);`,
 	}
@@ -134,7 +136,7 @@ func TestMigrate_SingleStatement(t *testing.T) {
 // TestMigrate_MultipleStatements 测试多条语句
 func TestMigrate_MultipleStatements(t *testing.T) {
 	db := setupTestDB(t)
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	mockReader := &mockScriptReader{
 		content: `CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);
 
@@ -168,7 +170,7 @@ UPDATE users SET name = 'updated' WHERE id = 1;`,
 // TestMigrate_WithCheckpoint 测试断点续执行
 func TestMigrate_WithCheckpoint(t *testing.T) {
 	db := setupTestDB(t)
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 
 	// 先创建表（模拟之前已执行过建表语句）
 	err := db.Exec("CREATE TABLE users (id INTEGER PRIMARY KEY);").Error
@@ -208,7 +210,7 @@ INSERT INTO users (id) VALUES (2);`,
 // TestMigrate_ScriptReaderError 测试脚本读取错误
 func TestMigrate_ScriptReaderError(t *testing.T) {
 	db := setupTestDB(t)
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	mockReader := &mockScriptReader{err: errors.New("read error")}
 	mockProgress := &mockProgressStore{}
 
@@ -228,7 +230,7 @@ func TestMigrate_ScriptReaderError(t *testing.T) {
 // TestMigrate_ProgressLoadError 测试进度加载错误
 func TestMigrate_ProgressLoadError(t *testing.T) {
 	db := setupTestDB(t)
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	mockReader := &mockScriptReader{content: "SELECT 1;"}
 	mockProgress := &mockProgressStore{loadErr: errors.New("load error")}
 
@@ -245,7 +247,7 @@ func TestMigrate_ProgressLoadError(t *testing.T) {
 // TestMigrate_ProgressSaveError 测试进度保存错误
 func TestMigrate_ProgressSaveError(t *testing.T) {
 	db := setupTestDB(t)
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	mockReader := &mockScriptReader{content: "SELECT 1;"}
 	mockProgress := &mockProgressStore{saveErr: errors.New("save error")}
 
@@ -262,7 +264,7 @@ func TestMigrate_ProgressSaveError(t *testing.T) {
 // TestMigrate_ContextCanceled 测试上下文取消
 func TestMigrate_ContextCanceled(t *testing.T) {
 	db := setupTestDB(t)
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	mockReader := &mockScriptReader{content: "SELECT 1;"}
 	mockProgress := &mockProgressStore{}
 
@@ -302,7 +304,7 @@ func TestMigrate_SQLError(t *testing.T) {
 // TestMigrate_CommentAndEmptyLines 测试注释和空行处理
 func TestMigrate_CommentAndEmptyLines(t *testing.T) {
 	db := setupTestDB(t)
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	mockReader := &mockScriptReader{
 		content: `-- This is a comment
 CREATE TABLE test_table (id INTEGER PRIMARY KEY);

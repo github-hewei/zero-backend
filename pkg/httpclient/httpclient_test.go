@@ -75,7 +75,7 @@ func TestNewHttpClient(t *testing.T) {
 			opts: []httpclient.Option{
 				httpclient.WithTimeout(5 * time.Second),
 				httpclient.WithUserAgent("CustomAgent/2.0"),
-				httpclient.WithLogger(logger.NewMockLogger()),
+				httpclient.WithLogger(logger.Nop()),
 			},
 			wantTimeout:   5 * time.Second,
 			wantUserAgent: "CustomAgent/2.0",
@@ -99,7 +99,7 @@ func TestHttpClient_Get(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()
 
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	client := httpclient.New(httpclient.WithLogger(mockLog))
 
 	resp, err := client.Get(context.Background(), server.URL+"/success")
@@ -120,7 +120,7 @@ func TestHttpClient_Post(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()
 
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	client := httpclient.New(httpclient.WithLogger(mockLog))
 
 	resp, err := client.Post(
@@ -139,7 +139,7 @@ func TestHttpClient_PostJSON(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()
 
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	client := httpclient.New(httpclient.WithLogger(mockLog))
 
 	data := map[string]string{"key": "value"}
@@ -159,7 +159,7 @@ func TestHttpClient_PostForm(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()
 
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	client := httpclient.New(httpclient.WithLogger(mockLog))
 
 	form := url.Values{}
@@ -179,7 +179,7 @@ func TestHttpClient_Put(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()
 
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	client := httpclient.New(httpclient.WithLogger(mockLog))
 
 	resp, err := client.Put(
@@ -198,7 +198,7 @@ func TestHttpClient_Delete(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()
 
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	client := httpclient.New(httpclient.WithLogger(mockLog))
 
 	resp, err := client.Delete(context.Background(), server.URL+"/success")
@@ -216,7 +216,7 @@ func TestHttpClient_Timeout(t *testing.T) {
 	}))
 	defer server.Close()
 
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	client := httpclient.New(
 		httpclient.WithTimeout(100*time.Millisecond),
 		httpclient.WithLogger(mockLog),
@@ -234,7 +234,7 @@ func TestHttpClient_ErrorResponse(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()
 
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	client := httpclient.New(httpclient.WithLogger(mockLog))
 
 	resp, err := client.Get(context.Background(), server.URL+"/error")
@@ -254,7 +254,7 @@ func TestHttpClient_WithHeader(t *testing.T) {
 	}))
 	defer server.Close()
 
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	client := httpclient.New(httpclient.WithLogger(mockLog))
 
 	resp, err := client.Get(
@@ -275,7 +275,7 @@ func TestHttpClient_WithQuery(t *testing.T) {
 	}))
 	defer server.Close()
 
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	client := httpclient.New(httpclient.WithLogger(mockLog))
 
 	query := url.Values{}
@@ -359,19 +359,20 @@ func TestHttpClient_LogOnSuccess(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()
 
-	mockLog := logger.NewMockLogger()
-	client := httpclient.New(httpclient.WithLogger(mockLog))
+	var buf bytes.Buffer
+	log := logger.New(logger.WithLevel(logger.DebugLevel), logger.WithWriter(&buf))
+	client := httpclient.New(httpclient.WithLogger(log))
 
 	_, err := client.Get(context.Background(), server.URL+"/success")
 	assert.NoError(t, err)
 
-	// 验证记录了 debug 级别日志（请求和响应）
-	assert.True(t, mockLog.HasLog(logger.DebugLevel))
+	// 验证记录了日志（请求和响应）
+	assert.True(t, buf.Len() > 0)
 }
 
 // TestHttpClient_LogOnError 测试错误请求时记录日志
 func TestHttpClient_LogOnError(t *testing.T) {
-	mockLog := logger.NewMockLogger()
+	mockLog := logger.Nop()
 	client := httpclient.New(
 		httpclient.WithTimeout(100*time.Millisecond),
 		httpclient.WithLogger(mockLog),
