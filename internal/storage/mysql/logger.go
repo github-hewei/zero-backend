@@ -36,21 +36,21 @@ func (l *Logger) LogMode(level logger.LogLevel) logger.Interface {
 // Info 打印info级别日志
 func (l *Logger) Info(ctx context.Context, msg string, data ...any) {
 	if l.LogLevel >= logger.Info {
-		l.Logger.Info(msg, append([]any{"traceId", ctx.Value(ctxkeys.TraceIDKey{})}, data...)...)
+		l.Logger.Info(msg, append([]any{"traceId", ctxkeys.TraceID(ctx)}, data...)...)
 	}
 }
 
 // Warn 打印warn级别日志
 func (l *Logger) Warn(ctx context.Context, msg string, data ...any) {
 	if l.LogLevel >= logger.Warn {
-		l.Logger.Warn(msg, append([]any{"traceId", ctx.Value(ctxkeys.TraceIDKey{})}, data...)...)
+		l.Logger.Warn(msg, append([]any{"traceId", ctxkeys.TraceID(ctx)}, data...)...)
 	}
 }
 
 // Error 打印error级别日志
 func (l *Logger) Error(ctx context.Context, msg string, data ...any) {
 	if l.LogLevel >= logger.Error {
-		l.Logger.Error(msg, append([]any{"traceId", ctx.Value(ctxkeys.TraceIDKey{})}, data...)...)
+		l.Logger.Error(msg, append([]any{"traceId", ctxkeys.TraceID(ctx)}, data...)...)
 	}
 }
 
@@ -63,7 +63,7 @@ func (l *Logger) Trace(ctx context.Context, begin time.Time, fc func() (string, 
 	elapsed := time.Since(begin)
 	sql, rows := fc()
 	fields := []any{
-		"traceId", ctx.Value(ctxkeys.TraceIDKey{}),
+		"traceId", ctxkeys.TraceID(ctx),
 		"sql", sql,
 		"rows", rows,
 		"timeMs", float64(elapsed.Nanoseconds()) / 1e6,

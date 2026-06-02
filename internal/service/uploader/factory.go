@@ -4,8 +4,6 @@ import (
 	"context"
 	"mime/multipart"
 	"zero-backend/internal/apperror"
-	"zero-backend/internal/ctxkeys"
-	"zero-backend/internal/dto"
 )
 
 // Uploader 定义文件上传接口
@@ -23,7 +21,7 @@ func NewUploader(storageType string, ctx context.Context) (Uploader, error) {
 	case "local":
 		return NewLocalUploader(), nil
 	case "qiniu":
-		qiniuConfig, _ := ctx.Value(ctxkeys.QiniuConfigKey{}).(*dto.QiniuConfig)
+		qiniuConfig := QiniuConfig(ctx)
 		return NewQiniuUploader(qiniuConfig), nil
 	default:
 		return nil, apperror.NewUserError("不支持的存储类型")

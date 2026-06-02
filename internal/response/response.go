@@ -66,14 +66,12 @@ func SetCookie(c *gin.Context, name, value string, maxAge int, path string) {
 
 // output 输出响应JSON
 func output(c *gin.Context, err error, resp Response) {
-	var traceId string
-	if val := c.Request.Context().Value(ctxkeys.TraceIDKey{}); val != nil {
-		traceId = val.(string)
-	}
+	traceId := ctxkeys.TraceID(c.Request.Context())
 
+	beginTime, _ := ctxkeys.BeginTime(c.Request.Context())
 	var cost time.Duration
-	if val := c.Request.Context().Value(ctxkeys.BeginTimeKey{}); val != nil {
-		cost = time.Since(val.(time.Time))
+	if !beginTime.IsZero() {
+		cost = time.Since(beginTime)
 	}
 
 	resp.Cost = fmt.Sprintf("%.4f", cost.Seconds())

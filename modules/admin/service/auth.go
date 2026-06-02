@@ -202,7 +202,7 @@ func (s *AuthService) WithSU(user *model.RbacUser) {
 
 // GetPermissions 获取用户菜单权限
 func (s *AuthService) GetPermissions(ctx context.Context, req *dto.AuthGetPermissionsRequest) ([]*model.RbacMenu, error) {
-	user := ctx.Value(ctxkeys.UserKey{}).(*model.RbacUser)
+	user := ctxkeys.User(ctx).(*model.RbacUser)
 	if user == nil {
 		return nil, nil
 	}
@@ -314,7 +314,7 @@ func (s *AuthService) GetRoleMenus(ctx context.Context, roleId uint32) ([]*model
 
 // ChangePassword 修改密码
 func (s *AuthService) ChangePassword(ctx context.Context, req *dto.ChangePasswordRequest) error {
-	user, _ := ctx.Value(ctxkeys.UserKey{}).(*model.RbacUser)
+	user, _ := ctxkeys.User(ctx).(*model.RbacUser)
 	if user == nil || user.ID == 0 {
 		return apperror.NewUserError("用户不存在")
 	}

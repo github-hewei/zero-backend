@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"zero-backend/internal/apperror"
 	"zero-backend/internal/config"
 	"zero-backend/internal/ctxkeys"
@@ -70,8 +69,8 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 			return
 		}
 
-		ctx = context.WithValue(ctx, ctxkeys.UserKey{}, user)
-		ctx = context.WithValue(ctx, ctxkeys.StoreIdKey{}, user.StoreId)
+		ctx = ctxkeys.WithUser(ctx, user)
+		ctx = ctxkeys.WithStoreID(ctx, user.StoreId)
 		c.Request = c.Request.WithContext(ctx)
 	}
 }

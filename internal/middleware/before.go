@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -29,8 +28,8 @@ func (m *BeforeMiddleware) Handle() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		traceId := uuid.New().String()
 		ctx := c.Request.Context()
-		ctx = context.WithValue(ctx, ctxkeys.TraceIDKey{}, traceId)
-		ctx = context.WithValue(ctx, ctxkeys.BeginTimeKey{}, time.Now())
+		ctx = ctxkeys.WithTraceID(ctx, traceId)
+		ctx = ctxkeys.WithBeginTime(ctx, time.Now())
 
 		// 添加日志上下文
 		logger := m.logger.With("traceId", traceId)

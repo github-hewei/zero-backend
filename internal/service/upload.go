@@ -15,7 +15,6 @@ import (
 	"strconv"
 	"strings"
 	"zero-backend/internal/apperror"
-	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
@@ -394,7 +393,7 @@ func (s *UploadFileService) Upload(ctx context.Context, req *dto.UploadFileReque
 			return nil, apperror.NewUserError("七牛云存储未启用")
 		}
 
-		ctx = context.WithValue(ctx, ctxkeys.QiniuConfigKey{}, qiniu)
+		ctx = uploader.WithQiniuConfig(ctx, qiniu)
 	}
 
 	// 创建上传方法实现

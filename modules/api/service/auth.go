@@ -175,7 +175,7 @@ func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*model.Us
 // ChangePassword 修改用户密码
 func (s *AuthService) ChangePassword(ctx context.Context, req *dto.ChangePasswordRequest) error {
 	// 1. 获取当前用户
-	user := ctx.Value(ctxkeys.UserKey{}).(*model.User)
+	user := ctxkeys.User(ctx).(*model.User)
 	if user == nil || user.ID == 0 {
 		return apperror.NewUserError("用户不存在")
 	}

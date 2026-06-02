@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"strings"
 	"zero-backend/internal/apperror"
 	"zero-backend/internal/config"
@@ -71,8 +70,8 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 			return
 		}
 
-		ctx = context.WithValue(ctx, ctxkeys.UserKey{}, user)
-		ctx = context.WithValue(ctx, ctxkeys.StoreIdKey{}, user.StoreId)
+		ctx = ctxkeys.WithUser(ctx, user)
+		ctx = ctxkeys.WithStoreID(ctx, user.StoreId)
 		c.Request = c.Request.WithContext(ctx)
 	}
 }
@@ -83,7 +82,7 @@ func (m *AuthMiddleware) CheckAPIPermission() gin.HandlerFunc {
 		ctx := c.Request.Context()
 
 		// 1. 获取当前用户
-		user, ok := ctx.Value(ctxkeys.UserKey{}).(*model.RbacUser)
+		user, ok := ctxkeys.User(ctx).(*model.RbacUser)
 		if !ok || user == nil {
 			response.Error(c, apperror.NewUnauthorizedError())
 			c.Abort()

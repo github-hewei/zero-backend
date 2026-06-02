@@ -68,26 +68,12 @@ func (r *Request) ShouldBindJSONArray(ctx *gin.Context, data any) error {
 
 // GetStoreId 获取企业ID
 func GetStoreId(ctx *gin.Context) uint32 {
-	value := ctx.Request.Context().Value(ctxkeys.StoreIdKey{})
-	if value == nil {
-		return 0
-	}
-
-	if storeId, ok := value.(uint32); ok {
-		return storeId
-	}
-
-	return 0
+	return ctxkeys.StoreID(ctx.Request.Context())
 }
 
 // IsSuperUser 是否是超级管理员
 func IsSuperUser(ctx *gin.Context) bool {
-	value := ctx.Request.Context().Value(ctxkeys.UserKey{})
-	if value == nil {
-		return false
-	}
-
-	if user, ok := value.(*model.RbacUser); ok {
+	if user, ok := ctxkeys.User(ctx.Request.Context()).(*model.RbacUser); ok {
 		return user.SU
 	}
 
@@ -96,16 +82,11 @@ func IsSuperUser(ctx *gin.Context) bool {
 
 // GetUserID 获取用户ID
 func GetUserID(ctx *gin.Context) uint32 {
-	value := ctx.Request.Context().Value(ctxkeys.UserKey{})
-	if value == nil {
-		return 0
-	}
-
-	if user, ok := value.(*model.RbacUser); ok {
+	if user, ok := ctxkeys.User(ctx.Request.Context()).(*model.RbacUser); ok {
 		return user.ID
 	}
 
-	if user, ok := value.(*model.User); ok {
+	if user, ok := ctxkeys.User(ctx.Request.Context()).(*model.User); ok {
 		return user.ID
 	}
 

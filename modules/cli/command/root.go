@@ -64,8 +64,8 @@ func (c *RootCommand) Configure(log logger.Logger, redisLocker *locker.RedisLock
 
 		// 将日志组件注入上下文
 		ctx := log.WithContext(cmd.Context())
-		ctx = context.WithValue(ctx, ctxkeys.TraceIDKey{}, traceId)
-		ctx = context.WithValue(ctx, ctxkeys.BeginTimeKey{}, time.Now())
+		ctx = ctxkeys.WithTraceID(ctx, traceId)
+		ctx = ctxkeys.WithBeginTime(ctx, time.Now())
 
 		// 为进程加锁逻辑
 		id, _ := cmd.Flags().GetInt("instance-id")
@@ -84,8 +84,8 @@ func (c *RootCommand) Configure(log logger.Logger, redisLocker *locker.RedisLock
 	// 命令执行结束
 	c.Command.PersistentPostRun = func(cmd *cobra.Command, args []string) {
 		var cost time.Duration
-		if val := cmd.Context().Value(ctxkeys.BeginTimeKey{}); val != nil {
-			cost = time.Since(val.(time.Time))
+		if t, ok := ctxkeys.BeginTime(cmd.Context()); ok {
+			cost = time.Since(t)
 		}
 
 		logger.Ctx(cmd.Context()).Info("End Command",
@@ -146,8 +146,8 @@ func (c *RootCommand) handleError(err error) {
 	ctx := c.Cmd().Context()
 
 	var cost time.Duration
-	if val := ctx.Value(ctxkeys.BeginTimeKey{}); val != nil {
-		cost = time.Since(val.(time.Time))
+	if t, ok := ctxkeys.BeginTime(ctx); ok {
+		cost = time.Since(t)
 	}
 
 	log := logger.Ctx(ctx)

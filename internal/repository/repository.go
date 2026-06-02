@@ -128,10 +128,8 @@ type DeleteConfig struct {
 // WithStoreIdScope 添加store_id筛选
 func WithStoreIdScope(ctx context.Context) func(*gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		if val := ctx.Value(ctxkeys.StoreIdKey{}); val != nil {
-			if storeId, ok := val.(uint32); ok {
-				db.Where("store_id = ?", storeId)
-			}
+		if storeId := ctxkeys.StoreID(ctx); storeId != 0 {
+			db.Where("store_id = ?", storeId)
 		}
 
 		return db
