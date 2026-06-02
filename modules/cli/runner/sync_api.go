@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"zero-backend/internal/apperror"
-	"zero-backend/internal/logger"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
+	"zero-backend/pkg/logger"
 )
 
 // OpenAPISpec OpenAPI 3.x 规范结构
@@ -38,12 +38,12 @@ type Operation struct {
 
 // SyncApiRunner API同步执行器
 type SyncApiRunner struct {
-	logger *logger.Logger
+	logger logger.Logger
 	repo   *repository.RbacApiRepository
 }
 
 // NewSyncApiRunner 创建API同步执行器
-func NewSyncApiRunner(l *logger.Logger, repo *repository.RbacApiRepository) *SyncApiRunner {
+func NewSyncApiRunner(l logger.Logger, repo *repository.RbacApiRepository) *SyncApiRunner {
 	return &SyncApiRunner{
 		logger: l,
 		repo:   repo,

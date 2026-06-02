@@ -31,9 +31,9 @@ func wireApp() *server.HTTPServer {
 	requestRequest := request.NewRequest(validate, translator)
 	conn := mongodb.NewConn(configConfig)
 	database := conn.DB
-	logger := providers.ProvideLogger(configConfig, database)
-	mysqlLogger := mysql.NewLogger(logger)
-	db := mysql.NewDB(configConfig, mysqlLogger)
+	zeroLogger := providers.ProvideLogger(configConfig, database)
+	logger := mysql.NewLogger(zeroLogger)
+	db := mysql.NewDB(configConfig, logger)
 	rbacUserRepository := repository.NewRbacUserRepository(db)
 	rbacApiRepository := repository.NewRbacApiRepository(db)
 	rbacRoleRepository := repository.NewRbacRoleRepository(db)
@@ -98,7 +98,7 @@ func wireApp() *server.HTTPServer {
 		RegionController:          regionController,
 		HealthController:          healthController,
 	}
-	beforeMiddleware := middleware.NewBeforeMiddleware(logger)
+	beforeMiddleware := middleware.NewBeforeMiddleware(zeroLogger)
 	corsMiddleware := middleware.NewCorsMiddleware(configConfig)
 	middlewares := &middleware.Middlewares{
 		Before: beforeMiddleware,
@@ -109,6 +109,6 @@ func wireApp() *server.HTTPServer {
 		Auth: authMiddleware,
 	}
 	engine := server.NewGin(controllers, middlewares, middlewareMiddlewares)
-	httpServer := server.NewHTTPServer(configConfig, engine, logger, db)
+	httpServer := server.NewHTTPServer(configConfig, engine, zeroLogger, db)
 	return httpServer
 }

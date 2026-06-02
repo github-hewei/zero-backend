@@ -10,7 +10,7 @@ import (
 )
 
 // ProvideLogger 提供日志实例
-func ProvideLogger(config *config.Config, db *mongo.Database) *logger.Logger {
+func ProvideLogger(config *config.Config, db *mongo.Database) *logger.ZeroLogger {
 	if config == nil {
 		return logger.Nop()
 	}
@@ -52,4 +52,4 @@ func ProvideLogger(config *config.Config, db *mongo.Database) *logger.Logger {
 }
 
 // LoggerProviderSet 提供日志依赖集合
-var LoggerProviderSet = wire.NewSet(ProvideLogger, wire.Bind(new(logger2.Logger), new(*logger.Logger)))
+var LoggerProviderSet = wire.NewSet(ProvideLogger, wire.Bind(new(logger2.Logger), new(*logger.ZeroLogger)))

@@ -31,9 +31,9 @@ func wireApp() *server.HTTPServer {
 	requestRequest := request.NewRequest(validate, translator)
 	conn := mongodb.NewConn(configConfig)
 	database := conn.DB
-	logger := providers.ProvideLogger(configConfig, database)
-	mysqlLogger := mysql.NewLogger(logger)
-	db := mysql.NewDB(configConfig, mysqlLogger)
+	zeroLogger := providers.ProvideLogger(configConfig, database)
+	logger := mysql.NewLogger(zeroLogger)
+	db := mysql.NewDB(configConfig, logger)
 	userRepository := repository.NewUserRepository(db)
 	client := redis.New(configConfig)
 	authService := service.NewAuthService(userRepository, configConfig, client)
@@ -54,7 +54,7 @@ func wireApp() *server.HTTPServer {
 		RegionController:     regionController,
 		SettingController:    settingController,
 	}
-	beforeMiddleware := middleware.NewBeforeMiddleware(logger)
+	beforeMiddleware := middleware.NewBeforeMiddleware(zeroLogger)
 	corsMiddleware := middleware.NewCorsMiddleware(configConfig)
 	middlewares := &middleware.Middlewares{
 		Before: beforeMiddleware,
@@ -65,6 +65,6 @@ func wireApp() *server.HTTPServer {
 		Auth: authMiddleware,
 	}
 	engine := server.NewGin(controllers, middlewares, middlewareMiddlewares)
-	httpServer := server.NewHTTPServer(configConfig, engine, logger)
+	httpServer := server.NewHTTPServer(configConfig, engine, zeroLogger)
 	return httpServer
 }

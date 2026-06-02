@@ -14,28 +14,28 @@ import (
 	"zero-backend/pkg/logger"
 )
 
-// Logger 日志组件
-type Logger struct {
+// ZeroLogger 日志组件
+type ZeroLogger struct {
 	logger  zerolog.Logger
 	level   logger.Level
 	writers []io.Writer
 }
 
 // Option 日志组件配置项
-type Option func(*Logger)
+type Option func(*ZeroLogger)
 
 // WithLevel 设置日志级别
-func WithLevel(level logger.Level) Option { return func(l *Logger) { l.level = level } }
+func WithLevel(level logger.Level) Option { return func(l *ZeroLogger) { l.level = level } }
 
 // WithWriters 设置日志写入器
-func WithWriters(w []io.Writer) Option { return func(l *Logger) { l.writers = w } }
+func WithWriters(w []io.Writer) Option { return func(l *ZeroLogger) { l.writers = w } }
 
 // WithWriter 添加日志写入器
-func WithWriter(w io.Writer) Option { return func(l *Logger) { l.writers = append(l.writers, w) } }
+func WithWriter(w io.Writer) Option { return func(l *ZeroLogger) { l.writers = append(l.writers, w) } }
 
 // WithConsole 设置控制台输出
 func WithConsole() Option {
-	return func(l *Logger) {
+	return func(l *ZeroLogger) {
 		l.writers = append(l.writers, zerolog.ConsoleWriter{
 			Out: os.Stderr,
 		})
@@ -68,7 +68,7 @@ func WithFile() Option {
 
 // WithFileWithConfig 添加文件写入器（使用自定义配置）
 func WithFileWithConfig(cfg FileConfig) Option {
-	return func(l *Logger) {
+	return func(l *ZeroLogger) {
 		filename, err := filepath.Abs(filepath.Join(cfg.Path, cfg.Filename))
 		if err != nil {
 			panic(fmt.Sprintf("logger: failed to get absolute path: %v", err))
@@ -86,7 +86,7 @@ func WithFileWithConfig(cfg FileConfig) Option {
 
 // WithMongo 添加MongoDB写入器
 func WithMongo(db *mongo.Database) Option {
-	return func(l *Logger) {
+	return func(l *ZeroLogger) {
 		if db != nil {
 			l.writers = append(l.writers, &mongoWriter{db: db})
 		}
@@ -94,11 +94,11 @@ func WithMongo(db *mongo.Database) Option {
 }
 
 // Nop 创建一个空日志组件
-func Nop() *Logger { return &Logger{logger: zerolog.Nop()} }
+func Nop() *ZeroLogger { return &ZeroLogger{logger: zerolog.Nop()} }
 
 // New 创建日志组件
-func New(opts ...Option) *Logger {
-	l := &Logger{
+func New(opts ...Option) *ZeroLogger {
+	l := &ZeroLogger{
 		level:   logger.Disabled,
 		writers: []io.Writer{},
 	}
@@ -141,32 +141,32 @@ func New(opts ...Option) *Logger {
 }
 
 // Info 记录信息日志
-func (l *Logger) Info(msg string, fields ...any) {
+func (l *ZeroLogger) Info(msg string, fields ...any) {
 	l.logger.Info().CallerSkipFrame(1).Fields(fields).Msg(msg)
 }
 
 // Error 记录错误信息日志
-func (l *Logger) Error(msg string, fields ...any) {
+func (l *ZeroLogger) Error(msg string, fields ...any) {
 	l.logger.Error().CallerSkipFrame(1).Fields(fields).Msg(msg)
 }
 
 // Debug 记录调试信息日志
-func (l *Logger) Debug(msg string, fields ...any) {
+func (l *ZeroLogger) Debug(msg string, fields ...any) {
 	l.logger.Debug().CallerSkipFrame(1).Fields(fields).Msg(msg)
 }
 
 // Warn 记录警告信息日志
-func (l *Logger) Warn(msg string, fields ...any) {
+func (l *ZeroLogger) Warn(msg string, fields ...any) {
 	l.logger.Warn().CallerSkipFrame(1).Fields(fields).Msg(msg)
 }
 
 // Err 记录包含错误信息日志
-func (l *Logger) Err(err error, msg string, fields ...any) {
+func (l *ZeroLogger) Err(err error, msg string, fields ...any) {
 	l.logger.Err(err).CallerSkipFrame(1).Fields(fields).Msg(msg)
 }
 
 // Log 指定级别记录日志
-func (l *Logger) Log(level logger.Level, msg string, fields ...any) {
+func (l *ZeroLogger) Log(level logger.Level, msg string, fields ...any) {
 	switch level {
 	case logger.DebugLevel:
 		l.Debug(msg, fields...)
@@ -183,13 +183,13 @@ func (l *Logger) Log(level logger.Level, msg string, fields ...any) {
 type ctxKey struct{}
 
 // WithContext 将日志实例添加到上下文中
-func (l *Logger) WithContext(ctx context.Context) context.Context {
+func (l *ZeroLogger) WithContext(ctx context.Context) context.Context {
 	if l.level == logger.Disabled {
 		return ctx
 	}
 
 	// 如果context已经有logger，不覆盖
-	if _, ok := ctx.Value(ctxKey{}).(*Logger); ok {
+	if _, ok := ctx.Value(ctxKey{}).(*ZeroLogger); ok {
 		return ctx
 	}
 
@@ -197,19 +197,19 @@ func (l *Logger) WithContext(ctx context.Context) context.Context {
 }
 
 // Ctx 从上下文中获取日志实例
-func Ctx(ctx context.Context) *Logger {
+func Ctx(ctx context.Context) *ZeroLogger {
 	if ctx == nil {
 		return Nop()
 	}
-	if l, ok := ctx.Value(ctxKey{}).(*Logger); ok {
+	if l, ok := ctx.Value(ctxKey{}).(*ZeroLogger); ok {
 		return l
 	}
 	return Nop()
 }
 
 // With 创建一个新的日志实例，并添加字段
-func (l Logger) With(fields ...any) logger.Logger {
-	l2 := &Logger{
+func (l ZeroLogger) With(fields ...any) logger.Logger {
+	l2 := &ZeroLogger{
 		logger:  l.logger.With().Fields(fields).Logger(),
 		level:   l.level,
 		writers: l.writers,

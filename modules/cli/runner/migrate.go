@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"zero-backend/internal/apperror"
-	"zero-backend/internal/logger"
+	"zero-backend/pkg/logger"
 	"zero-backend/pkg/migrate"
 
 	"gorm.io/gorm"
@@ -16,12 +16,12 @@ import (
 
 // MigrateRunner 迁移执行器
 type MigrateRunner struct {
-	logger *logger.Logger
+	logger logger.Logger
 	db     *gorm.DB
 }
 
 // NewMigrateRunner 创建迁移执行器
-func NewMigrateRunner(l *logger.Logger, db *gorm.DB) *MigrateRunner {
+func NewMigrateRunner(l logger.Logger, db *gorm.DB) *MigrateRunner {
 	return &MigrateRunner{
 		logger: l,
 		db:     db,

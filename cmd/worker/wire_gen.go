@@ -24,9 +24,9 @@ func wireApp() *server.WorkerServer {
 	queueManager := queue.NewQueueManager(client)
 	conn := mongodb.NewConn(configConfig)
 	database := conn.DB
-	logger := providers.ProvideLogger(configConfig, database)
-	exampleHandler := handler.NewExampleHandler(logger)
-	registry := providers.ProvideRegistry(logger, exampleHandler)
-	workerServer := server.NewWorkerServer(queueManager, registry, logger)
+	zeroLogger := providers.ProvideLogger(configConfig, database)
+	exampleHandler := handler.NewExampleHandler(zeroLogger)
+	registry := providers.ProvideRegistry(zeroLogger, exampleHandler)
+	workerServer := server.NewWorkerServer(queueManager, registry, zeroLogger)
 	return workerServer
 }

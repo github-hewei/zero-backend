@@ -26,11 +26,11 @@ func wireApp() *command.RootCommand {
 	configConfig := config.New()
 	conn := mongodb.NewConn(configConfig)
 	database := conn.DB
-	logger := providers.ProvideLogger(configConfig, database)
+	zeroLogger := providers.ProvideLogger(configConfig, database)
 	client := redis.New(configConfig)
 	redisLocker := locker.NewRedisLocker(client)
-	mysqlLogger := mysql.NewLogger(logger)
-	db := mysql.NewDB(configConfig, mysqlLogger)
+	logger := mysql.NewLogger(zeroLogger)
+	db := mysql.NewDB(configConfig, logger)
 	userRepository := repository.NewUserRepository(db)
 	userPointsLogRepository := repository.NewUserPointsLogRepository(db)
 	userService := service.NewUserService(db, userRepository, userPointsLogRepository)
@@ -40,8 +40,8 @@ func wireApp() *command.RootCommand {
 	queueManager := queue.NewQueueManager(client)
 	queueCommand := command.NewQueueCommand(queueManager)
 	rbacApiRepository := repository.NewRbacApiRepository(db)
-	syncApiRunner := runner.NewSyncApiRunner(logger, rbacApiRepository)
+	syncApiRunner := runner.NewSyncApiRunner(zeroLogger, rbacApiRepository)
 	syncApiCommand := command.NewSyncApiCommand(syncApiRunner)
-	rootCommand := command.NewRootCommand(logger, redisLocker, userCommand, migrateCommand, queueCommand, syncApiCommand)
+	rootCommand := command.NewRootCommand(zeroLogger, redisLocker, userCommand, migrateCommand, queueCommand, syncApiCommand)
 	return rootCommand
 }
