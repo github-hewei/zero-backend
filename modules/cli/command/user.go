@@ -3,9 +3,9 @@ package command
 import (
 	"time"
 	"zero-backend/internal/dto"
-	"zero-backend/internal/logger"
 	"zero-backend/internal/model"
 	"zero-backend/internal/service"
+	"zero-backend/pkg/logger"
 
 	"github.com/spf13/cobra"
 )

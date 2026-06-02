@@ -1,8 +1,8 @@
 package command
 
 import (
-	"zero-backend/internal/logger"
 	"zero-backend/modules/cli/runner"
+	"zero-backend/pkg/logger"
 
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"

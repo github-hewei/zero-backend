@@ -3,8 +3,8 @@ package command
 import (
 	"fmt"
 
-	"zero-backend/internal/logger"
 	"zero-backend/modules/cli/runner"
+	"zero-backend/pkg/logger"
 
 	"github.com/spf13/cobra"
 )

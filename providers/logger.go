@@ -2,8 +2,7 @@ package providers
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/internal/logger"
-	logger2 "zero-backend/pkg/logger"
+	"zero-backend/pkg/logger"
 
 	"github.com/google/wire"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -35,16 +34,16 @@ func ProvideLogger(config *config.Config, db *mongo.Database) *logger.ZeroLogger
 		}
 	}
 
-	level := logger2.Disabled
+	level := logger.Disabled
 	switch config.Logger.Level {
 	case "info":
-		level = logger2.InfoLevel
+		level = logger.InfoLevel
 	case "debug":
-		level = logger2.DebugLevel
+		level = logger.DebugLevel
 	case "warn":
-		level = logger2.WarnLevel
+		level = logger.WarnLevel
 	case "error":
-		level = logger2.ErrorLevel
+		level = logger.ErrorLevel
 	}
 
 	options = append(options, logger.WithLevel(level))
@@ -52,4 +51,4 @@ func ProvideLogger(config *config.Config, db *mongo.Database) *logger.ZeroLogger
 }
 
 // LoggerProviderSet 提供日志依赖集合
-var LoggerProviderSet = wire.NewSet(ProvideLogger, wire.Bind(new(logger2.Logger), new(*logger.ZeroLogger)))
+var LoggerProviderSet = wire.NewSet(ProvideLogger, wire.Bind(new(logger.Logger), new(*logger.ZeroLogger)))

@@ -9,20 +9,19 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"zero-backend/internal/logger"
-	loggeriface "zero-backend/pkg/logger"
+	"zero-backend/pkg/logger"
 )
 
 // TestNew_WithLevel 测试 WithLevel 选项
 func TestNew_WithLevel(t *testing.T) {
 	tests := []struct {
 		name  string
-		level loggeriface.Level
+		level logger.Level
 	}{
-		{"Debug 级别", loggeriface.DebugLevel},
-		{"Info 级别", loggeriface.InfoLevel},
-		{"Warn 级别", loggeriface.WarnLevel},
-		{"Error 级别", loggeriface.ErrorLevel},
+		{"Debug 级别", logger.DebugLevel},
+		{"Info 级别", logger.InfoLevel},
+		{"Warn 级别", logger.WarnLevel},
+		{"Error 级别", logger.ErrorLevel},
 	}
 
 	for _, tt := range tests {
@@ -43,7 +42,7 @@ func TestNew_WithLevel(t *testing.T) {
 func TestNew_WithWriter(t *testing.T) {
 	var buf bytes.Buffer
 	log := logger.New(
-		logger.WithLevel(loggeriface.InfoLevel),
+		logger.WithLevel(logger.InfoLevel),
 		logger.WithWriter(&buf),
 	)
 
@@ -56,7 +55,7 @@ func TestNew_WithWriter(t *testing.T) {
 func TestNew_MultipleWriters(t *testing.T) {
 	var buf1, buf2 bytes.Buffer
 	log := logger.New(
-		logger.WithLevel(loggeriface.InfoLevel),
+		logger.WithLevel(logger.InfoLevel),
 		logger.WithWriter(&buf1),
 		logger.WithWriter(&buf2),
 	)
@@ -98,7 +97,7 @@ func TestNop(t *testing.T) {
 func TestLogLevel_Debug(t *testing.T) {
 	var buf bytes.Buffer
 	log := logger.New(
-		logger.WithLevel(loggeriface.DebugLevel),
+		logger.WithLevel(logger.DebugLevel),
 		logger.WithWriter(&buf),
 	)
 
@@ -115,7 +114,7 @@ func TestLogLevel_Debug(t *testing.T) {
 func TestLogLevel_Info(t *testing.T) {
 	var buf bytes.Buffer
 	log := logger.New(
-		logger.WithLevel(loggeriface.InfoLevel),
+		logger.WithLevel(logger.InfoLevel),
 		logger.WithWriter(&buf),
 	)
 
@@ -132,7 +131,7 @@ func TestLogLevel_Info(t *testing.T) {
 func TestLogLevel_Warn(t *testing.T) {
 	var buf bytes.Buffer
 	log := logger.New(
-		logger.WithLevel(loggeriface.WarnLevel),
+		logger.WithLevel(logger.WarnLevel),
 		logger.WithWriter(&buf),
 	)
 
@@ -149,7 +148,7 @@ func TestLogLevel_Warn(t *testing.T) {
 func TestLogLevel_Error(t *testing.T) {
 	var buf bytes.Buffer
 	log := logger.New(
-		logger.WithLevel(loggeriface.ErrorLevel),
+		logger.WithLevel(logger.ErrorLevel),
 		logger.WithWriter(&buf),
 	)
 
@@ -166,16 +165,16 @@ func TestLogLevel_Error(t *testing.T) {
 func TestLogLevel_Filtering(t *testing.T) {
 	tests := []struct {
 		name         string
-		level        loggeriface.Level
-		logFunc      func(loggeriface.Logger)
+		level        logger.Level
+		logFunc      func(logger.Logger)
 		shouldOutput bool
 	}{
-		{"Info 级别过滤 Debug", loggeriface.InfoLevel, func(l loggeriface.Logger) { l.Debug("debug") }, false},
-		{"Warn 级别过滤 Debug", loggeriface.WarnLevel, func(l loggeriface.Logger) { l.Debug("debug") }, false},
-		{"Warn 级别过滤 Info", loggeriface.WarnLevel, func(l loggeriface.Logger) { l.Info("info") }, false},
-		{"Error 级别过滤 Warn", loggeriface.ErrorLevel, func(l loggeriface.Logger) { l.Warn("warn") }, false},
-		{"Info 级别输出 Info", loggeriface.InfoLevel, func(l loggeriface.Logger) { l.Info("info") }, true},
-		{"Debug 级别输出所有", loggeriface.DebugLevel, func(l loggeriface.Logger) { l.Debug("debug") }, true},
+		{"Info 级别过滤 Debug", logger.InfoLevel, func(l logger.Logger) { l.Debug("debug") }, false},
+		{"Warn 级别过滤 Debug", logger.WarnLevel, func(l logger.Logger) { l.Debug("debug") }, false},
+		{"Warn 级别过滤 Info", logger.WarnLevel, func(l logger.Logger) { l.Info("info") }, false},
+		{"Error 级别过滤 Warn", logger.ErrorLevel, func(l logger.Logger) { l.Warn("warn") }, false},
+		{"Info 级别输出 Info", logger.InfoLevel, func(l logger.Logger) { l.Info("info") }, true},
+		{"Debug 级别输出所有", logger.DebugLevel, func(l logger.Logger) { l.Debug("debug") }, true},
 	}
 
 	for _, tt := range tests {
@@ -201,7 +200,7 @@ func TestLogLevel_Filtering(t *testing.T) {
 func TestLogWithFields(t *testing.T) {
 	var buf bytes.Buffer
 	log := logger.New(
-		logger.WithLevel(loggeriface.InfoLevel),
+		logger.WithLevel(logger.InfoLevel),
 		logger.WithWriter(&buf),
 	)
 
@@ -220,7 +219,7 @@ func TestLogWithFields(t *testing.T) {
 func TestErr(t *testing.T) {
 	var buf bytes.Buffer
 	log := logger.New(
-		logger.WithLevel(loggeriface.ErrorLevel),
+		logger.WithLevel(logger.ErrorLevel),
 		logger.WithWriter(&buf),
 	)
 
@@ -240,7 +239,7 @@ func TestErr(t *testing.T) {
 func TestWith(t *testing.T) {
 	var buf bytes.Buffer
 	log := logger.New(
-		logger.WithLevel(loggeriface.InfoLevel),
+		logger.WithLevel(logger.InfoLevel),
 		logger.WithWriter(&buf),
 	)
 
@@ -257,14 +256,14 @@ func TestWith(t *testing.T) {
 	assert.Equal(t, "message with fields", entry["message"])
 
 	// 验证返回的是 Logger 接口类型
-	var _ loggeriface.Logger = logWithFields
+	var _ logger.Logger = logWithFields
 }
 
 // TestWith_Chained 测试 With 链式调用
 func TestWith_Chained(t *testing.T) {
 	var buf bytes.Buffer
 	log := logger.New(
-		logger.WithLevel(loggeriface.InfoLevel),
+		logger.WithLevel(logger.InfoLevel),
 		logger.WithWriter(&buf),
 	)
 
@@ -283,7 +282,7 @@ func TestWith_Chained(t *testing.T) {
 // TestWithContext 测试 WithContext 方法
 func TestWithContext(t *testing.T) {
 	log := logger.New(
-		logger.WithLevel(loggeriface.InfoLevel),
+		logger.WithLevel(logger.InfoLevel),
 		logger.WithWriter(&bytes.Buffer{}),
 	)
 
@@ -305,7 +304,7 @@ func TestWithContext(t *testing.T) {
 		ctx := context.Background()
 		ctx = log.WithContext(ctx)
 
-		anotherLog := logger.New(logger.WithLevel(loggeriface.DebugLevel))
+		anotherLog := logger.New(logger.WithLevel(logger.DebugLevel))
 		ctx = anotherLog.WithContext(ctx)
 
 		retrieved := logger.Ctx(ctx)
@@ -317,7 +316,7 @@ func TestWithContext(t *testing.T) {
 func TestConsoleWriter(t *testing.T) {
 	// ConsoleWriter 输出到 stderr，验证不会 panic
 	log := logger.New(
-		logger.WithLevel(loggeriface.InfoLevel),
+		logger.WithLevel(logger.InfoLevel),
 		logger.WithConsole(),
 	)
 
@@ -331,7 +330,7 @@ func TestConsoleWriter(t *testing.T) {
 func TestFileWriter(t *testing.T) {
 	// WithFile 会尝试创建 runtime/logs/app.log
 	log := logger.New(
-		logger.WithLevel(loggeriface.InfoLevel),
+		logger.WithLevel(logger.InfoLevel),
 		logger.WithFile(),
 	)
 
@@ -342,7 +341,7 @@ func TestFileWriter(t *testing.T) {
 func TestCallerInfo(t *testing.T) {
 	var buf bytes.Buffer
 	log := logger.New(
-		logger.WithLevel(loggeriface.InfoLevel),
+		logger.WithLevel(logger.InfoLevel),
 		logger.WithWriter(&buf),
 	)
 
@@ -361,7 +360,7 @@ func TestCallerInfo(t *testing.T) {
 func TestTimestamp(t *testing.T) {
 	var buf bytes.Buffer
 	log := logger.New(
-		logger.WithLevel(loggeriface.InfoLevel),
+		logger.WithLevel(logger.InfoLevel),
 		logger.WithWriter(&buf),
 	)
 
@@ -379,11 +378,11 @@ func TestTimestamp(t *testing.T) {
 // TestLoggerInterface 验证 Logger 实现了接口
 func TestLoggerInterface(t *testing.T) {
 	log := logger.New(
-		logger.WithLevel(loggeriface.InfoLevel),
+		logger.WithLevel(logger.InfoLevel),
 		logger.WithWriter(&bytes.Buffer{}),
 	)
 
-	// 编译期检查：确保 Logger 实现了 loggeriface.Logger 接口
-	var _ loggeriface.Logger = log
-	var _ loggeriface.Logger = logger.Nop()
+	// 编译期检查：确保 Logger 实现了 logger.Logger 接口
+	var _ logger.Logger = log
+	var _ logger.Logger = logger.Nop()
 }

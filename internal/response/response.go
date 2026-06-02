@@ -7,7 +7,7 @@ import (
 	"time"
 	"zero-backend/internal/apperror"
 	"zero-backend/internal/ctxkeys"
-	"zero-backend/internal/logger"
+	"zero-backend/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 )

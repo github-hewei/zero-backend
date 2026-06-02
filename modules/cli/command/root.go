@@ -9,7 +9,6 @@ import (
 	"syscall"
 	"time"
 	"zero-backend/internal/ctxkeys"
-	logger2 "zero-backend/internal/logger"
 	"zero-backend/pkg/locker"
 	"zero-backend/pkg/logger"
 
@@ -50,7 +49,7 @@ func NewRootCommand(
 }
 
 // Configure 配置命令
-func (c *RootCommand) Configure(logger logger.Logger, redisLocker *locker.RedisLocker) {
+func (c *RootCommand) Configure(log logger.Logger, redisLocker *locker.RedisLocker) {
 	c.Command.PersistentFlags().IntP("instance-id", "i", 0, "实例编号, 防止并发执行")
 
 	// 命令执行之前
@@ -60,11 +59,11 @@ func (c *RootCommand) Configure(logger logger.Logger, redisLocker *locker.RedisL
 
 		// 设置 traceID 追踪日志
 		traceId := uuid.New().String()
-		logger := logger.With("traceId", traceId)
-		logger.Info("Start Command")
+		log := log.With("traceId", traceId)
+		log.Info("Start Command")
 
 		// 将日志组件注入上下文
-		ctx := logger.WithContext(cmd.Context())
+		ctx := log.WithContext(cmd.Context())
 		ctx = context.WithValue(ctx, ctxkeys.TraceIDKey{}, traceId)
 		ctx = context.WithValue(ctx, ctxkeys.BeginTimeKey{}, time.Now())
 
@@ -76,7 +75,7 @@ func (c *RootCommand) Configure(logger logger.Logger, redisLocker *locker.RedisL
 			return err
 		}
 		c.lock = lock
-		logger.Info("Locked Command", "key", key)
+		log.Info("Locked Command", "key", key)
 
 		cmd.SetContext(ctx)
 		return nil
@@ -89,7 +88,7 @@ func (c *RootCommand) Configure(logger logger.Logger, redisLocker *locker.RedisL
 			cost = time.Since(val.(time.Time))
 		}
 
-		logger2.Ctx(cmd.Context()).Info("End Command",
+		logger.Ctx(cmd.Context()).Info("End Command",
 			"cost", fmt.Sprintf("%.4f", cost.Seconds()))
 	}
 }
@@ -128,15 +127,15 @@ func (c *RootCommand) Run() {
 
 	select {
 	case <-sigChan:
-		logger := logger2.Ctx(c.Cmd().Context())
-		logger.Info("Exiting manually...")
+		log := logger.Ctx(c.Cmd().Context())
+		log.Info("Exiting manually...")
 		cancel()
 		timeout := time.NewTimer(10 * time.Second)
 		defer timeout.Stop()
 		select {
 		case <-done:
 		case <-timeout.C:
-			logger.Warn("Timeout exit")
+			log.Warn("Timeout exit")
 		}
 	case <-done:
 	}
@@ -151,8 +150,8 @@ func (c *RootCommand) handleError(err error) {
 		cost = time.Since(val.(time.Time))
 	}
 
-	logger := logger2.Ctx(ctx)
-	logger.Err(err, "Error Command", "cost", cost)
+	log := logger.Ctx(ctx)
+	log.Err(err, "Error Command", "cost", cost)
 }
 
 // unlock 解锁
@@ -163,6 +162,6 @@ func (c *RootCommand) unlock() {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	c.lock.Unlock(ctx)
-	logger := logger2.Ctx(c.Cmd().Context())
-	logger.Info("Unlocked Command")
+	log := logger.Ctx(c.Cmd().Context())
+	log.Info("Unlocked Command")
 }
