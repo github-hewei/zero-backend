@@ -3,26 +3,32 @@ package mongodb
 import (
 	"context"
 	"time"
-	"zero-backend/internal/config"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+// Config MongoDB 连接配置
+type Config struct {
+	URI      string
+	Database string
+	Enabled  bool
+}
 
 type Conn struct {
 	Client *mongo.Client
 	DB     *mongo.Database
 }
 
-func NewConn(cfg *config.Config) *Conn {
-	if !cfg.MongoDB.Enabled {
+func NewConn(cfg Config) *Conn {
+	if !cfg.Enabled {
 		return &Conn{}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	clientOptions := options.Client().ApplyURI(cfg.MongoDB.URI)
+	clientOptions := options.Client().ApplyURI(cfg.URI)
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		panic(err)
@@ -35,6 +41,6 @@ func NewConn(cfg *config.Config) *Conn {
 
 	return &Conn{
 		Client: client,
-		DB:     client.Database(cfg.MongoDB.Database),
+		DB:     client.Database(cfg.Database),
 	}
 }

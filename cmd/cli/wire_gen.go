@@ -10,13 +10,13 @@ import (
 	"zero-backend/internal/config"
 	"zero-backend/internal/repository"
 	"zero-backend/internal/service"
-	"zero-backend/internal/storage/mongodb"
-	"zero-backend/internal/storage/mysql"
-	"zero-backend/internal/storage/redis"
 	"zero-backend/modules/cli/command"
 	"zero-backend/modules/cli/runner"
 	"zero-backend/pkg/locker"
+	"zero-backend/pkg/mongodb"
+	"zero-backend/pkg/mysql"
 	"zero-backend/pkg/queue"
+	"zero-backend/pkg/redis"
 	"zero-backend/providers"
 )
 
@@ -24,13 +24,16 @@ import (
 
 func wireApp() *command.RootCommand {
 	configConfig := config.New()
-	conn := mongodb.NewConn(configConfig)
+	mongodbConfig := providers.NewMongoDBConfig(configConfig)
+	conn := mongodb.NewConn(mongodbConfig)
 	database := conn.DB
 	zeroLogger := providers.ProvideLogger(configConfig, database)
-	client := redis.New(configConfig)
+	redisConfig := providers.NewRedisConfig(configConfig)
+	client := redis.New(redisConfig)
 	redisLocker := locker.NewRedisLocker(client)
+	mysqlConfig := providers.NewMySQLConfig(configConfig)
 	logger := mysql.NewLogger(zeroLogger)
-	db := mysql.NewDB(configConfig, logger)
+	db := mysql.NewDB(mysqlConfig, logger)
 	userRepository := repository.NewUserRepository(db)
 	userPointsLogRepository := repository.NewUserPointsLogRepository(db)
 	userService := service.NewUserService(db, userRepository, userPointsLogRepository)

@@ -5,7 +5,6 @@ package main
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/internal/storage/redis"
 	"zero-backend/modules/cli/command"
 	"zero-backend/pkg/locker"
 	"zero-backend/providers"
@@ -16,7 +15,7 @@ import (
 func wireApp() *command.RootCommand {
 	panic(wire.Build(
 		config.New,
-		redis.New,
+		providers.RedisProviderSet,
 		locker.NewRedisLocker,
 		providers.LoggerProviderSet,
 		providers.MongoDBProviderSet,

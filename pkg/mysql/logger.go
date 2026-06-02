@@ -5,7 +5,6 @@ import (
 	"errors"
 	"time"
 
-	"zero-backend/internal/ctxkeys"
 	logger2 "zero-backend/pkg/logger"
 
 	"gorm.io/gorm"
@@ -22,7 +21,7 @@ type Logger struct {
 func NewLogger(l logger2.Logger) *Logger {
 	return &Logger{
 		Logger:   l,
-		LogLevel: logger.Info, // 默认日志级别
+		LogLevel: logger.Info,
 	}
 }
 
@@ -36,21 +35,21 @@ func (l *Logger) LogMode(level logger.LogLevel) logger.Interface {
 // Info 打印info级别日志
 func (l *Logger) Info(ctx context.Context, msg string, data ...any) {
 	if l.LogLevel >= logger.Info {
-		l.Logger.Info(msg, append([]any{"traceId", ctxkeys.TraceID(ctx)}, data...)...)
+		l.Logger.Info(msg, append([]any{"traceId", TraceID(ctx)}, data...)...)
 	}
 }
 
 // Warn 打印warn级别日志
 func (l *Logger) Warn(ctx context.Context, msg string, data ...any) {
 	if l.LogLevel >= logger.Warn {
-		l.Logger.Warn(msg, append([]any{"traceId", ctxkeys.TraceID(ctx)}, data...)...)
+		l.Logger.Warn(msg, append([]any{"traceId", TraceID(ctx)}, data...)...)
 	}
 }
 
 // Error 打印error级别日志
 func (l *Logger) Error(ctx context.Context, msg string, data ...any) {
 	if l.LogLevel >= logger.Error {
-		l.Logger.Error(msg, append([]any{"traceId", ctxkeys.TraceID(ctx)}, data...)...)
+		l.Logger.Error(msg, append([]any{"traceId", TraceID(ctx)}, data...)...)
 	}
 }
 
@@ -63,7 +62,7 @@ func (l *Logger) Trace(ctx context.Context, begin time.Time, fc func() (string, 
 	elapsed := time.Since(begin)
 	sql, rows := fc()
 	fields := []any{
-		"traceId", ctxkeys.TraceID(ctx),
+		"traceId", TraceID(ctx),
 		"sql", sql,
 		"rows", rows,
 		"timeMs", float64(elapsed.Nanoseconds()) / 1e6,

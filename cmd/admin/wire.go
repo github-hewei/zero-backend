@@ -5,7 +5,6 @@ package main
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/internal/storage/redis"
 
 	"zero-backend/modules/admin/server"
 	"zero-backend/providers"
@@ -16,7 +15,7 @@ import (
 func wireApp() *server.HTTPServer {
 	panic(wire.Build(
 		config.New,
-		redis.New,
+		providers.RedisProviderSet,
 		providers.AdminControllersProviderSet,
 		providers.MiddlewaresProviderSet,
 		providers.AdminMiddlewaresProviderSet,

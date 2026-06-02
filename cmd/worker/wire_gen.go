@@ -8,11 +8,11 @@ package main
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/internal/storage/mongodb"
-	"zero-backend/internal/storage/redis"
 	"zero-backend/modules/worker/handler"
 	"zero-backend/modules/worker/server"
+	"zero-backend/pkg/mongodb"
 	"zero-backend/pkg/queue"
+	"zero-backend/pkg/redis"
 	"zero-backend/providers"
 )
 
@@ -20,9 +20,11 @@ import (
 
 func wireApp() *server.WorkerServer {
 	configConfig := config.New()
-	client := redis.New(configConfig)
+	redisConfig := providers.NewRedisConfig(configConfig)
+	client := redis.New(redisConfig)
 	queueManager := queue.NewQueueManager(client)
-	conn := mongodb.NewConn(configConfig)
+	mongodbConfig := providers.NewMongoDBConfig(configConfig)
+	conn := mongodb.NewConn(mongodbConfig)
 	database := conn.DB
 	zeroLogger := providers.ProvideLogger(configConfig, database)
 	exampleHandler := handler.NewExampleHandler(zeroLogger)

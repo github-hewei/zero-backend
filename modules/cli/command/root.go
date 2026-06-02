@@ -11,6 +11,7 @@ import (
 	"zero-backend/internal/ctxkeys"
 	"zero-backend/pkg/locker"
 	"zero-backend/pkg/logger"
+	"zero-backend/pkg/mysql"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -65,6 +66,7 @@ func (c *RootCommand) Configure(log logger.Logger, redisLocker *locker.RedisLock
 		// 将日志组件注入上下文
 		ctx := log.WithContext(cmd.Context())
 		ctx = ctxkeys.WithTraceID(ctx, traceId)
+		ctx = mysql.WithTraceID(ctx, traceId)
 		ctx = ctxkeys.WithBeginTime(ctx, time.Now())
 
 		// 为进程加锁逻辑

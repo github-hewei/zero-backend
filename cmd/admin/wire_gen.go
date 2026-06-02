@@ -12,13 +12,13 @@ import (
 	"zero-backend/internal/repository"
 	"zero-backend/internal/request"
 	service2 "zero-backend/internal/service"
-	"zero-backend/internal/storage/mongodb"
-	"zero-backend/internal/storage/mysql"
-	"zero-backend/internal/storage/redis"
 	"zero-backend/modules/admin/controller"
 	middleware2 "zero-backend/modules/admin/middleware"
 	"zero-backend/modules/admin/server"
 	"zero-backend/modules/admin/service"
+	"zero-backend/pkg/mongodb"
+	"zero-backend/pkg/mysql"
+	"zero-backend/pkg/redis"
 	"zero-backend/providers"
 )
 
@@ -29,11 +29,13 @@ func wireApp() *server.HTTPServer {
 	validate := request.NewValidate()
 	translator := request.NewTrans(validate)
 	requestRequest := request.NewRequest(validate, translator)
-	conn := mongodb.NewConn(configConfig)
+	mysqlConfig := providers.NewMySQLConfig(configConfig)
+	mongodbConfig := providers.NewMongoDBConfig(configConfig)
+	conn := mongodb.NewConn(mongodbConfig)
 	database := conn.DB
 	zeroLogger := providers.ProvideLogger(configConfig, database)
 	logger := mysql.NewLogger(zeroLogger)
-	db := mysql.NewDB(configConfig, logger)
+	db := mysql.NewDB(mysqlConfig, logger)
 	rbacUserRepository := repository.NewRbacUserRepository(db)
 	rbacApiRepository := repository.NewRbacApiRepository(db)
 	rbacRoleRepository := repository.NewRbacRoleRepository(db)
@@ -41,7 +43,8 @@ func wireApp() *server.HTTPServer {
 	rbacRoleMenuRepository := repository.NewRbacRoleMenuRepository(db)
 	rbacUserRoleRepository := repository.NewRbacUserRoleRepository(db)
 	rbacMenuApiRepository := repository.NewRbacMenuApiRepository(db)
-	client := redis.New(configConfig)
+	redisConfig := providers.NewRedisConfig(configConfig)
+	client := redis.New(redisConfig)
 	authService := service.NewAuthService(rbacUserRepository, rbacApiRepository, rbacRoleRepository, rbacMenuRepository, rbacRoleMenuRepository, rbacUserRoleRepository, rbacMenuApiRepository, configConfig, client)
 	authController := controller.NewAuthController(requestRequest, authService, configConfig)
 	rbacMenuService := service2.NewRbacMenuService(rbacMenuRepository, rbacMenuApiRepository, db)
