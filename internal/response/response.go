@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	"zero-backend/internal/apperror"
+
 	"zero-backend/internal/ctxkeys"
+	"zero-backend/internal/errcode"
+	"zero-backend/pkg/apperror"
 	"zero-backend/pkg/logger"
 
 	"github.com/gin-gonic/gin"
@@ -21,33 +23,32 @@ type Response struct {
 	TraceId string `json:"traceId"`
 }
 
-// Error 输出错误信息
+// Error 输出错误响应
+// 优先解析 *apperror.Error，提取错误码和消息；未识别的错误兜底为 Internal
 func Error(c *gin.Context, err error) {
-	if coded, ok := errors.AsType[apperror.Coded](err); ok {
-		code, msg := coded.CodePair()
-		output(c, errors.Unwrap(err), Response{
-			ErrCode: int(code),
-			Message: msg,
+	if appErr, ok := errors.AsType[*apperror.Error](err); ok {
+		output(c, appErr.Cause(), Response{
+			ErrCode: appErr.Code().Value(),
+			Message: appErr.Error(),
 		})
 		return
 	}
 
-	// 未识别的错误统一包装为 SystemError
-	systemError := apperror.NewSystemError(err, "系统异常")
-	output(c, systemError.Err, Response{
-		ErrCode: int(systemError.Code),
-		Message: systemError.Message,
+	// 非 apperror 错误兜底
+	output(c, err, Response{
+		ErrCode: errcode.Internal.Value(),
+		Message: errcode.Internal.Template(),
 	})
 }
 
-// Success 输出成功信息
+// Success 输出成功响应
 func Success(c *gin.Context, message string, data any) {
 	if message == "" {
 		message = "success"
 	}
 
 	output(c, nil, Response{
-		ErrCode: int(apperror.ErrorCodeNone),
+		ErrCode: 0,
 		Message: message,
 		Data:    data,
 	})
