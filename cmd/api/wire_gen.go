@@ -61,17 +61,15 @@ func wireApp() *server.HTTPServer {
 		SettingController:    settingController,
 	}
 	beforeMiddleware := middleware.NewBeforeMiddleware(zeroLogger)
-	adminCorsConfig := providers.NewAdminCorsConfig(configConfig)
-	corsMiddleware := middleware.NewCorsMiddleware(adminCorsConfig)
 	middlewares := &middleware.Middlewares{
 		Before: beforeMiddleware,
-		Cors:   corsMiddleware,
 	}
 	authMiddleware := middleware2.NewAuthMiddleware(apiAuthConfig, authService)
 	middlewareMiddlewares := &middleware2.Middlewares{
 		Auth: authMiddleware,
 	}
-	engine := server.NewGin(controllers, middlewares, middlewareMiddlewares)
+	corsConfig := providers.NewApiCorsConfig(configConfig)
+	engine := server.NewGin(controllers, middlewares, middlewareMiddlewares, corsConfig)
 	httpServer := server.NewHTTPServer(serverConfig, engine, zeroLogger)
 	return httpServer
 }

@@ -19,8 +19,6 @@ type Config struct {
 	MongoDB MongoDBConfig `mapstructure:"mongodb"`
 }
 
-// --- 共享基础类型 ---
-
 // AuthConfig 认证配置（Admin 和 Api 共用字段）
 type AuthConfig struct {
 	RefreshTokenTtl int    `mapstructure:"refresh_token_ttl"`
@@ -41,8 +39,6 @@ type CorsConfig struct {
 	AllowHeaders     []string `mapstructure:"allow_headers"`
 	AllowCredentials bool     `mapstructure:"allow_credentials"`
 }
-
-// --- 模块级类型 ---
 
 // AdminConfig 管理后台配置
 type AdminConfig struct {
@@ -68,14 +64,6 @@ type ApiConfig struct {
 type ApiAuthConfig struct {
 	AuthConfig `mapstructure:",squash"`
 }
-
-// --- Wire 区分类型（用于同一基础类型在不同模块的注入区分） ---
-
-// AdminCorsConfig 管理端跨域配置（wire 区分用）
-type AdminCorsConfig CorsConfig
-
-// ApiCorsConfig API端跨域配置（wire 区分用）
-type ApiCorsConfig CorsConfig
 
 // LoggerConfig 日志配置
 type LoggerConfig struct {

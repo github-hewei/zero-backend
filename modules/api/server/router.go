@@ -1,6 +1,7 @@
 package server
 
 import (
+	"zero-backend/internal/config"
 	"zero-backend/internal/middleware"
 	"zero-backend/modules/api/controller"
 	apiMiddleware "zero-backend/modules/api/middleware"
@@ -12,8 +13,11 @@ func NewGin(
 	ctrl *controller.Controllers,
 	middlewares *middleware.Middlewares,
 	apiMiddleware *apiMiddleware.Middlewares,
+	corsConfig config.CorsConfig,
 ) *gin.Engine {
 	r := gin.Default()
+	cors := middleware.NewCorsMiddleware(corsConfig)
+	r.Use(cors.Handle())
 	r.Use(middlewares.Before.Handle())
 
 	apiGroup := r.Group("/api")

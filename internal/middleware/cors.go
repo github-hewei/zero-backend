@@ -10,10 +10,10 @@ import (
 )
 
 type CorsMiddleware struct {
-	cfg config.AdminCorsConfig
+	cfg config.CorsConfig
 }
 
-func NewCorsMiddleware(cfg config.AdminCorsConfig) *CorsMiddleware {
+func NewCorsMiddleware(cfg config.CorsConfig) *CorsMiddleware {
 	return &CorsMiddleware{
 		cfg: cfg,
 	}
