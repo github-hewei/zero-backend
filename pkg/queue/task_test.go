@@ -49,7 +49,7 @@ func TestNewTask_EmptyPayload(t *testing.T) {
 // TestNewTask_UniqueIDs 验证连续创建 1000 个任务的 ID 不会重复
 func TestNewTask_UniqueIDs(t *testing.T) {
 	ids := make(map[string]struct{})
-	for i := 0; i < 1000; i++ {
+	for range 1000 {
 		task := queue.NewTask("q", "t", []byte("payload"))
 		_, exists := ids[task.ID]
 		assert.False(t, exists, "duplicate task ID found: %s", task.ID)

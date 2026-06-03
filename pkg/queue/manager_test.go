@@ -89,7 +89,7 @@ func TestQueueManager_GetQueueStats(t *testing.T) {
 
 	ctx := context.Background()
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		task := queue.NewTask("queue-a", "test", []byte{byte(i)})
 		require.NoError(t, manager.EnqueueTask(ctx, "queue-a", task))
 	}
@@ -125,7 +125,7 @@ func TestQueueManager_RegisterWorkerPool(t *testing.T) {
 
 	require.NoError(t, manager.StartAllWorkerPools(ctx))
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		task := queue.NewTask("worker-queue", "test", []byte{byte(i)})
 		require.NoError(t, manager.EnqueueTask(ctx, "worker-queue", task))
 	}
@@ -186,7 +186,7 @@ func TestQueueManager_FullWorkflow(t *testing.T) {
 
 	require.NoError(t, manager.StartAllWorkerPools(ctx))
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		emailTask := queue.NewTask("emails", "send-email", []byte{byte(i)})
 		require.NoError(t, manager.EnqueueTask(ctx, "emails", emailTask))
 

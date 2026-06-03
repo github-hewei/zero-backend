@@ -152,7 +152,7 @@ func TestRedisLocker_ConcurrentLock(t *testing.T) {
 	results := make(chan error, 10)
 
 	// 10 个协程同时尝试获取同一把锁
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		go func() {
 			lock, err := locker.Lock(ctx, key, WithTTL(5*time.Second))
 			if err != nil {
@@ -167,7 +167,7 @@ func TestRedisLocker_ConcurrentLock(t *testing.T) {
 	// 等待所有结果
 	successCount := 0
 	failCount := 0
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		err := <-results
 		if err == nil {
 			successCount++

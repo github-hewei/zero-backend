@@ -46,12 +46,11 @@ func TestWorker_ProcessTask(t *testing.T) {
 	})
 
 	worker := queue.NewWorker("test-worker", q, handler)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 
 	require.NoError(t, worker.Start(ctx))
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		task := queue.NewTask("worker-test", "test", []byte{byte(i)})
 		require.NoError(t, q.Enqueue(ctx, task))
 	}
@@ -71,8 +70,7 @@ func TestWorker_NackOnHandlerError(t *testing.T) {
 	})
 
 	worker := queue.NewWorker("test-worker", q, handler)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 
 	require.NoError(t, worker.Start(ctx))
 
@@ -96,8 +94,7 @@ func TestWorker_StopsGracefully(t *testing.T) {
 	})
 
 	worker := queue.NewWorker("test-worker", q, handler)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 
 	require.NoError(t, worker.Start(ctx))
 	require.NoError(t, worker.Stop())
@@ -147,7 +144,7 @@ func TestWorkerPool_ProcessesTasks(t *testing.T) {
 	ctx := context.Background()
 	require.NoError(t, pool.Start(ctx))
 
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		task := queue.NewTask("worker-test", "test", []byte{byte(i)})
 		require.NoError(t, q.Enqueue(ctx, task))
 	}
@@ -205,7 +202,7 @@ func TestWorkerPool_ContextCancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	require.NoError(t, pool.Start(ctx))
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		task := queue.NewTask("worker-test", "test", []byte{byte(i)})
 		require.NoError(t, q.Enqueue(ctx, task))
 	}

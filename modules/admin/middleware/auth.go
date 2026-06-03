@@ -38,7 +38,7 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.Parse(tokenString[7:], func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.Parse(tokenString[7:], func(token *jwt.Token) (any, error) {
 			return []byte(m.config.Admin.HmacSecret), nil
 		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 

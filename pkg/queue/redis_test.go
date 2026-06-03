@@ -87,7 +87,7 @@ func TestRedisQueue_Enqueue_MultipleTasks(t *testing.T) {
 
 	ctx := context.Background()
 
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		task := queue.NewTask("test-queue", "batch", []byte{byte(i)})
 		err := q.Enqueue(ctx, task)
 		require.NoError(t, err)
@@ -358,7 +358,7 @@ func TestRedisQueue_GetStats_AfterOperations(t *testing.T) {
 
 	ctx := context.Background()
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		task := queue.NewTask("test-queue", "test", []byte{byte(i)})
 		require.NoError(t, q.Enqueue(ctx, task))
 	}
@@ -386,7 +386,7 @@ func TestRedisQueue_Purge(t *testing.T) {
 
 	ctx := context.Background()
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		task := queue.NewTask("test-queue", "test", []byte{byte(i)})
 		require.NoError(t, q.Enqueue(ctx, task))
 	}
@@ -424,14 +424,14 @@ func TestRedisQueue_FullWorkflow(t *testing.T) {
 
 	// 1. 入队 5 个任务
 	tasks := make([]*queue.Task, 5)
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		tasks[i] = queue.NewTask("test-queue", "workflow", []byte{byte(i)})
 		tasks[i].WithMetadata("index", string(rune('0'+i)))
 		require.NoError(t, q.Enqueue(ctx, tasks[i]))
 	}
 
 	// 2. 逐个出队并 Ack 前 3 个
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		dequeued, err := q.Dequeue(ctx)
 		require.NoError(t, err)
 		require.NotNil(t, dequeued)

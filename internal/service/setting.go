@@ -164,7 +164,7 @@ func (s *SettingService) checkSettingKey(ctx context.Context, key string, storeI
 }
 
 // GetSettingValue 获取并解析设置项
-func (s *SettingService) GetSettingValue(ctx context.Context, key string, out interface{}) error {
+func (s *SettingService) GetSettingValue(ctx context.Context, key string, out any) error {
 	filter := repository.SettingFilterField{SettingKey: key}
 	setting, err := s.repo.FindOne(ctx, filter)
 

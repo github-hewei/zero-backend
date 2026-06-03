@@ -20,6 +20,6 @@ type SettingFormField struct {
 
 // FormOption 表单选项
 type FormOption struct {
-	Label string      `json:"label"` // 显示文本
-	Value interface{} `json:"value"` // 选项值
+	Label string `json:"label"` // 显示文本
+	Value any    `json:"value"` // 选项值
 }
