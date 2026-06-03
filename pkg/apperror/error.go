@@ -6,23 +6,17 @@ import (
 
 // Error 应用错误，唯一的核心错误类型
 type Error struct {
-	code    Code
-	cause   error
-	args    []any
-	message string // 缓存渲染结果
+	code  Code
+	cause error
+	msg   string
 }
 
-// Error 实现 error 接口，返回渲染后的错误消息
+// Error 实现 error 接口，返回错误消息
 func (e *Error) Error() string {
-	if e.message != "" {
-		return e.message
+	if e.msg != "" {
+		return e.msg
 	}
-	if len(e.args) > 0 {
-		e.message = fmt.Sprintf(e.code.template, e.args...)
-	} else {
-		e.message = e.code.template
-	}
-	return e.message
+	return e.code.template
 }
 
 // Unwrap 实现 errors.Unwrap 协议，返回内部原因
@@ -82,10 +76,10 @@ func WithCause(err error) Option {
 	}
 }
 
-// WithArgs 设置消息模板参数
-func WithArgs(args ...any) Option {
+// WithMsg 覆盖默认消息
+func WithMsg(msg string) Option {
 	return func(e *Error) {
-		e.args = args
+		e.msg = msg
 	}
 }
 
@@ -98,7 +92,7 @@ func New(code Code, opts ...Option) *Error {
 	return e
 }
 
-// Wrap 快捷包装已有错误，支持模板参数
-func Wrap(code Code, cause error, args ...any) *Error {
-	return New(code, WithCause(cause), WithArgs(args...))
+// Wrap 快捷包装已有错误
+func Wrap(code Code, cause error) *Error {
+	return New(code, WithCause(cause))
 }
