@@ -32,8 +32,7 @@ func (r *Request) ShouldBindJSON(ctx *gin.Context, data any) error {
 
 	// 对传入参数进行验证
 	if err := r.validate.Struct(data); err != nil {
-		var validationErrors validator.ValidationErrors
-		if errors.As(err, &validationErrors) {
+		if validationErrors, ok := errors.AsType[validator.ValidationErrors](err); ok {
 			return apperror.NewUserError(validationErrors[0].Translate(r.trans))
 		}
 
@@ -54,8 +53,7 @@ func (r *Request) ShouldBindJSONArray(ctx *gin.Context, data any) error {
 	list, _ := data.([]any)
 	for _, item := range list {
 		if err := r.validate.Struct(item); err != nil {
-			var validationErrors validator.ValidationErrors
-			if errors.As(err, &validationErrors) {
+			if validationErrors, ok := errors.AsType[validator.ValidationErrors](err); ok {
 				return apperror.NewUserError(validationErrors[0].Translate(r.trans))
 			}
 

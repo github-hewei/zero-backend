@@ -23,8 +23,7 @@ type Response struct {
 
 // Error 输出错误信息
 func Error(c *gin.Context, err error) {
-	var coded apperror.Coded
-	if errors.As(err, &coded) {
+	if coded, ok := errors.AsType[apperror.Coded](err); ok {
 		code, msg := coded.CodePair()
 		output(c, errors.Unwrap(err), Response{
 			ErrCode: int(code),

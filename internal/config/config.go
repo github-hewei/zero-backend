@@ -111,8 +111,7 @@ func loadConfig() *Config {
 
 	// 读取配置文件
 	if err := viper.ReadInConfig(); err != nil {
-		var configFileNotFoundError viper.ConfigFileNotFoundError
-		if errors.As(err, &configFileNotFoundError) {
+		if _, ok := errors.AsType[viper.ConfigFileNotFoundError](err); ok {
 			log.Println("[WARN] config.yaml not found")
 		} else {
 			log.Printf("[WARN] read config.yaml failed: %v\n", err)

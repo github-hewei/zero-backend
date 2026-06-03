@@ -45,8 +45,7 @@ func (r *MigrateRunner) Up(ctx context.Context, filePath string) error {
 			return apperror.NewUserError(fmt.Sprintf("找不到指定 SQL 文件：%s", sqlFile))
 		}
 
-		var migrationError *migrate.MigrationError
-		if errors.As(err, &migrationError) {
+		if migrationError, ok := errors.AsType[*migrate.MigrationError](err); ok {
 			return apperror.NewUserError(fmt.Sprintf("执行迁移失败：%s", migrationError.Error()))
 		}
 

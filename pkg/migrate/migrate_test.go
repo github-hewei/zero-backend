@@ -222,8 +222,8 @@ func TestMigrate_ScriptReaderError(t *testing.T) {
 
 	err := m.Migrate(context.Background())
 	assert.Error(t, err)
-	var migrateErr *migrate.MigrationError
-	assert.True(t, errors.As(err, &migrateErr))
+	migrateErr, ok := errors.AsType[*migrate.MigrationError](err)
+	assert.True(t, ok)
 	assert.Contains(t, migrateErr.Op, "parseSQLStatements")
 }
 
@@ -296,8 +296,8 @@ func TestMigrate_SQLError(t *testing.T) {
 
 	err := m.Migrate(context.Background())
 	assert.Error(t, err)
-	var migrateErr *migrate.MigrationError
-	assert.True(t, errors.As(err, &migrateErr))
+	migrateErr, ok := errors.AsType[*migrate.MigrationError](err)
+	assert.True(t, ok)
 	assert.Contains(t, migrateErr.Op, "db.Exec")
 }
 
