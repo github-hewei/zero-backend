@@ -1,12 +1,13 @@
 package controller
 
 import (
-	"zero-backend/internal/apperror"
 	"zero-backend/internal/config"
 	"zero-backend/internal/dto"
+	"zero-backend/internal/errcode"
 	"zero-backend/internal/request"
 	"zero-backend/internal/response"
 	"zero-backend/modules/admin/service"
+	"zero-backend/pkg/apperror"
 
 	"github.com/gin-gonic/gin"
 )
@@ -55,7 +56,7 @@ func (c *AuthController) Logout(ctx *gin.Context) {
 func (c *AuthController) RefreshToken(ctx *gin.Context) {
 	cookie, err := ctx.Request.Cookie("token")
 	if err != nil {
-		response.Error(ctx, apperror.NewSystemError(err, "登录已过期，请重新登录"))
+		response.Error(ctx, apperror.Wrap(errcode.Internal, err))
 		return
 	}
 

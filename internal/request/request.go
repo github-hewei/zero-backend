@@ -2,9 +2,10 @@ package request
 
 import (
 	"errors"
-	"zero-backend/internal/apperror"
 	"zero-backend/internal/ctxkeys"
+	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
+	"zero-backend/pkg/apperror"
 
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
@@ -27,16 +28,16 @@ func NewRequest(validate *validator.Validate, trans ut.Translator) *Request {
 func (r *Request) ShouldBindJSON(ctx *gin.Context, data any) error {
 	// 将Json数据绑定到变量
 	if err := ctx.ShouldBindJSON(data); err != nil {
-		return apperror.NewSystemError(err, "传入参数错误")
+		return apperror.New(errcode.InvalidInput, apperror.WithCause(err))
 	}
 
 	// 对传入参数进行验证
 	if err := r.validate.Struct(data); err != nil {
 		if validationErrors, ok := errors.AsType[validator.ValidationErrors](err); ok {
-			return apperror.NewUserError(validationErrors[0].Translate(r.trans))
+			return apperror.New(errcode.InvalidInput, apperror.WithMsg(validationErrors[0].Translate(r.trans)))
 		}
 
-		return apperror.NewSystemError(err, "参数验证错误")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -46,7 +47,7 @@ func (r *Request) ShouldBindJSON(ctx *gin.Context, data any) error {
 func (r *Request) ShouldBindJSONArray(ctx *gin.Context, data any) error {
 	// 将Json数据绑定到变量
 	if err := ctx.ShouldBindJSON(data); err != nil {
-		return apperror.NewSystemError(err, "传入参数错误")
+		return apperror.New(errcode.InvalidInput, apperror.WithCause(err))
 	}
 
 	// 对传入参数进行验证
@@ -54,10 +55,10 @@ func (r *Request) ShouldBindJSONArray(ctx *gin.Context, data any) error {
 	for _, item := range list {
 		if err := r.validate.Struct(item); err != nil {
 			if validationErrors, ok := errors.AsType[validator.ValidationErrors](err); ok {
-				return apperror.NewUserError(validationErrors[0].Translate(r.trans))
+				return apperror.New(errcode.InvalidInput, apperror.WithMsg(validationErrors[0].Translate(r.trans)))
 			}
 
-			return apperror.NewSystemError(err, "参数验证错误")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 	}
 

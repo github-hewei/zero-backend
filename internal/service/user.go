@@ -2,11 +2,12 @@ package service
 
 import (
 	"context"
-	"zero-backend/internal/apperror"
 	"zero-backend/internal/constants"
 	"zero-backend/internal/dto"
+	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
+	"zero-backend/pkg/apperror"
 	"zero-backend/pkg/helper"
 
 	"gorm.io/gorm"
@@ -79,7 +80,7 @@ func (s *UserService) Create(ctx context.Context, req *dto.UserCreateRequest) er
 	// 密码加密
 	hashedPassword, err := helper.HashPassword(req.Password)
 	if err != nil {
-		return apperror.NewSystemError(err, "密码加密失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	user := &model.User{
@@ -94,7 +95,7 @@ func (s *UserService) Create(ctx context.Context, req *dto.UserCreateRequest) er
 	}
 
 	if err := s.repo.Create(ctx, user); err != nil {
-		return apperror.NewSystemError(err, "创建用户失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -108,11 +109,11 @@ func (s *UserService) Update(ctx context.Context, req *dto.UserUpdateRequest) er
 	}
 	user, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
-		return apperror.NewSystemError(err, "查询用户失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if user.ID == 0 {
-		return apperror.NewUserError("用户不存在或无权限访问")
+		return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在或无权限访问"))
 	}
 
 	if user.Username != req.Username {
@@ -134,13 +135,13 @@ func (s *UserService) Update(ctx context.Context, req *dto.UserUpdateRequest) er
 	if req.Password != "" {
 		hashedPassword, err := helper.HashPassword(req.Password)
 		if err != nil {
-			return apperror.NewSystemError(err, "密码加密失败")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 		updateData["password"] = hashedPassword
 	}
 
 	if err := s.repo.Updates(ctx, user, updateData); err != nil {
-		return apperror.NewSystemError(err, "更新用户失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -151,11 +152,11 @@ func (s *UserService) checkUsername(ctx context.Context, username string) error 
 	filter := &repository.UserFilterField{Username: username}
 	user, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
-		return apperror.NewSystemError(err, "查询用户名失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if user.ID > 0 {
-		return apperror.NewUserError("用户名已存在")
+		return apperror.New(errcode.Conflict, apperror.WithMsg("用户名已存在"))
 	}
 
 	return nil
@@ -175,7 +176,7 @@ func (s *UserService) GetPointsLogs(ctx context.Context, req *dto.UserPointsLogL
 
 	total, err := s.pointsLogRepo.Count(ctx, filter)
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询积分记录总数失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	result.Total = total
@@ -194,7 +195,7 @@ func (s *UserService) GetPointsLogs(ctx context.Context, req *dto.UserPointsLogL
 
 	list, err := s.pointsLogRepo.FindAll(ctx, filter, pagination, orders)
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询积分记录失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	result.List = list
@@ -205,11 +206,11 @@ func (s *UserService) GetPointsLogs(ctx context.Context, req *dto.UserPointsLogL
 func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsChangeRequest) error {
 	// 参数校验
 	if req.Points <= 0 {
-		return apperror.NewUserError("积分变更值必须为正整数")
+		return apperror.New(errcode.InvalidInput, apperror.WithMsg("积分变更值必须为正整数"))
 	}
 
 	if !constants.PointsSourceType(req.SourceType).IsValid() {
-		return apperror.NewUserError("无效的积分来源类型")
+		return apperror.New(errcode.InvalidInput, apperror.WithMsg("无效的积分来源类型"))
 	}
 
 	// 根据变更类型调整积分值
@@ -226,10 +227,10 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 		}
 		user, err := s.repo.FindOne(ctx, userFilter, repository.WithTx[*repository.QueryConfig](tx))
 		if err != nil {
-			return apperror.NewSystemError(err, "查询用户失败")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 		if user.ID == 0 {
-			return apperror.NewUserError("用户不存在")
+			return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 		}
 
 		// 更新用户积分
@@ -238,7 +239,7 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 		}
 
 		if err := s.repo.Updates(ctx, user, updateData, repository.WithTx[*repository.UpdateConfig](tx)); err != nil {
-			return apperror.NewSystemError(err, "更新用户积分失败")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 
 		// 创建积分记录
@@ -253,7 +254,7 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 		}
 
 		if err := s.pointsLogRepo.Create(ctx, pointsLog, repository.WithTx[*repository.CreateConfig](tx)); err != nil {
-			return apperror.NewSystemError(err, "创建积分记录失败")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 
 		return nil
@@ -264,11 +265,11 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 func (s *UserService) Detail(ctx context.Context, id uint32) (*model.User, error) {
 	user, err := s.repo.FindOne(ctx, id)
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询用户详情失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	if user == nil || user.ID == 0 {
-		return nil, apperror.NewUserError("用户不存在")
+		return nil, apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 	}
 
 	return user, nil
@@ -282,15 +283,15 @@ func (s *UserService) Delete(ctx context.Context, req *dto.UserDeleteRequest) er
 	}
 	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
-		return apperror.NewSystemError(err, "查询用户失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item == nil || item.ID == 0 {
-		return apperror.NewUserError("用户不存在或无权限访问")
+		return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在或无权限访问"))
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
-		return apperror.NewSystemError(err, "删除用户失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 	return nil
 }

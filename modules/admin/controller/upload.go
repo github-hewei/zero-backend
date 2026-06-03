@@ -2,11 +2,12 @@ package controller
 
 import (
 	"strconv"
-	"zero-backend/internal/apperror"
 	"zero-backend/internal/dto"
+	"zero-backend/internal/errcode"
 	"zero-backend/internal/request"
 	"zero-backend/internal/response"
 	"zero-backend/internal/service"
+	"zero-backend/pkg/apperror"
 
 	"github.com/gin-gonic/gin"
 )
@@ -118,7 +119,7 @@ func (c *UploadFileController) List(ctx *gin.Context) {
 func (c *UploadFileController) Upload(ctx *gin.Context) {
 	file, err := ctx.FormFile("file")
 	if err != nil {
-		response.Error(ctx, apperror.NewUserError("请选择上传文件"))
+		response.Error(ctx, apperror.New(errcode.InvalidInput, apperror.WithMsg("请选择上传文件")))
 		return
 	}
 

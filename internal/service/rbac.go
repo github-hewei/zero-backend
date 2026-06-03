@@ -2,10 +2,11 @@ package service
 
 import (
 	"context"
-	"zero-backend/internal/apperror"
 	"zero-backend/internal/dto"
+	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
+	"zero-backend/pkg/apperror"
 	"zero-backend/pkg/helper"
 
 	"gorm.io/gorm"
@@ -52,7 +53,7 @@ func (s *RbacUserService) FindList(ctx context.Context, req *dto.RbacUserListReq
 
 	total, err := s.repo.Count(ctx, filter, repository.WithScopes(nil))
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询用户数量失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	if total == 0 {
@@ -67,7 +68,7 @@ func (s *RbacUserService) FindList(ctx context.Context, req *dto.RbacUserListReq
 	)
 
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询用户列表失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	result.List = list
@@ -84,7 +85,7 @@ func (s *RbacUserService) Create(ctx context.Context, req *dto.RbacUserCreateReq
 	// 密码加密
 	hashedPassword, err := helper.HashPassword(req.Password)
 	if err != nil {
-		return apperror.NewSystemError(err, "密码加密失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	item := &model.RbacUser{
@@ -97,7 +98,7 @@ func (s *RbacUserService) Create(ctx context.Context, req *dto.RbacUserCreateReq
 	}
 
 	if err := s.repo.Create(ctx, item); err != nil {
-		return apperror.NewSystemError(err, "创建用户失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -107,11 +108,11 @@ func (s *RbacUserService) Create(ctx context.Context, req *dto.RbacUserCreateReq
 func (s *RbacUserService) Update(ctx context.Context, req *dto.RbacUserUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return apperror.NewSystemError(err, "查询用户失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID == 0 || item.StoreId != req.StoreId {
-		return apperror.NewUserError("用户不存在")
+		return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 	}
 
 	if item.Username != req.Username {
@@ -129,7 +130,7 @@ func (s *RbacUserService) Update(ctx context.Context, req *dto.RbacUserUpdateReq
 	}
 
 	if err := s.repo.Updates(ctx, item, updateData); err != nil {
-		return apperror.NewSystemError(err, "更新用户失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -139,15 +140,19 @@ func (s *RbacUserService) Update(ctx context.Context, req *dto.RbacUserUpdateReq
 func (s *RbacUserService) Delete(ctx context.Context, req *dto.RbacUserDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return apperror.NewSystemError(err, "查询用户失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID == 0 || item.StoreId != req.StoreId {
-		return apperror.NewUserError("找不到此记录")
+		return apperror.New(errcode.NotFound)
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
-		return apperror.NewSystemError(err, "删除用户失败")
+		return apperror.Wrap(errcode.Internal, err)
+	}
+
+	if err := s.repo.Delete(ctx, item.ID); err != nil {
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -159,11 +164,11 @@ func (s *RbacUserService) SetRoles(ctx context.Context, req *dto.RbacUserRoleSet
 		// 验证用户存在
 		user, err := s.repo.FindOne(ctx, req.UserID, repository.WithTx[*repository.QueryConfig](tx), repository.WithScopes(nil))
 		if err != nil {
-			return apperror.NewSystemError(err, "查询用户失败")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 
 		if user.ID == 0 || user.StoreId != req.StoreId {
-			return apperror.NewUserError("用户不存在")
+			return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 		}
 
 		// 获取现有角色
@@ -173,7 +178,7 @@ func (s *RbacUserService) SetRoles(ctx context.Context, req *dto.RbacUserRoleSet
 			repository.WithTx[*repository.QueryConfig](tx),
 		)
 		if err != nil {
-			return apperror.NewSystemError(err, "查询用户角色失败")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 
 		// 计算差异
@@ -196,7 +201,7 @@ func (s *RbacUserService) SetRoles(ctx context.Context, req *dto.RbacUserRoleSet
 		}
 		if len(deleteIds) > 0 {
 			if err := s.userRoleRepo.Delete(ctx, deleteIds, repository.WithTx[*repository.DeleteConfig](tx)); err != nil {
-				return apperror.NewSystemError(err, "删除用户角色失败")
+				return apperror.Wrap(errcode.Internal, err)
 			}
 		}
 
@@ -213,7 +218,7 @@ func (s *RbacUserService) SetRoles(ctx context.Context, req *dto.RbacUserRoleSet
 		}
 
 		if err := s.userRoleRepo.CreateBatch(ctx, createUserRoles, repository.WithTx[*repository.CreateConfig](tx)); err != nil {
-			return apperror.NewSystemError(err, "创建用户角色失败")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 
 		return nil
@@ -226,11 +231,11 @@ func (s *RbacUserService) checkUsername(ctx context.Context, username string, st
 	item, err := s.repo.FindOne(ctx, filter)
 
 	if err != nil {
-		return apperror.NewSystemError(err, "查询用户名失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID > 0 {
-		return apperror.NewUserError("用户名已存在")
+		return apperror.New(errcode.Conflict, apperror.WithMsg("用户名已存在"))
 	}
 
 	return nil
@@ -240,18 +245,18 @@ func (s *RbacUserService) checkUsername(ctx context.Context, username string, st
 func (s *RbacUserService) ResetPassword(ctx context.Context, req *dto.RbacUserResetPasswordRequest) (string, error) {
 	user, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return "", apperror.NewSystemError(err, "查询用户失败")
+		return "", apperror.Wrap(errcode.Internal, err)
 	}
 
 	if user.ID == 0 || user.StoreId != req.StoreId {
-		return "", apperror.NewUserError("用户不存在")
+		return "", apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 	}
 
 	// 生成12位包含特殊字符的随机密码
 	newPassword := helper.RandomStringWithSymbols(12)
 	hashedPassword, err := helper.HashPassword(newPassword)
 	if err != nil {
-		return "", apperror.NewSystemError(err, "密码加密失败")
+		return "", apperror.Wrap(errcode.Internal, err)
 	}
 
 	// 更新密码
@@ -260,7 +265,7 @@ func (s *RbacUserService) ResetPassword(ctx context.Context, req *dto.RbacUserRe
 	}
 
 	if err := s.repo.Updates(ctx, user, updateData); err != nil {
-		return "", apperror.NewSystemError(err, "重置密码失败")
+		return "", apperror.Wrap(errcode.Internal, err)
 	}
 
 	return newPassword, nil
@@ -286,7 +291,7 @@ func NewRbacMenuService(repo *repository.RbacMenuRepository, apiRepo *repository
 func (s *RbacMenuService) FindTreeList(ctx context.Context) ([]*model.RbacMenu, error) {
 	list, err := s.repo.FindAll(ctx, nil, nil, nil, repository.WithScopes(nil))
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询菜单列表失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	if len(list) > 0 {
@@ -319,7 +324,7 @@ func (s *RbacMenuService) Create(ctx context.Context, req *dto.RbacMenuCreateReq
 	}
 
 	if err := s.repo.Create(ctx, item); err != nil {
-		return apperror.NewSystemError(err, "创建菜单失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -329,11 +334,11 @@ func (s *RbacMenuService) Create(ctx context.Context, req *dto.RbacMenuCreateReq
 func (s *RbacMenuService) Update(ctx context.Context, req *dto.RbacMenuUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return apperror.NewSystemError(err, "查询菜单失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID == 0 {
-		return apperror.NewUserError("找不到此记录")
+		return apperror.New(errcode.NotFound)
 	}
 
 	if item.Name != req.Name {
@@ -354,7 +359,7 @@ func (s *RbacMenuService) Update(ctx context.Context, req *dto.RbacMenuUpdateReq
 	}
 
 	if err := s.repo.Updates(ctx, item, updateData); err != nil {
-		return apperror.NewSystemError(err, "更新菜单失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -364,15 +369,15 @@ func (s *RbacMenuService) Update(ctx context.Context, req *dto.RbacMenuUpdateReq
 func (s *RbacMenuService) Delete(ctx context.Context, req *dto.RbacMenuDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return apperror.NewSystemError(err, "查询菜单失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID == 0 {
-		return apperror.NewUserError("找不到此记录")
+		return apperror.New(errcode.NotFound)
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
-		return apperror.NewSystemError(err, "删除菜单失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -387,7 +392,7 @@ func (s *RbacMenuService) Sync(ctx context.Context, req []dto.RbacMenuSyncReques
 			repository.WithScopes(nil),
 		)
 		if err != nil {
-			return apperror.NewSystemError(err, "查询菜单列表失败")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 
 		menuMap := map[string]*model.RbacMenu{}
@@ -401,7 +406,7 @@ func (s *RbacMenuService) Sync(ctx context.Context, req []dto.RbacMenuSyncReques
 
 		for _, item := range menuMap {
 			if err := s.repo.Delete(ctx, item.ID, repository.WithTx[*repository.DeleteConfig](tx)); err != nil {
-				return apperror.NewSystemError(err, "删除菜单失败")
+				return apperror.Wrap(errcode.Internal, err)
 			}
 		}
 		return nil
@@ -423,7 +428,7 @@ func (s *RbacMenuService) SyncMenuList(ctx context.Context, req []dto.RbacMenuSy
 			}
 
 			if err := s.repo.Updates(ctx, menu, updateData, repository.WithTx[*repository.UpdateConfig](tx)); err != nil {
-				return apperror.NewSystemError(err, "更新菜单失败")
+				return apperror.Wrap(errcode.Internal, err)
 			}
 			delete(menuMap, item.Path)
 
@@ -439,7 +444,7 @@ func (s *RbacMenuService) SyncMenuList(ctx context.Context, req []dto.RbacMenuSy
 			}
 
 			if err := s.repo.Create(ctx, menu, repository.WithTx[*repository.CreateConfig](tx)); err != nil {
-				return apperror.NewSystemError(err, "创建菜单失败")
+				return apperror.Wrap(errcode.Internal, err)
 			}
 		}
 
@@ -459,11 +464,11 @@ func (s *RbacMenuService) checkName(ctx context.Context, name string) error {
 	item, err := s.repo.FindOne(ctx, filter, repository.WithScopes(nil))
 
 	if err != nil {
-		return apperror.NewSystemError(err, "查询菜单名失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID > 0 {
-		return apperror.NewUserError("菜单名已存在")
+		return apperror.New(errcode.Conflict, apperror.WithMsg("菜单名已存在"))
 	}
 
 	return nil
@@ -475,7 +480,7 @@ func (s *RbacMenuService) FindApiList(ctx context.Context, req *dto.RbacMenuApiL
 	list, err := s.apiRepo.FindAll(ctx, filter, nil, nil, repository.WithScopes(nil))
 
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询菜单权限失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	apiIds := make([]uint32, 0)
@@ -500,7 +505,7 @@ func (s *RbacMenuService) SaveApiList(ctx context.Context, req *dto.RbacMenuApiS
 		)
 
 		if err != nil {
-			return apperror.NewSystemError(err, "查询菜单权限失败")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 
 		apiIds := make(map[uint32]bool)
@@ -516,7 +521,7 @@ func (s *RbacMenuService) SaveApiList(ctx context.Context, req *dto.RbacMenuApiS
 				}
 				err := s.apiRepo.Create(ctx, item, repository.WithTx[*repository.CreateConfig](tx))
 				if err != nil {
-					return apperror.NewSystemError(err, "保存菜单权限失败")
+					return apperror.Wrap(errcode.Internal, err)
 				}
 			} else {
 				delete(apiIds, apiId)
@@ -528,7 +533,7 @@ func (s *RbacMenuService) SaveApiList(ctx context.Context, req *dto.RbacMenuApiS
 			err := s.apiRepo.Delete(ctx, filter, repository.WithTx[*repository.DeleteConfig](tx))
 
 			if err != nil {
-				return apperror.NewSystemError(err, "删除菜单权限失败")
+				return apperror.Wrap(errcode.Internal, err)
 			}
 		}
 
@@ -564,7 +569,7 @@ func (s *RbacRoleService) FindTreeList(ctx context.Context, req *dto.RbacRoleLis
 		repository.WithPreloads("RbacRoleMenu.RbacMenu"),
 	)
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询角色列表失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	if len(list) > 0 {
@@ -598,7 +603,7 @@ func (s *RbacRoleService) Create(ctx context.Context, req *dto.RbacRoleCreateReq
 	}
 
 	if err := s.repo.Create(ctx, item); err != nil {
-		return apperror.NewSystemError(err, "创建角色失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -608,11 +613,11 @@ func (s *RbacRoleService) Create(ctx context.Context, req *dto.RbacRoleCreateReq
 func (s *RbacRoleService) Update(ctx context.Context, req *dto.RbacRoleUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return apperror.NewSystemError(err, "查询角色失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID == 0 || item.StoreId != req.StoreId {
-		return apperror.NewUserError("找不到此记录")
+		return apperror.New(errcode.NotFound)
 	}
 
 	if item.RoleName != req.RoleName {
@@ -629,7 +634,7 @@ func (s *RbacRoleService) Update(ctx context.Context, req *dto.RbacRoleUpdateReq
 	}
 
 	if err := s.repo.Updates(ctx, item, updateData); err != nil {
-		return apperror.NewSystemError(err, "更新角色失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -639,15 +644,15 @@ func (s *RbacRoleService) Update(ctx context.Context, req *dto.RbacRoleUpdateReq
 func (s *RbacRoleService) Delete(ctx context.Context, req *dto.RbacRoleDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return apperror.NewSystemError(err, "查询角色失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID == 0 || item.StoreId != req.StoreId {
-		return apperror.NewUserError("找不到此记录")
+		return apperror.New(errcode.NotFound)
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
-		return apperror.NewSystemError(err, "删除角色失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -660,11 +665,11 @@ func (s *RbacRoleService) SetMenus(ctx context.Context, req *dto.RbacRoleMenuSet
 		role, err := s.repo.FindOne(ctx, req.RoleID, repository.WithTx[*repository.QueryConfig](tx), repository.WithScopes(nil))
 
 		if err != nil {
-			return apperror.NewSystemError(err, "查询角色失败")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 
 		if role.ID == 0 || role.StoreId != req.StoreId {
-			return apperror.NewUserError("角色不存在")
+			return apperror.New(errcode.NotFound, apperror.WithMsg("角色不存在"))
 		}
 
 		filter := &repository.RbacRoleMenuFilterField{RoleId: role.ID}
@@ -674,7 +679,7 @@ func (s *RbacRoleService) SetMenus(ctx context.Context, req *dto.RbacRoleMenuSet
 		)
 
 		if err != nil {
-			return apperror.NewSystemError(err, "查询角色菜单失败")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 
 		// 计算差异
@@ -725,11 +730,11 @@ func (s *RbacRoleService) SetMenus(ctx context.Context, req *dto.RbacRoleMenuSet
 func (s *RbacRoleService) checkName(ctx context.Context, name string, StoreId uint32) error {
 	item, err := s.repo.FindByName(ctx, name, StoreId)
 	if err != nil {
-		return apperror.NewSystemError(err, "查询角色名失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID > 0 {
-		return apperror.NewUserError("角色名已存在")
+		return apperror.New(errcode.Conflict, apperror.WithMsg("角色名已存在"))
 	}
 
 	return nil
@@ -739,15 +744,15 @@ func (s *RbacRoleService) checkName(ctx context.Context, name string, StoreId ui
 func (s *RbacRoleService) checkParent(ctx context.Context, parentId uint32, StoreId uint32) error {
 	parent, err := s.repo.FindOne(ctx, parentId)
 	if err != nil {
-		return apperror.NewSystemError(err, "查询父级角色失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if parent.ID == 0 {
-		return apperror.NewUserError("父级角色不存在")
+		return apperror.New(errcode.NotFound, apperror.WithMsg("父级角色不存在"))
 	}
 
 	if parent.StoreId != StoreId {
-		return apperror.NewUserError("父级角色不属于当前企业")
+		return apperror.New(errcode.Forbidden, apperror.WithMsg("父级角色不属于当前企业"))
 	}
 
 	return nil
@@ -767,7 +772,7 @@ func NewRbacApiService(repo *repository.RbacApiRepository) *RbacApiService {
 func (s *RbacApiService) FindTreeList(ctx context.Context) ([]*model.RbacApi, error) {
 	list, err := s.repo.FindAll(ctx, nil, nil, nil, repository.WithScopes(nil))
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询接口列表失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	if len(list) > 0 {
@@ -796,7 +801,7 @@ func (s *RbacApiService) Create(ctx context.Context, req *dto.RbacApiCreateReque
 	}
 
 	if err := s.repo.Create(ctx, item); err != nil {
-		return apperror.NewSystemError(err, "创建接口失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -806,7 +811,7 @@ func (s *RbacApiService) Create(ctx context.Context, req *dto.RbacApiCreateReque
 func (s *RbacApiService) Update(ctx context.Context, req *dto.RbacApiUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return apperror.NewSystemError(err, "查询接口失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.Name != req.Name {
@@ -823,7 +828,7 @@ func (s *RbacApiService) Update(ctx context.Context, req *dto.RbacApiUpdateReque
 	}
 
 	if err := s.repo.Updates(ctx, item, updateData); err != nil {
-		return apperror.NewSystemError(err, "更新接口失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -833,15 +838,15 @@ func (s *RbacApiService) Update(ctx context.Context, req *dto.RbacApiUpdateReque
 func (s *RbacApiService) Delete(ctx context.Context, req *dto.RbacApiDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return apperror.NewSystemError(err, "查询接口失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID == 0 {
-		return apperror.NewUserError("找不到此记录")
+		return apperror.New(errcode.NotFound)
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
-		return apperror.NewSystemError(err, "删除接口失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -853,11 +858,11 @@ func (s *RbacApiService) checkName(ctx context.Context, name string) error {
 	item, err := s.repo.FindOne(ctx, filter, repository.WithScopes(nil))
 
 	if err != nil {
-		return apperror.NewSystemError(err, "查询接口名失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID > 0 {
-		return apperror.NewUserError("接口名已存在")
+		return apperror.New(errcode.Conflict, apperror.WithMsg("接口名已存在"))
 	}
 
 	return nil
@@ -897,7 +902,7 @@ func (s *RbacStoreService) FindList(ctx context.Context, req *dto.RbacStoreListR
 
 	total, err := s.repo.Count(ctx, filter, repository.WithScopes(nil))
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询企业数量失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	if total == 0 {
@@ -908,7 +913,7 @@ func (s *RbacStoreService) FindList(ctx context.Context, req *dto.RbacStoreListR
 
 	list, err := s.repo.FindAll(ctx, filter, pagination, orders, repository.WithScopes(nil))
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询企业列表失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	result.List = list
@@ -933,7 +938,7 @@ func (s *RbacStoreService) Create(ctx context.Context, req *dto.RbacStoreCreateR
 	}
 
 	if err := s.repo.Create(ctx, item); err != nil {
-		return apperror.NewSystemError(err, "创建企业失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -945,11 +950,11 @@ func (s *RbacStoreService) checkName(ctx context.Context, name string) error {
 	item, err := s.repo.FindOne(ctx, filter, repository.WithScopes(nil))
 
 	if err != nil {
-		return apperror.NewSystemError(err, "查询企业名失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID > 0 {
-		return apperror.NewUserError("企业名已存在")
+		return apperror.New(errcode.Conflict, apperror.WithMsg("企业名已存在"))
 	}
 
 	return nil
@@ -959,7 +964,7 @@ func (s *RbacStoreService) checkName(ctx context.Context, name string) error {
 func (s *RbacStoreService) Update(ctx context.Context, req *dto.RbacStoreUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return apperror.NewSystemError(err, "查询企业失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.Name != req.Name {
@@ -979,7 +984,7 @@ func (s *RbacStoreService) Update(ctx context.Context, req *dto.RbacStoreUpdateR
 	}
 
 	if err := s.repo.Updates(ctx, item, updateData); err != nil {
-		return apperror.NewSystemError(err, "更新企业失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -989,15 +994,15 @@ func (s *RbacStoreService) Update(ctx context.Context, req *dto.RbacStoreUpdateR
 func (s *RbacStoreService) Delete(ctx context.Context, req *dto.RbacStoreDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return apperror.NewSystemError(err, "查询企业失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID == 0 {
-		return apperror.NewUserError("找不到此记录")
+		return apperror.New(errcode.NotFound)
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
-		return apperror.NewSystemError(err, "删除企业失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -1007,18 +1012,18 @@ func (s *RbacStoreService) Delete(ctx context.Context, req *dto.RbacStoreDeleteR
 func (s *RbacStoreService) Recycle(ctx context.Context, req *dto.RbacStoreDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID)
 	if err != nil {
-		return apperror.NewSystemError(err, "查询企业失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID == 0 {
-		return apperror.NewUserError("找不到此记录")
+		return apperror.New(errcode.NotFound)
 	}
 
 	updateData := map[string]any{
 		"is_recycle": 1,
 	}
 	if err := s.repo.Updates(ctx, item, updateData); err != nil {
-		return apperror.NewSystemError(err, "移入回收站失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -1028,18 +1033,18 @@ func (s *RbacStoreService) Recycle(ctx context.Context, req *dto.RbacStoreDelete
 func (s *RbacStoreService) Restore(ctx context.Context, req *dto.RbacStoreDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID)
 	if err != nil {
-		return apperror.NewSystemError(err, "查询企业失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID == 0 {
-		return apperror.NewUserError("找不到此记录")
+		return apperror.New(errcode.NotFound)
 	}
 
 	updateData := map[string]any{
 		"is_recycle": 0,
 	}
 	if err := s.repo.Updates(ctx, item, updateData); err != nil {
-		return apperror.NewSystemError(err, "从回收站恢复失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil

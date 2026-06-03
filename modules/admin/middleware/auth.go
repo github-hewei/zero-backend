@@ -2,12 +2,13 @@ package middleware
 
 import (
 	"strings"
-	"zero-backend/internal/apperror"
 	"zero-backend/internal/config"
 	"zero-backend/internal/ctxkeys"
+	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/response"
 	"zero-backend/modules/admin/service"
+	"zero-backend/pkg/apperror"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -33,7 +34,7 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 		tokenString := c.Request.Header.Get("Authorization")
 
 		if tokenString == "" || len(tokenString) < 10 {
-			response.Error(c, apperror.NewUnauthorizedError())
+			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()
 			return
 		}
@@ -43,21 +44,21 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 
 		if err != nil {
-			response.Error(c, apperror.NewUnauthorizedError())
+			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			response.Error(c, apperror.NewUnauthorizedError())
+			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()
 			return
 		}
 
 		userId, ok := claims["user_id"]
 		if !ok {
-			response.Error(c, apperror.NewUnauthorizedError())
+			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()
 			return
 		}
@@ -65,7 +66,7 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 		ctx := c.Request.Context()
 		user, err := m.authServ.GetUserInfo(ctx, uint32(userId.(float64)))
 		if err != nil {
-			response.Error(c, apperror.NewUnauthorizedError())
+			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()
 			return
 		}
@@ -84,7 +85,7 @@ func (m *AuthMiddleware) CheckAPIPermission() gin.HandlerFunc {
 		// 1. 获取当前用户
 		user, ok := ctxkeys.User(ctx).(*model.RbacUser)
 		if !ok || user == nil {
-			response.Error(c, apperror.NewUnauthorizedError())
+			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()
 			return
 		}
@@ -101,7 +102,7 @@ func (m *AuthMiddleware) CheckAPIPermission() gin.HandlerFunc {
 		// 4. 检查用户是否有该API权限
 		hasPerm, err := m.authServ.CheckAPIPermission(ctx, user, apiPath)
 		if err != nil || !hasPerm {
-			response.Error(c, apperror.NewUserError("暂无访问权限，请联系管理员授权"))
+			response.Error(c, apperror.New(errcode.Forbidden, apperror.WithMsg("暂无访问权限，请联系管理员授权")))
 			c.Abort()
 			return
 		}

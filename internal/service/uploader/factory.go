@@ -3,7 +3,8 @@ package uploader
 import (
 	"context"
 	"mime/multipart"
-	"zero-backend/internal/apperror"
+	"zero-backend/internal/errcode"
+	"zero-backend/pkg/apperror"
 )
 
 // Uploader 定义文件上传接口
@@ -24,6 +25,6 @@ func NewUploader(storageType string, ctx context.Context) (Uploader, error) {
 		qiniuConfig := QiniuConfig(ctx)
 		return NewQiniuUploader(qiniuConfig), nil
 	default:
-		return nil, apperror.NewUserError("不支持的存储类型")
+		return nil, apperror.New(errcode.Internal, apperror.WithMsg("不支持的存储类型"))
 	}
 }

@@ -8,9 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"zero-backend/internal/apperror"
+	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
+	"zero-backend/pkg/apperror"
 	"zero-backend/pkg/logger"
 )
 
@@ -241,22 +242,22 @@ func (r *SyncApiRunner) parseOpenAPI(filePath string) (*OpenAPISpec, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, apperror.NewUserError("找不到 OpenAPI 文档文件：" + filePath)
+			return nil, apperror.New(errcode.NotFound, apperror.WithMsg("找不到 OpenAPI 文档文件："+filePath))
 		}
-		return nil, apperror.NewSystemError(err, "读取 OpenAPI 文档失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	var spec OpenAPISpec
 	if err := json.Unmarshal(data, &spec); err != nil {
-		return nil, apperror.NewSystemError(err, "解析 OpenAPI 文档失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	if spec.OpenAPI == "" {
-		return nil, apperror.NewUserError("无效的 OpenAPI 文档：缺少 openapi 字段")
+		return nil, apperror.New(errcode.InvalidInput, apperror.WithMsg("无效的 OpenAPI 文档：缺少 openapi 字段"))
 	}
 
 	if len(spec.Paths) == 0 {
-		return nil, apperror.NewUserError("OpenAPI 文档中未找到任何路径")
+		return nil, apperror.New(errcode.InvalidInput, apperror.WithMsg("OpenAPI 文档中未找到任何路径"))
 	}
 
 	r.logger.Info("解析 OpenAPI 文档成功", "版本", spec.OpenAPI, "路径数", len(spec.Paths))

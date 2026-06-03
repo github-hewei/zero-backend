@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-	"zero-backend/internal/apperror"
 	"zero-backend/internal/config"
 	"zero-backend/internal/constants"
 	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/dto"
+	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
+	"zero-backend/pkg/apperror"
 	"zero-backend/pkg/helper"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -47,11 +48,11 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 	}
 
 	if item.ID == 0 {
-		return nil, "", apperror.NewUserError("用户名或密码错误")
+		return nil, "", apperror.New(errcode.InvalidInput, apperror.WithMsg("用户名或密码错误"))
 	}
 
 	if ok := helper.CheckPassword(req.Password, item.Password); !ok {
-		return nil, "", apperror.NewUserError("用户名或密码错误")
+		return nil, "", apperror.New(errcode.InvalidInput, apperror.WithMsg("用户名或密码错误"))
 	}
 
 	refreshToken, err := s.getRefreshToken()
@@ -61,7 +62,7 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 
 	itemBytes, err := json.Marshal(item)
 	if err != nil {
-		return nil, "", apperror.NewSystemError(err, "序列化用户信息失败")
+		return nil, "", apperror.Wrap(errcode.Internal, err)
 	}
 
 	result := s.rdb.Set(ctx,
@@ -70,12 +71,12 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 		time.Duration(s.cfg.Api.RefreshTokenTtl)*time.Second)
 
 	if result.Err() != nil {
-		return nil, "", apperror.NewSystemError(result.Err(), "保存token失败")
+		return nil, "", apperror.Wrap(errcode.Internal, result.Err())
 	}
 
 	tokenString, err := s.getAccessToken(item)
 	if err != nil {
-		return nil, "", apperror.NewSystemError(err, "生成token失败")
+		return nil, "", apperror.Wrap(errcode.Internal, err)
 	}
 
 	return &dto.UserLoginResponse{
@@ -91,17 +92,17 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*d
 		fmt.Sprintf("%s:%s", constants.RedisUserRefreshTokenKey, refreshToken)).Bytes()
 
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "登录已过期，请重新登录")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	item := &model.User{}
 	if err := json.Unmarshal(itemBytes, item); err != nil {
-		return nil, apperror.NewSystemError(err, "登录已过期，请重新登录")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	token, err := s.getAccessToken(item)
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "登录已过期，请重新登录")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	return &dto.UserLoginResponse{
@@ -154,10 +155,10 @@ func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*model.Us
 	// 3. 缓存未命中，查询数据库
 	user, err := s.userRepo.FindOne(ctx, userId)
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询用户信息失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 	if user == nil || user.ID == 0 {
-		return nil, apperror.NewUserError("用户不存在")
+		return nil, apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 	}
 
 	// 4. 写入缓存
@@ -177,27 +178,27 @@ func (s *AuthService) ChangePassword(ctx context.Context, req *dto.ChangePasswor
 	// 1. 获取当前用户
 	user := ctxkeys.User(ctx).(*model.User)
 	if user == nil || user.ID == 0 {
-		return apperror.NewUserError("用户不存在")
+		return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 	}
 
 	// 2. 获取用户信息
 	user, err := s.userRepo.FindOne(ctx, user.ID)
 	if err != nil {
-		return apperror.NewSystemError(err, "查询用户信息失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 	if user == nil || user.ID == 0 {
-		return apperror.NewUserError("用户不存在")
+		return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 	}
 
 	// 3. 验证旧密码
 	if ok := helper.CheckPassword(req.OldPassword, user.Password); !ok {
-		return apperror.NewUserError("旧密码不正确")
+		return apperror.New(errcode.InvalidInput, apperror.WithMsg("旧密码不正确"))
 	}
 
 	// 4. 加密新密码
 	hashedPassword, err := helper.HashPassword(req.NewPassword)
 	if err != nil {
-		return apperror.NewSystemError(err, "密码加密失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	// 5. 更新密码
@@ -206,7 +207,7 @@ func (s *AuthService) ChangePassword(ctx context.Context, req *dto.ChangePasswor
 	}
 
 	if err := s.userRepo.Updates(ctx, user, updateData); err != nil {
-		return apperror.NewSystemError(err, "密码更新失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil

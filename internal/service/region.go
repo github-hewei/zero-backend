@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
-	"zero-backend/internal/apperror"
+	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
+	"zero-backend/pkg/apperror"
 )
 
 // RegionService 通用服务
@@ -23,7 +24,7 @@ func (s *RegionService) Regions(ctx context.Context) ([]*model.Region, error) {
 	// 获取所有地区数据
 	regions, err := s.repo.FindAll(ctx)
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询地区数据失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	// 转换为RegionList并构建树形结构

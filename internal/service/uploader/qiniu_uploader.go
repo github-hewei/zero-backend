@@ -4,8 +4,9 @@ import (
 	"context"
 	"mime/multipart"
 	"strings"
-	"zero-backend/internal/apperror"
 	"zero-backend/internal/dto"
+	"zero-backend/internal/errcode"
+	"zero-backend/pkg/apperror"
 
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
@@ -60,14 +61,14 @@ func (u *QiniuUploader) Upload(ctx context.Context, file *multipart.FileHeader, 
 	// 执行上传
 	fileReader, err := file.Open()
 	if err != nil {
-		return "", apperror.NewSystemError(err, "打开上传文件失败")
+		return "", apperror.Wrap(errcode.Internal, err)
 	}
 	defer fileReader.Close()
 
 	savePath = strings.ReplaceAll(savePath, "\\", "/")
 	err = formUploader.Put(ctx, &ret, upToken, savePath, fileReader, file.Size, nil)
 	if err != nil {
-		return "", apperror.NewSystemError(err, "七牛云上传失败")
+		return "", apperror.Wrap(errcode.Internal, err)
 	}
 
 	return u.config.Domain, nil

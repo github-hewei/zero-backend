@@ -1,11 +1,12 @@
 package middleware
 
 import (
-	"zero-backend/internal/apperror"
 	"zero-backend/internal/config"
 	"zero-backend/internal/ctxkeys"
+	"zero-backend/internal/errcode"
 	"zero-backend/internal/response"
 	"zero-backend/modules/api/service"
+	"zero-backend/pkg/apperror"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -31,7 +32,7 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 		tokenString := c.Request.Header.Get("Authorization")
 
 		if tokenString == "" || len(tokenString) < 10 {
-			response.Error(c, apperror.NewUnauthorizedError())
+			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()
 			return
 		}
@@ -42,21 +43,21 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 
 		if err != nil {
 			// zlog.Err(err).Str("token", tokenString).Msg("parse jwt error")
-			response.Error(c, apperror.NewUnauthorizedError())
+			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			response.Error(c, apperror.NewUnauthorizedError())
+			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()
 			return
 		}
 
 		userId, ok := claims["user_id"]
 		if !ok {
-			response.Error(c, apperror.NewUnauthorizedError())
+			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()
 			return
 		}
@@ -64,7 +65,7 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 		ctx := c.Request.Context()
 		user, err := m.authServ.GetUserInfo(ctx, uint32(userId.(float64)))
 		if err != nil {
-			response.Error(c, apperror.NewUnauthorizedError())
+			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()
 			return
 		}

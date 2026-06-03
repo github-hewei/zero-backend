@@ -3,10 +3,11 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"zero-backend/internal/apperror"
 	"zero-backend/internal/dto"
+	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
+	"zero-backend/pkg/apperror"
 
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
@@ -52,7 +53,7 @@ func (s *SettingService) FindList(ctx context.Context, req *dto.SettingListReque
 
 	total, err := s.repo.Count(ctx, filter)
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询设置数量失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	if total == 0 {
@@ -63,7 +64,7 @@ func (s *SettingService) FindList(ctx context.Context, req *dto.SettingListReque
 
 	list, err := s.repo.FindAll(ctx, filter, pagination, orders)
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询设置列表失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	result.List = list
@@ -85,7 +86,7 @@ func (s *SettingService) Create(ctx context.Context, req *dto.SettingCreateReque
 	}
 
 	if err := s.repo.Create(ctx, item); err != nil {
-		return apperror.NewSystemError(err, "创建设置失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -99,10 +100,10 @@ func (s *SettingService) Update(ctx context.Context, req *dto.SettingUpdateReque
 	}
 	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
-		return apperror.NewSystemError(err, "查询设置失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 	if item == nil || item.ID == 0 {
-		return apperror.NewUserError("设置不存在或无权限访问")
+		return apperror.New(errcode.NotFound, apperror.WithMsg("设置不存在或无权限访问"))
 	}
 
 	if item.SettingKey != req.SettingKey {
@@ -119,7 +120,7 @@ func (s *SettingService) Update(ctx context.Context, req *dto.SettingUpdateReque
 	}
 
 	if err := s.repo.Updates(ctx, item, updateData); err != nil {
-		return apperror.NewSystemError(err, "更新设置失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -133,15 +134,15 @@ func (s *SettingService) Delete(ctx context.Context, req *dto.SettingDeleteReque
 	}
 	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
-		return apperror.NewSystemError(err, "查询设置失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID == 0 {
-		return apperror.NewUserError("找不到此记录")
+		return apperror.New(errcode.NotFound)
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
-		return apperror.NewSystemError(err, "删除设置失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -153,11 +154,11 @@ func (s *SettingService) checkSettingKey(ctx context.Context, key string, storeI
 	item, err := s.repo.FindOne(ctx, filter)
 
 	if err != nil {
-		return apperror.NewSystemError(err, "查询设置key失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID > 0 {
-		return apperror.NewUserError("设置key已存在")
+		return apperror.New(errcode.Conflict, apperror.WithMsg("设置key已存在"))
 	}
 
 	return nil
@@ -169,7 +170,7 @@ func (s *SettingService) GetSettingValue(ctx context.Context, key string, out an
 	setting, err := s.repo.FindOne(ctx, filter)
 
 	if err != nil {
-		return apperror.NewSystemError(err, "查询设置失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	var settingValues string
@@ -181,16 +182,16 @@ func (s *SettingService) GetSettingValue(ctx context.Context, key string, out an
 		defaultSetting, err := s.defaultRepo.FindOne(ctx, filter, repository.WithScopes(nil))
 
 		if err != nil {
-			return apperror.NewSystemError(err, "查询默认设置失败")
+			return apperror.Wrap(errcode.Internal, err)
 		}
 		if defaultSetting.ID == 0 {
-			return apperror.NewUserError("设置项不存在")
+			return apperror.New(errcode.NotFound, apperror.WithMsg("设置项不存在"))
 		}
 		settingValues = defaultSetting.SettingValues
 	}
 
 	if err := json.Unmarshal([]byte(settingValues), out); err != nil {
-		return apperror.NewSystemError(err, "解析设置值失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 	return nil
 }
@@ -266,7 +267,7 @@ func (s *SettingDefaultService) FindList(ctx context.Context, req *dto.SettingDe
 
 	total, err := s.repo.Count(ctx, filter, repository.WithScopes(nil))
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询默认设置数量失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	if total == 0 {
@@ -277,7 +278,7 @@ func (s *SettingDefaultService) FindList(ctx context.Context, req *dto.SettingDe
 
 	list, err := s.repo.FindAll(ctx, filter, pagination, orders, repository.WithScopes(nil))
 	if err != nil {
-		return nil, apperror.NewSystemError(err, "查询默认设置列表失败")
+		return nil, apperror.Wrap(errcode.Internal, err)
 	}
 
 	result.List = list
@@ -298,7 +299,7 @@ func (s *SettingDefaultService) Create(ctx context.Context, req *dto.SettingDefa
 	}
 
 	if err := s.repo.Create(ctx, item); err != nil {
-		return apperror.NewSystemError(err, "创建默认设置失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -308,7 +309,7 @@ func (s *SettingDefaultService) Create(ctx context.Context, req *dto.SettingDefa
 func (s *SettingDefaultService) Update(ctx context.Context, req *dto.SettingDefaultUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return apperror.NewSystemError(err, "查询默认设置失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.SettingKey != req.SettingKey {
@@ -324,7 +325,7 @@ func (s *SettingDefaultService) Update(ctx context.Context, req *dto.SettingDefa
 	}
 
 	if err := s.repo.Updates(ctx, item, updateData); err != nil {
-		return apperror.NewSystemError(err, "更新默认设置失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -334,15 +335,15 @@ func (s *SettingDefaultService) Update(ctx context.Context, req *dto.SettingDefa
 func (s *SettingDefaultService) Delete(ctx context.Context, req *dto.SettingDefaultDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
 	if err != nil {
-		return apperror.NewSystemError(err, "查询默认设置失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID == 0 {
-		return apperror.NewUserError("找不到此记录")
+		return apperror.New(errcode.NotFound)
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
-		return apperror.NewSystemError(err, "删除默认设置失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	return nil
@@ -354,11 +355,11 @@ func (s *SettingDefaultService) checkSettingKey(ctx context.Context, key string)
 	item, err := s.repo.FindOne(ctx, filter, repository.WithScopes(nil))
 
 	if err != nil {
-		return apperror.NewSystemError(err, "查询默认设置key失败")
+		return apperror.Wrap(errcode.Internal, err)
 	}
 
 	if item.ID > 0 {
-		return apperror.NewUserError("默认设置key已存在")
+		return apperror.New(errcode.Conflict, apperror.WithMsg("默认设置key已存在"))
 	}
 
 	return nil
