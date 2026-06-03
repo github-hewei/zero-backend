@@ -4,14 +4,16 @@ admin:
   server:
     host: "0.0.0.0"
     port: 8081
-  # 刷新令牌有效期（秒），默认24小时
-  refresh_token_ttl: 86400
-  # 访问令牌有效期（秒），默认1小时
-  access_token_ttl: 3600
-  # JWT签名密钥
-  hmac_secret: "your-secret-key-change-in-production"
-  # 超级管理员ID
-  super_user_id: 1001
+  # 认证配置
+  auth:
+    # 刷新令牌有效期（秒），默认24小时
+    refresh_token_ttl: 86400
+    # 访问令牌有效期（秒），默认1小时
+    access_token_ttl: 3600
+    # JWT签名密钥
+    hmac_secret: "your-secret-key-change-in-production"
+    # 超级管理员ID
+    super_user_id: 1001
   # 跨域配置
   cors:
     allow_origins:
@@ -37,12 +39,14 @@ api:
   server:
     host: "0.0.0.0"
     port: 8082
-  # 刷新令牌有效期（秒）
-  refresh_token_ttl: 604800
-  # 访问令牌有效期（秒）
-  access_token_ttl: 7200
-  # JWT签名密钥
-  hmac_secret: "api-secret-key-change-in-production"
+  # 认证配置
+  auth:
+    # 刷新令牌有效期（秒）
+    refresh_token_ttl: 604800
+    # 访问令牌有效期（秒）
+    access_token_ttl: 7200
+    # JWT签名密钥
+    hmac_secret: "api-secret-key-change-in-production"
   # 跨域配置
   cors:
     allow_origins:

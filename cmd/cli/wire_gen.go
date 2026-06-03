@@ -24,10 +24,11 @@ import (
 
 func wireApp() *command.RootCommand {
 	configConfig := config.New()
+	loggerConfig := configConfig.Logger
 	mongodbConfig := providers.NewMongoDBConfig(configConfig)
 	conn := mongodb.NewConn(mongodbConfig)
 	database := conn.DB
-	zeroLogger := providers.ProvideLogger(configConfig, database)
+	zeroLogger := providers.ProvideLogger(loggerConfig, database)
 	redisConfig := providers.NewRedisConfig(configConfig)
 	client := redis.New(redisConfig)
 	redisLocker := locker.NewRedisLocker(client)

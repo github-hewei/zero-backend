@@ -22,14 +22,14 @@ import (
 // AuthService 用户认证服务
 type AuthService struct {
 	userRepo *repository.UserRepository
-	cfg      *config.Config
+	cfg      config.ApiAuthConfig
 	rdb      *redis.Client
 }
 
 // NewAuthService 创建AuthService实例
 func NewAuthService(
 	userRepo *repository.UserRepository,
-	cfg *config.Config,
+	cfg config.ApiAuthConfig,
 	rdb *redis.Client,
 ) *AuthService {
 	return &AuthService{
@@ -68,7 +68,7 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 	result := s.rdb.Set(ctx,
 		fmt.Sprintf("%s:%s", constants.RedisUserRefreshTokenKey, refreshToken),
 		itemBytes,
-		time.Duration(s.cfg.Api.RefreshTokenTtl)*time.Second)
+		time.Duration(s.cfg.RefreshTokenTtl)*time.Second)
 
 	if result.Err() != nil {
 		return nil, "", apperror.Wrap(errcode.Internal, result.Err())
@@ -81,7 +81,7 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 
 	return &dto.UserLoginResponse{
 		Token: tokenString,
-		Ttl:   s.cfg.Api.AccessTokenTtl,
+		Ttl:   s.cfg.AccessTokenTtl,
 		User:  item,
 	}, refreshToken, nil
 }
@@ -107,7 +107,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*d
 
 	return &dto.UserLoginResponse{
 		Token: token,
-		Ttl:   s.cfg.Api.AccessTokenTtl,
+		Ttl:   s.cfg.AccessTokenTtl,
 		User:  nil,
 	}, nil
 }
@@ -122,12 +122,12 @@ func (s *AuthService) getRefreshToken() (string, error) {
 func (s *AuthService) getAccessToken(item *model.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iat":      time.Now().Unix(),
-		"exp":      time.Now().Add(time.Duration(s.cfg.Api.AccessTokenTtl) * time.Second).Unix(),
+		"exp":      time.Now().Add(time.Duration(s.cfg.AccessTokenTtl) * time.Second).Unix(),
 		"user_id":  item.ID,
 		"store_id": item.StoreId,
 	})
 
-	tokenString, err := token.SignedString([]byte(s.cfg.Api.HmacSecret))
+	tokenString, err := token.SignedString([]byte(s.cfg.HmacSecret))
 	if err != nil {
 		return "", err
 	}

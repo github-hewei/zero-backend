@@ -9,25 +9,21 @@ import (
 )
 
 // ProvideLogger 提供日志实例
-func ProvideLogger(config *config.Config, db *mongo.Database) *logger.ZeroLogger {
-	if config == nil {
-		return logger.Nop()
-	}
-
+func ProvideLogger(cfg config.LoggerConfig, db *mongo.Database) *logger.ZeroLogger {
 	options := []logger.Option{}
-	for _, writer := range config.Logger.Writers {
+	for _, writer := range cfg.Writers {
 		switch writer {
 		case "console":
 			options = append(options, logger.WithConsole())
 		case "file":
 			options = append(options, logger.WithFileWithConfig(logger.FileConfig{
-				Path:       config.Logger.File.Path,
-				Filename:   config.Logger.File.Filename,
-				MaxSize:    config.Logger.File.MaxSize,
-				MaxAge:     config.Logger.File.MaxAge,
-				MaxBackups: config.Logger.File.MaxBackups,
-				Compress:   config.Logger.File.Compress,
-				LocalTime:  config.Logger.File.LocalTime,
+				Path:       cfg.File.Path,
+				Filename:   cfg.File.Filename,
+				MaxSize:    cfg.File.MaxSize,
+				MaxAge:     cfg.File.MaxAge,
+				MaxBackups: cfg.File.MaxBackups,
+				Compress:   cfg.File.Compress,
+				LocalTime:  cfg.File.LocalTime,
 			}))
 		case "mongodb":
 			options = append(options, logger.WithMongo(db))
@@ -35,7 +31,7 @@ func ProvideLogger(config *config.Config, db *mongo.Database) *logger.ZeroLogger
 	}
 
 	level := logger.Disabled
-	switch config.Logger.Level {
+	switch cfg.Level {
 	case "info":
 		level = logger.InfoLevel
 	case "debug":
@@ -51,4 +47,8 @@ func ProvideLogger(config *config.Config, db *mongo.Database) *logger.ZeroLogger
 }
 
 // LoggerProviderSet 提供日志依赖集合
-var LoggerProviderSet = wire.NewSet(ProvideLogger, wire.Bind(new(logger.Logger), new(*logger.ZeroLogger)))
+var LoggerProviderSet = wire.NewSet(
+	wire.FieldsOf(new(*config.Config), "Logger"),
+	ProvideLogger,
+	wire.Bind(new(logger.Logger), new(*logger.ZeroLogger)),
+)

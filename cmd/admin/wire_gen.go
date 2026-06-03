@@ -26,14 +26,16 @@ import (
 
 func wireApp() *server.HTTPServer {
 	configConfig := config.New()
+	serverConfig := providers.NewAdminServerConfig(configConfig)
 	validate := request.NewValidate()
 	translator := request.NewTrans(validate)
 	requestRequest := request.NewRequest(validate, translator)
 	mysqlConfig := providers.NewMySQLConfig(configConfig)
+	loggerConfig := configConfig.Logger
 	mongodbConfig := providers.NewMongoDBConfig(configConfig)
 	conn := mongodb.NewConn(mongodbConfig)
 	database := conn.DB
-	zeroLogger := providers.ProvideLogger(configConfig, database)
+	zeroLogger := providers.ProvideLogger(loggerConfig, database)
 	logger := mysql.NewLogger(zeroLogger)
 	db := mysql.NewDB(mysqlConfig, logger)
 	rbacUserRepository := repository.NewRbacUserRepository(db)
@@ -43,10 +45,11 @@ func wireApp() *server.HTTPServer {
 	rbacRoleMenuRepository := repository.NewRbacRoleMenuRepository(db)
 	rbacUserRoleRepository := repository.NewRbacUserRoleRepository(db)
 	rbacMenuApiRepository := repository.NewRbacMenuApiRepository(db)
+	adminAuthConfig := providers.NewAdminAuthConfig(configConfig)
 	redisConfig := providers.NewRedisConfig(configConfig)
 	client := redis.New(redisConfig)
-	authService := service.NewAuthService(rbacUserRepository, rbacApiRepository, rbacRoleRepository, rbacMenuRepository, rbacRoleMenuRepository, rbacUserRoleRepository, rbacMenuApiRepository, configConfig, client)
-	authController := controller.NewAuthController(requestRequest, authService, configConfig)
+	authService := service.NewAuthService(rbacUserRepository, rbacApiRepository, rbacRoleRepository, rbacMenuRepository, rbacRoleMenuRepository, rbacUserRoleRepository, rbacMenuApiRepository, adminAuthConfig, client)
+	authController := controller.NewAuthController(requestRequest, authService, adminAuthConfig)
 	rbacMenuService := service2.NewRbacMenuService(rbacMenuRepository, rbacMenuApiRepository, db)
 	rbacMenuController := controller.NewRbacMenuController(requestRequest, rbacMenuService)
 	rbacApiService := service2.NewRbacApiService(rbacApiRepository)
@@ -102,16 +105,17 @@ func wireApp() *server.HTTPServer {
 		HealthController:          healthController,
 	}
 	beforeMiddleware := middleware.NewBeforeMiddleware(zeroLogger)
-	corsMiddleware := middleware.NewCorsMiddleware(configConfig)
+	adminCorsConfig := providers.NewAdminCorsConfig(configConfig)
+	corsMiddleware := middleware.NewCorsMiddleware(adminCorsConfig)
 	middlewares := &middleware.Middlewares{
 		Before: beforeMiddleware,
 		Cors:   corsMiddleware,
 	}
-	authMiddleware := middleware2.NewAuthMiddleware(configConfig, authService)
+	authMiddleware := middleware2.NewAuthMiddleware(adminAuthConfig, authService)
 	middlewareMiddlewares := &middleware2.Middlewares{
 		Auth: authMiddleware,
 	}
 	engine := server.NewGin(controllers, middlewares, middlewareMiddlewares)
-	httpServer := server.NewHTTPServer(configConfig, engine, zeroLogger, db)
+	httpServer := server.NewHTTPServer(serverConfig, engine, zeroLogger, db)
 	return httpServer
 }

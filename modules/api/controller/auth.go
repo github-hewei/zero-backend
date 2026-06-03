@@ -16,11 +16,11 @@ import (
 type AuthController struct {
 	req  *request.Request
 	serv *service.AuthService
-	cfg  *config.Config
+	cfg  config.ApiAuthConfig
 }
 
 // NewAuthController 创建权限控制器实例
-func NewAuthController(req *request.Request, serv *service.AuthService, cfg *config.Config) *AuthController {
+func NewAuthController(req *request.Request, serv *service.AuthService, cfg config.ApiAuthConfig) *AuthController {
 	return &AuthController{
 		req:  req,
 		serv: serv,
@@ -42,7 +42,7 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 
-	response.SetCookie(ctx, "token", refreshToken, c.cfg.Api.RefreshTokenTtl, "/api/refresh-token")
+	response.SetCookie(ctx, "token", refreshToken, c.cfg.RefreshTokenTtl, "/api/refresh-token")
 	response.Success(ctx, "请求成功", result)
 }
 

@@ -26,21 +26,24 @@ import (
 
 func wireApp() *server.HTTPServer {
 	configConfig := config.New()
+	serverConfig := providers.NewApiServerConfig(configConfig)
 	validate := request.NewValidate()
 	translator := request.NewTrans(validate)
 	requestRequest := request.NewRequest(validate, translator)
 	mysqlConfig := providers.NewMySQLConfig(configConfig)
+	loggerConfig := configConfig.Logger
 	mongodbConfig := providers.NewMongoDBConfig(configConfig)
 	conn := mongodb.NewConn(mongodbConfig)
 	database := conn.DB
-	zeroLogger := providers.ProvideLogger(configConfig, database)
+	zeroLogger := providers.ProvideLogger(loggerConfig, database)
 	logger := mysql.NewLogger(zeroLogger)
 	db := mysql.NewDB(mysqlConfig, logger)
 	userRepository := repository.NewUserRepository(db)
+	apiAuthConfig := providers.NewApiAuthConfig(configConfig)
 	redisConfig := providers.NewRedisConfig(configConfig)
 	client := redis.New(redisConfig)
-	authService := service.NewAuthService(userRepository, configConfig, client)
-	authController := controller.NewAuthController(requestRequest, authService, configConfig)
+	authService := service.NewAuthService(userRepository, apiAuthConfig, client)
+	authController := controller.NewAuthController(requestRequest, authService, apiAuthConfig)
 	uploadFileRepository := repository.NewUploadFileRepository(db)
 	settingRepository := repository.NewSettingRepository(db)
 	settingDefaultRepository := repository.NewSettingDefaultRepository(db)
@@ -58,16 +61,17 @@ func wireApp() *server.HTTPServer {
 		SettingController:    settingController,
 	}
 	beforeMiddleware := middleware.NewBeforeMiddleware(zeroLogger)
-	corsMiddleware := middleware.NewCorsMiddleware(configConfig)
+	adminCorsConfig := providers.NewAdminCorsConfig(configConfig)
+	corsMiddleware := middleware.NewCorsMiddleware(adminCorsConfig)
 	middlewares := &middleware.Middlewares{
 		Before: beforeMiddleware,
 		Cors:   corsMiddleware,
 	}
-	authMiddleware := middleware2.NewAuthMiddleware(configConfig, authService)
+	authMiddleware := middleware2.NewAuthMiddleware(apiAuthConfig, authService)
 	middlewareMiddlewares := &middleware2.Middlewares{
 		Auth: authMiddleware,
 	}
 	engine := server.NewGin(controllers, middlewares, middlewareMiddlewares)
-	httpServer := server.NewHTTPServer(configConfig, engine, zeroLogger)
+	httpServer := server.NewHTTPServer(serverConfig, engine, zeroLogger)
 	return httpServer
 }

@@ -26,7 +26,7 @@ var ServiceProviderSet = wire.NewSet(
 )
 
 // AdminServiceProviderSet 提供管理端服务层依赖集合
-var AdminServiceProviderSet = wire.NewSet(service2.NewAuthService)
+var AdminServiceProviderSet = wire.NewSet(NewAdminAuthConfig, service2.NewAuthService)
 
-// ApiServiceProviderSet 提供管理端服务层依赖集合
-var ApiServiceProviderSet = wire.NewSet(service3.NewAuthService)
+// ApiServiceProviderSet 提供API端服务层依赖集合
+var ApiServiceProviderSet = wire.NewSet(NewApiAuthConfig, service3.NewAuthService)

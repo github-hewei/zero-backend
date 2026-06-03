@@ -14,12 +14,12 @@ import (
 
 // AuthMiddleware 权限验证中间件
 type AuthMiddleware struct {
-	config   *config.Config
+	config   config.ApiAuthConfig
 	authServ *service.AuthService
 }
 
 // NewAuthMiddleware 创建权限验证中间件
-func NewAuthMiddleware(cfg *config.Config, authServ *service.AuthService) *AuthMiddleware {
+func NewAuthMiddleware(cfg config.ApiAuthConfig, authServ *service.AuthService) *AuthMiddleware {
 	return &AuthMiddleware{
 		config:   cfg,
 		authServ: authServ,
@@ -38,7 +38,7 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 		}
 
 		token, err := jwt.Parse(tokenString[7:], func(token *jwt.Token) (any, error) {
-			return []byte(m.config.Api.HmacSecret), nil
+			return []byte(m.config.HmacSecret), nil
 		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 
 		if err != nil {

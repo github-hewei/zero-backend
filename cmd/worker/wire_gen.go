@@ -23,10 +23,11 @@ func wireApp() *server.WorkerServer {
 	redisConfig := providers.NewRedisConfig(configConfig)
 	client := redis.New(redisConfig)
 	queueManager := queue.NewQueueManager(client)
+	loggerConfig := configConfig.Logger
 	mongodbConfig := providers.NewMongoDBConfig(configConfig)
 	conn := mongodb.NewConn(mongodbConfig)
 	database := conn.DB
-	zeroLogger := providers.ProvideLogger(configConfig, database)
+	zeroLogger := providers.ProvideLogger(loggerConfig, database)
 	exampleHandler := handler.NewExampleHandler(zeroLogger)
 	registry := providers.ProvideRegistry(zeroLogger, exampleHandler)
 	workerServer := server.NewWorkerServer(queueManager, registry, zeroLogger)

@@ -20,8 +20,8 @@ type HTTPServer struct {
 	handler  *gin.Engine
 }
 
-func NewHTTPServer(cfg *config.Config, handler *gin.Engine, logger logger.Logger) *HTTPServer {
-	addr := fmt.Sprintf("%s:%d", cfg.Api.Server.Host, cfg.Api.Server.Port)
+func NewHTTPServer(cfg config.ServerConfig, handler *gin.Engine, logger logger.Logger) *HTTPServer {
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	httpServ := &http.Server{
 		Addr:    addr,
 		Handler: handler,

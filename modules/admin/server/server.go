@@ -20,13 +20,12 @@ type HTTPServer struct {
 	httpServ *http.Server
 	logger   logger.Logger
 	handler  *gin.Engine
-	cfg      *config.Config
 	db       *gorm.DB
 }
 
 // NewHTTPServer 创建 HTTP 服务
-func NewHTTPServer(cfg *config.Config, handler *gin.Engine, logger logger.Logger, db *gorm.DB) *HTTPServer {
-	addr := fmt.Sprintf("%s:%d", cfg.Admin.Server.Host, cfg.Admin.Server.Port)
+func NewHTTPServer(cfg config.ServerConfig, handler *gin.Engine, logger logger.Logger, db *gorm.DB) *HTTPServer {
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	httpServ := &http.Server{
 		Addr:    addr,
 		Handler: handler,
@@ -36,7 +35,6 @@ func NewHTTPServer(cfg *config.Config, handler *gin.Engine, logger logger.Logger
 		httpServ: httpServ,
 		logger:   logger,
 		handler:  handler,
-		cfg:      cfg,
 		db:       db,
 	}
 }

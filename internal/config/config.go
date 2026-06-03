@@ -19,23 +19,13 @@ type Config struct {
 	MongoDB MongoDBConfig `mapstructure:"mongodb"`
 }
 
-// AdminConfig 管理后台配置
-type AdminConfig struct {
-	Server          ServerConfig `mapstructure:"server"`
-	RefreshTokenTtl int          `mapstructure:"refresh_token_ttl"`
-	AccessTokenTtl  int          `mapstructure:"access_token_ttl"`
-	HmacSecret      string       `mapstructure:"hmac_secret"`
-	SuperUserId     int          `mapstructure:"super_user_id"`
-	Cors            CorsConfig   `mapstructure:"cors"`
-}
+// --- 共享基础类型 ---
 
-// ApiConfig API模块配置
-type ApiConfig struct {
-	Server          ServerConfig `mapstructure:"server"`
-	RefreshTokenTtl int          `mapstructure:"refresh_token_ttl"`
-	AccessTokenTtl  int          `mapstructure:"access_token_ttl"`
-	HmacSecret      string       `mapstructure:"hmac_secret"`
-	Cors            CorsConfig   `mapstructure:"cors"`
+// AuthConfig 认证配置（Admin 和 Api 共用字段）
+type AuthConfig struct {
+	RefreshTokenTtl int    `mapstructure:"refresh_token_ttl"`
+	AccessTokenTtl  int    `mapstructure:"access_token_ttl"`
+	HmacSecret      string `mapstructure:"hmac_secret"`
 }
 
 // ServerConfig 服务配置
@@ -51,6 +41,41 @@ type CorsConfig struct {
 	AllowHeaders     []string `mapstructure:"allow_headers"`
 	AllowCredentials bool     `mapstructure:"allow_credentials"`
 }
+
+// --- 模块级类型 ---
+
+// AdminConfig 管理后台配置
+type AdminConfig struct {
+	Server ServerConfig    `mapstructure:"server"`
+	Auth   AdminAuthConfig `mapstructure:"auth"`
+	Cors   CorsConfig      `mapstructure:"cors"`
+}
+
+// AdminAuthConfig 管理端认证配置
+type AdminAuthConfig struct {
+	AuthConfig  `mapstructure:",squash"`
+	SuperUserId int `mapstructure:"super_user_id"`
+}
+
+// ApiConfig API模块配置
+type ApiConfig struct {
+	Server ServerConfig  `mapstructure:"server"`
+	Auth   ApiAuthConfig `mapstructure:"auth"`
+	Cors   CorsConfig    `mapstructure:"cors"`
+}
+
+// ApiAuthConfig API端认证配置
+type ApiAuthConfig struct {
+	AuthConfig `mapstructure:",squash"`
+}
+
+// --- Wire 区分类型（用于同一基础类型在不同模块的注入区分） ---
+
+// AdminCorsConfig 管理端跨域配置（wire 区分用）
+type AdminCorsConfig CorsConfig
+
+// ApiCorsConfig API端跨域配置（wire 区分用）
+type ApiCorsConfig CorsConfig
 
 // LoggerConfig 日志配置
 type LoggerConfig struct {
@@ -141,25 +166,47 @@ func loadConfig() *Config {
 
 // validate 验证配置有效性
 func (c *Config) validate() error {
-	// 验证服务端口
+	// 验证 Admin 配置
+	if err := c.validateAdmin(); err != nil {
+		return err
+	}
+
+	// 验证 API 配置
+	if err := c.validateApi(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Config) validateAdmin() error {
 	if c.Admin.Server.Port <= 0 || c.Admin.Server.Port > 65535 {
-		return errors.New("invalid server port: must be between 1 and 65535")
+		return errors.New("invalid admin server port: must be between 1 and 65535")
 	}
-
-	// 验证访问令牌有效期
-	if c.Admin.AccessTokenTtl <= 0 {
-		return errors.New("invalid access token TTL: must be positive")
+	if c.Admin.Auth.AccessTokenTtl <= 0 {
+		return errors.New("invalid admin access token TTL: must be positive")
 	}
-
-	// 验证刷新令牌有效期
-	if c.Admin.RefreshTokenTtl <= 0 {
-		return errors.New("invalid refresh token TTL: must be positive")
+	if c.Admin.Auth.RefreshTokenTtl <= 0 {
+		return errors.New("invalid admin refresh token TTL: must be positive")
 	}
-
-	// 验证JWT密钥
-	if c.Admin.HmacSecret == "" {
-		return errors.New("invalid HMAC secret: cannot be empty")
+	if c.Admin.Auth.HmacSecret == "" {
+		return errors.New("invalid admin HMAC secret: cannot be empty")
 	}
+	return nil
+}
 
+func (c *Config) validateApi() error {
+	if c.Api.Server.Port <= 0 || c.Api.Server.Port > 65535 {
+		return errors.New("invalid api server port: must be between 1 and 65535")
+	}
+	if c.Api.Auth.AccessTokenTtl <= 0 {
+		return errors.New("invalid api access token TTL: must be positive")
+	}
+	if c.Api.Auth.RefreshTokenTtl <= 0 {
+		return errors.New("invalid api refresh token TTL: must be positive")
+	}
+	if c.Api.Auth.HmacSecret == "" {
+		return errors.New("invalid api HMAC secret: cannot be empty")
+	}
 	return nil
 }

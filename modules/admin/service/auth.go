@@ -29,7 +29,7 @@ type AuthService struct {
 	roleMenuRepo *repository.RbacRoleMenuRepository
 	userRoleRepo *repository.RbacUserRoleRepository
 	menuApiRepo  *repository.RbacMenuApiRepository
-	cfg          *config.Config
+	cfg          config.AdminAuthConfig
 	rdb          *redis.Client
 }
 
@@ -42,7 +42,7 @@ func NewAuthService(
 	roleMenuRepo *repository.RbacRoleMenuRepository,
 	userRoleRepo *repository.RbacUserRoleRepository,
 	menuApiRepo *repository.RbacMenuApiRepository,
-	cfg *config.Config,
+	cfg config.AdminAuthConfig,
 	rdb *redis.Client,
 ) *AuthService {
 	return &AuthService{
@@ -87,7 +87,7 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 	result := s.rdb.Set(ctx,
 		fmt.Sprintf("%s:%s", constants.RedisAdminRefreshTokenKey, refreshToken),
 		itemBytes,
-		time.Duration(s.cfg.Admin.RefreshTokenTtl)*time.Second)
+		time.Duration(s.cfg.RefreshTokenTtl)*time.Second)
 
 	if result.Err() != nil {
 		return nil, "", apperror.Wrap(errcode.Internal, result.Err())
@@ -102,7 +102,7 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 
 	return &dto.AdminLoginResponse{
 		Token: tokenString,
-		Ttl:   s.cfg.Admin.RefreshTokenTtl,
+		Ttl:   s.cfg.RefreshTokenTtl,
 		User:  item,
 	}, refreshToken, nil
 }
@@ -128,7 +128,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*d
 
 	return &dto.AdminLoginResponse{
 		Token: token,
-		Ttl:   s.cfg.Admin.AccessTokenTtl,
+		Ttl:   s.cfg.AccessTokenTtl,
 		User:  nil,
 	}, nil
 }
@@ -143,12 +143,12 @@ func (s *AuthService) getRefreshToken() (string, error) {
 func (s *AuthService) getAccessToken(item *model.RbacUser) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iat":      time.Now().Unix(),
-		"exp":      time.Now().Add(time.Duration(s.cfg.Admin.AccessTokenTtl) * time.Second).Unix(),
+		"exp":      time.Now().Add(time.Duration(s.cfg.AccessTokenTtl) * time.Second).Unix(),
 		"user_id":  item.ID,
 		"store_id": item.StoreId,
 	})
 
-	tokenString, err := token.SignedString([]byte(s.cfg.Admin.HmacSecret))
+	tokenString, err := token.SignedString([]byte(s.cfg.HmacSecret))
 	if err != nil {
 		return "", err
 	}
@@ -197,7 +197,7 @@ func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*model.Rb
 
 // WithSU 设置是否为超级管理员
 func (s *AuthService) WithSU(user *model.RbacUser) {
-	if int(user.ID) == s.cfg.Admin.SuperUserId {
+	if int(user.ID) == s.cfg.SuperUserId {
 		user.SU = true
 	}
 }
