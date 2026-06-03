@@ -3,6 +3,7 @@ package repository
 import (
 	"time"
 	"zero-backend/internal/model"
+	"zero-backend/pkg/baserepo"
 
 	"gorm.io/gorm"
 )
@@ -47,12 +48,12 @@ func (f *UserFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // UserRepository 用户数据操作
 type UserRepository struct {
-	*BaseRepository[model.User]
+	*baserepo.BaseRepository[model.User]
 }
 
 // NewUserRepository 创建用户数据操作
 func NewUserRepository(db *gorm.DB) *UserRepository {
-	baseRepo := NewBaseRepository[model.User](db)
+	baseRepo := baserepo.NewBaseRepository[model.User](db)
 	return &UserRepository{
 		BaseRepository: baseRepo,
 	}
@@ -60,12 +61,12 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 
 // UserPointsLogRepository 用户积分记录数据操作
 type UserPointsLogRepository struct {
-	*BaseRepository[model.UserPointsLog]
+	*baserepo.BaseRepository[model.UserPointsLog]
 }
 
 // NewUserPointsLogRepository 创建用户积分记录数据操作
 func NewUserPointsLogRepository(db *gorm.DB) *UserPointsLogRepository {
-	baseRepo := NewBaseRepository[model.UserPointsLog](db)
+	baseRepo := baserepo.NewBaseRepository[model.UserPointsLog](db)
 	return &UserPointsLogRepository{
 		BaseRepository: baseRepo,
 	}

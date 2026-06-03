@@ -8,6 +8,7 @@ import (
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
 	"zero-backend/pkg/apperror"
+	"zero-backend/pkg/baserepo"
 	"zero-backend/pkg/helper"
 
 	"gorm.io/gorm"
@@ -53,16 +54,13 @@ func (s *UserService) List(ctx context.Context, req *dto.UserListRequest) (*dto.
 		return result, nil
 	}
 
-	pagination := &repository.Pagination{
-		Page:  req.Page,
-		Limit: req.Limit,
-	}
+	pagination := baserepo.NewPagination(req.Page, req.Limit)
 
-	orders := repository.Orders{
+	orders := baserepo.Orders{
 		{Field: "id", Sort: "desc"},
 	}
 
-	list, err := s.repo.FindAll(ctx, filter, pagination, orders, repository.WithPreloads("Avatar"))
+	list, err := s.repo.FindAll(ctx, filter, pagination, orders, baserepo.WithPreloads("Avatar"))
 	if err != nil {
 		return nil, err
 	}
@@ -184,12 +182,9 @@ func (s *UserService) GetPointsLogs(ctx context.Context, req *dto.UserPointsLogL
 		return result, nil
 	}
 
-	pagination := &repository.Pagination{
-		Page:  req.Page,
-		Limit: req.Limit,
-	}
+	pagination := baserepo.NewPagination(req.Page, req.Limit)
 
-	orders := repository.Orders{
+	orders := baserepo.Orders{
 		{Field: "created_at", Sort: "desc"},
 	}
 
@@ -225,7 +220,7 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 			Id:      req.UserId,
 			StoreId: req.StoreId,
 		}
-		user, err := s.repo.FindOne(ctx, userFilter, repository.WithTx[*repository.QueryConfig](tx))
+		user, err := s.repo.FindOne(ctx, userFilter, baserepo.WithTx[*baserepo.QueryConfig](tx))
 		if err != nil {
 			return apperror.Wrap(errcode.Internal, err)
 		}
@@ -238,7 +233,7 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 			"points": gorm.Expr("points + ?", points),
 		}
 
-		if err := s.repo.Updates(ctx, user, updateData, repository.WithTx[*repository.UpdateConfig](tx)); err != nil {
+		if err := s.repo.Updates(ctx, user, updateData, baserepo.WithTx[*baserepo.UpdateConfig](tx)); err != nil {
 			return apperror.Wrap(errcode.Internal, err)
 		}
 
@@ -253,7 +248,7 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 			StoreId:    req.StoreId,
 		}
 
-		if err := s.pointsLogRepo.Create(ctx, pointsLog, repository.WithTx[*repository.CreateConfig](tx)); err != nil {
+		if err := s.pointsLogRepo.Create(ctx, pointsLog, baserepo.WithTx[*baserepo.CreateConfig](tx)); err != nil {
 			return apperror.Wrap(errcode.Internal, err)
 		}
 

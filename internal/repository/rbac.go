@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"zero-backend/internal/model"
+	"zero-backend/pkg/baserepo"
 	"zero-backend/pkg/helper"
 
 	"gorm.io/gorm"
@@ -62,12 +63,12 @@ func (f *RbacUserUsernameFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // RbacUserRepository 用户数据操作
 type RbacUserRepository struct {
-	*BaseRepository[model.RbacUser]
+	*baserepo.BaseRepository[model.RbacUser]
 }
 
 // NewRbacUserRepository 创建用户数据操作
 func NewRbacUserRepository(db *gorm.DB) *RbacUserRepository {
-	baseRepo := NewBaseRepository[model.RbacUser](db)
+	baseRepo := baserepo.NewBaseRepository[model.RbacUser](db)
 	return &RbacUserRepository{
 		BaseRepository: baseRepo,
 	}
@@ -98,12 +99,12 @@ func (f *RbacUserRoleFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // RbacUserRoleRepository 用户关联角色数据操作
 type RbacUserRoleRepository struct {
-	*BaseRepository[model.RbacUserRole]
+	*baserepo.BaseRepository[model.RbacUserRole]
 }
 
 // NewRbacUserRoleRepository 创建用户关联角色数据操作
 func NewRbacUserRoleRepository(db *gorm.DB) *RbacUserRoleRepository {
-	baseRepo := NewBaseRepository[model.RbacUserRole](db)
+	baseRepo := baserepo.NewBaseRepository[model.RbacUserRole](db)
 	return &RbacUserRoleRepository{
 		BaseRepository: baseRepo,
 	}
@@ -139,12 +140,12 @@ func (f *RbacMenuFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // RbacMenuRepository 菜单数据操作
 type RbacMenuRepository struct {
-	*BaseRepository[model.RbacMenu]
+	*baserepo.BaseRepository[model.RbacMenu]
 }
 
 // NewRbacMenuRepository 创建菜单数据操作
 func NewRbacMenuRepository(db *gorm.DB) *RbacMenuRepository {
-	baseRepo := NewBaseRepository[model.RbacMenu](db)
+	baseRepo := baserepo.NewBaseRepository[model.RbacMenu](db)
 	return &RbacMenuRepository{
 		BaseRepository: baseRepo,
 	}
@@ -180,12 +181,12 @@ func (f *RbacMenuApiFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // RbacMenuApiRepository 菜单关联接口数据操作
 type RbacMenuApiRepository struct {
-	*BaseRepository[model.RbacMenuApi]
+	*baserepo.BaseRepository[model.RbacMenuApi]
 }
 
 // NewRbacMenuApiRepository 创建菜单关联接口数据操作
 func NewRbacMenuApiRepository(db *gorm.DB) *RbacMenuApiRepository {
-	baseRepo := NewBaseRepository[model.RbacMenuApi](db)
+	baseRepo := baserepo.NewBaseRepository[model.RbacMenuApi](db)
 	return &RbacMenuApiRepository{
 		BaseRepository: baseRepo,
 	}
@@ -221,12 +222,12 @@ func (f *RbacRoleFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // RbacRoleRepository 角色数据操作
 type RbacRoleRepository struct {
-	*BaseRepository[model.RbacRole]
+	*baserepo.BaseRepository[model.RbacRole]
 }
 
 // NewRbacRoleRepository 创建角色数据操作
 func NewRbacRoleRepository(db *gorm.DB) *RbacRoleRepository {
-	baseRepo := NewBaseRepository[model.RbacRole](db)
+	baseRepo := baserepo.NewBaseRepository[model.RbacRole](db)
 	return &RbacRoleRepository{
 		BaseRepository: baseRepo,
 	}
@@ -269,12 +270,12 @@ func (f *RbacRoleMenuFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // RbacRoleMenuRepository 角色关联菜单数据操作
 type RbacRoleMenuRepository struct {
-	*BaseRepository[model.RbacRoleMenu]
+	*baserepo.BaseRepository[model.RbacRoleMenu]
 }
 
 // NewRbacRoleMenuRepository 创建角色关联菜单数据操作
 func NewRbacRoleMenuRepository(db *gorm.DB) *RbacRoleMenuRepository {
-	baseRepo := NewBaseRepository[model.RbacRoleMenu](db)
+	baseRepo := baserepo.NewBaseRepository[model.RbacRoleMenu](db)
 	return &RbacRoleMenuRepository{
 		BaseRepository: baseRepo,
 	}
@@ -299,12 +300,12 @@ func (f *RbacApiFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // RbacApiRepository 接口数据操作
 type RbacApiRepository struct {
-	*BaseRepository[model.RbacApi]
+	*baserepo.BaseRepository[model.RbacApi]
 }
 
 // NewRbacApiRepository 创建接口数据操作
 func NewRbacApiRepository(db *gorm.DB) *RbacApiRepository {
-	baseRepo := NewBaseRepository[model.RbacApi](db)
+	baseRepo := baserepo.NewBaseRepository[model.RbacApi](db)
 	return &RbacApiRepository{
 		BaseRepository: baseRepo,
 	}
@@ -377,12 +378,12 @@ func (f *RbacStoreNameFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // RbacStoreRepository 企业数据操作
 type RbacStoreRepository struct {
-	*BaseRepository[model.RbacStore]
+	*baserepo.BaseRepository[model.RbacStore]
 }
 
 // NewRbacStoreRepository 创建企业数据操作
 func NewRbacStoreRepository(db *gorm.DB) *RbacStoreRepository {
-	baseRepo := NewBaseRepository[model.RbacStore](db)
+	baseRepo := baserepo.NewBaseRepository[model.RbacStore](db)
 	return &RbacStoreRepository{
 		BaseRepository: baseRepo,
 	}

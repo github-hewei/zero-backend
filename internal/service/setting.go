@@ -8,6 +8,7 @@ import (
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
 	"zero-backend/pkg/apperror"
+	"zero-backend/pkg/baserepo"
 
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
@@ -42,12 +43,9 @@ func (s *SettingService) FindList(ctx context.Context, req *dto.SettingListReque
 		StoreId:    req.StoreId,
 	}
 
-	pagination := &repository.Pagination{
-		Page:  req.Page,
-		Limit: req.Limit,
-	}
+	pagination := baserepo.NewPagination(req.Page, req.Limit)
 
-	orders := repository.Orders{
+	orders := baserepo.Orders{
 		{Field: "id", Sort: "desc"},
 	}
 
@@ -179,7 +177,7 @@ func (s *SettingService) GetSettingValue(ctx context.Context, key string, out an
 	} else {
 		// 尝试从默认设置获取
 		filter := &repository.SettingDefaultFilterField{SettingKey: key}
-		defaultSetting, err := s.defaultRepo.FindOne(ctx, filter, repository.WithScopes(nil))
+		defaultSetting, err := s.defaultRepo.FindOne(ctx, filter, baserepo.WithScopes(nil))
 
 		if err != nil {
 			return apperror.Wrap(errcode.Internal, err)
@@ -256,16 +254,13 @@ func (s *SettingDefaultService) FindList(ctx context.Context, req *dto.SettingDe
 		SettingKey: req.SettingKey,
 	}
 
-	pagination := &repository.Pagination{
-		Page:  req.Page,
-		Limit: req.Limit,
-	}
+	pagination := baserepo.NewPagination(req.Page, req.Limit)
 
-	orders := repository.Orders{
+	orders := baserepo.Orders{
 		{Field: "id", Sort: "desc"},
 	}
 
-	total, err := s.repo.Count(ctx, filter, repository.WithScopes(nil))
+	total, err := s.repo.Count(ctx, filter, baserepo.WithScopes(nil))
 	if err != nil {
 		return nil, apperror.Wrap(errcode.Internal, err)
 	}
@@ -276,7 +271,7 @@ func (s *SettingDefaultService) FindList(ctx context.Context, req *dto.SettingDe
 
 	result.Total = total
 
-	list, err := s.repo.FindAll(ctx, filter, pagination, orders, repository.WithScopes(nil))
+	list, err := s.repo.FindAll(ctx, filter, pagination, orders, baserepo.WithScopes(nil))
 	if err != nil {
 		return nil, apperror.Wrap(errcode.Internal, err)
 	}
@@ -307,7 +302,7 @@ func (s *SettingDefaultService) Create(ctx context.Context, req *dto.SettingDefa
 
 // Update 更新默认设置
 func (s *SettingDefaultService) Update(ctx context.Context, req *dto.SettingDefaultUpdateRequest) error {
-	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
+	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
 		return apperror.Wrap(errcode.Internal, err)
 	}
@@ -333,7 +328,7 @@ func (s *SettingDefaultService) Update(ctx context.Context, req *dto.SettingDefa
 
 // Delete 删除默认设置
 func (s *SettingDefaultService) Delete(ctx context.Context, req *dto.SettingDefaultDeleteRequest) error {
-	item, err := s.repo.FindOne(ctx, req.ID, repository.WithScopes(nil))
+	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
 		return apperror.Wrap(errcode.Internal, err)
 	}
@@ -352,7 +347,7 @@ func (s *SettingDefaultService) Delete(ctx context.Context, req *dto.SettingDefa
 // checkSettingKey 检查默认设置key是否已存在
 func (s *SettingDefaultService) checkSettingKey(ctx context.Context, key string) error {
 	filter := &repository.SettingDefaultFilterField{SettingKey: key}
-	item, err := s.repo.FindOne(ctx, filter, repository.WithScopes(nil))
+	item, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))
 
 	if err != nil {
 		return apperror.Wrap(errcode.Internal, err)

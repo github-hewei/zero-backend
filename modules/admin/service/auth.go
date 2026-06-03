@@ -13,6 +13,7 @@ import (
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
 	"zero-backend/pkg/apperror"
+	"zero-backend/pkg/baserepo"
 	"zero-backend/pkg/helper"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -210,7 +211,7 @@ func (s *AuthService) GetPermissions(ctx context.Context, req *dto.AuthGetPermis
 
 	// 1. 如果是超级管理员，返回全部菜单
 	if user.SU {
-		menus, err := s.menuRepo.FindAll(ctx, nil, nil, nil, repository.WithScopes(nil))
+		menus, err := s.menuRepo.FindAll(ctx, nil, nil, nil, baserepo.WithScopes(nil))
 		if err != nil {
 			return nil, apperror.Wrap(errcode.Internal, err)
 		}
@@ -305,7 +306,7 @@ func (s *AuthService) GetRoleMenus(ctx context.Context, roleId uint32) ([]*model
 	}
 
 	// 获取菜单详情
-	menus, err := s.menuRepo.FindAll(ctx, &repository.RbacMenuFilterField{IDs: menuIDs}, nil, nil, repository.WithScopes(nil))
+	menus, err := s.menuRepo.FindAll(ctx, &repository.RbacMenuFilterField{IDs: menuIDs}, nil, nil, baserepo.WithScopes(nil))
 	if err != nil {
 		return nil, err
 	}
@@ -408,7 +409,7 @@ func (s *AuthService) CheckRoleAPIPermission(ctx context.Context, roleID uint32,
 	}
 
 	filter := &repository.RbacMenuApiFilterField{MenuIDs: menuIDs, ApiId: apiID}
-	menuApis, err := s.menuApiRepo.FindAll(ctx, filter, nil, nil, repository.WithScopes(nil))
+	menuApis, err := s.menuApiRepo.FindAll(ctx, filter, nil, nil, baserepo.WithScopes(nil))
 	if err != nil {
 		return false, err
 	}

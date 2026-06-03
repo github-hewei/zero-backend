@@ -2,6 +2,7 @@ package repository
 
 import (
 	"zero-backend/internal/model"
+	"zero-backend/pkg/baserepo"
 	"zero-backend/pkg/helper"
 
 	"gorm.io/gorm"
@@ -37,12 +38,12 @@ func (f *UploadGroupFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // UploadGroupRepository 文件分组仓库
 type UploadGroupRepository struct {
-	*BaseRepository[model.UploadGroup]
+	*baserepo.BaseRepository[model.UploadGroup]
 }
 
 // NewUploadGroupRepository 创建文件分组仓库
 func NewUploadGroupRepository(db *gorm.DB) *UploadGroupRepository {
-	baseRepo := NewBaseRepository[model.UploadGroup](db)
+	baseRepo := baserepo.NewBaseRepository[model.UploadGroup](db)
 	return &UploadGroupRepository{
 		BaseRepository: baseRepo,
 	}
@@ -88,12 +89,12 @@ func (f *UploadFileFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // UploadFileRepository 文件仓库
 type UploadFileRepository struct {
-	*BaseRepository[model.UploadFile]
+	*baserepo.BaseRepository[model.UploadFile]
 }
 
 // NewUploadFileRepository 创建文件仓库
 func NewUploadFileRepository(db *gorm.DB) *UploadFileRepository {
-	baseRepo := NewBaseRepository[model.UploadFile](db)
+	baseRepo := baserepo.NewBaseRepository[model.UploadFile](db)
 	return &UploadFileRepository{
 		BaseRepository: baseRepo,
 	}

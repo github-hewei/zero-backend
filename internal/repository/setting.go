@@ -2,6 +2,7 @@ package repository
 
 import (
 	"zero-backend/internal/model"
+	"zero-backend/pkg/baserepo"
 
 	"gorm.io/gorm"
 )
@@ -36,12 +37,12 @@ func (f *SettingFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // SettingRepository 设置数据操作
 type SettingRepository struct {
-	*BaseRepository[model.Setting]
+	*baserepo.BaseRepository[model.Setting]
 }
 
 // NewSettingRepository 创建设置数据操作
 func NewSettingRepository(db *gorm.DB) *SettingRepository {
-	baseRepo := NewBaseRepository[model.Setting](db)
+	baseRepo := baserepo.NewBaseRepository[model.Setting](db)
 	return &SettingRepository{
 		BaseRepository: baseRepo,
 	}
@@ -67,12 +68,12 @@ func (f *SettingDefaultFilterField) Apply(db *gorm.DB) *gorm.DB {
 
 // SettingDefaultRepository 默认设置数据操作
 type SettingDefaultRepository struct {
-	*BaseRepository[model.SettingDefault]
+	*baserepo.BaseRepository[model.SettingDefault]
 }
 
 // NewSettingDefaultRepository 创建默认设置数据操作
 func NewSettingDefaultRepository(db *gorm.DB) *SettingDefaultRepository {
-	baseRepo := NewBaseRepository[model.SettingDefault](db)
+	baseRepo := baserepo.NewBaseRepository[model.SettingDefault](db)
 	return &SettingDefaultRepository{
 		BaseRepository: baseRepo,
 	}

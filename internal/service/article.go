@@ -7,6 +7,7 @@ import (
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
 	"zero-backend/pkg/apperror"
+	"zero-backend/pkg/baserepo"
 )
 
 // ArticleCategoryService 文章分类业务逻辑层
@@ -44,12 +45,9 @@ func (s *ArticleCategoryService) List(ctx context.Context, req *dto.ArticleCateg
 		return result, nil
 	}
 
-	pagination := &repository.Pagination{
-		Page:  req.Page,
-		Limit: req.Limit,
-	}
+	pagination := baserepo.NewPagination(req.Page, req.Limit)
 
-	orders := repository.Orders{
+	orders := baserepo.Orders{
 		{Field: "sort", Sort: "asc"},
 		{Field: "id", Sort: "desc"},
 	}
@@ -165,18 +163,15 @@ func (s *ArticleService) List(ctx context.Context, req *dto.ArticleListRequest) 
 		return result, nil
 	}
 
-	pagination := &repository.Pagination{
-		Page:  req.Page,
-		Limit: req.Limit,
-	}
+	pagination := baserepo.NewPagination(req.Page, req.Limit)
 
-	orders := repository.Orders{
+	orders := baserepo.Orders{
 		{Field: "sort", Sort: "asc"},
 		{Field: "id", Sort: "desc"},
 	}
 
 	// 预加载图片信息
-	list, err := s.repo.FindAll(ctx, filter, pagination, orders, repository.WithPreloads("Image"))
+	list, err := s.repo.FindAll(ctx, filter, pagination, orders, baserepo.WithPreloads("Image"))
 	if err != nil {
 		return nil, apperror.Wrap(errcode.Internal, err)
 	}

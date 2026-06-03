@@ -1,4 +1,4 @@
-package repository
+package baserepo
 
 import (
 	"context"
@@ -12,19 +12,44 @@ type Filter interface {
 	Apply(db *gorm.DB) *gorm.DB
 }
 
+// Paginator 分页器接口
+type Paginator interface {
+	Offset() int
+	Limit() int
+}
+
 // Pagination 分页参数
 type Pagination struct {
-	Page  int
-	Limit int
+	page  int
+	limit int
+}
+
+// NewPagination 创建分页参数
+func NewPagination(page, limit int) *Pagination {
+	if page <= 0 {
+		page = 1
+	}
+	if limit < 0 {
+		limit = 0
+	}
+	return &Pagination{page: page, limit: limit}
 }
 
 // Offset 计算偏移量
 func (p *Pagination) Offset() int {
-	if p.Limit <= 0 {
+	if p == nil || p.limit <= 0 {
 		return 0
 	}
 
-	return (p.Page - 1) * p.Limit
+	return (p.page - 1) * p.limit
+}
+
+// Limit 获取每页数量
+func (p *Pagination) Limit() int {
+	if p == nil {
+		return 0
+	}
+	return p.limit
 }
 
 // Order 排序参数
@@ -229,7 +254,7 @@ func (r *BaseRepository[T]) FindOne(ctx context.Context, id any, opts ...QueryOp
 }
 
 // FindAll 查询所有记录
-func (r *BaseRepository[T]) FindAll(ctx context.Context, filter Filter, pagination *Pagination, orders Orders, opts ...QueryOption) ([]*T, error) {
+func (r *BaseRepository[T]) FindAll(ctx context.Context, filter Filter, pagination Paginator, orders Orders, opts ...QueryOption) ([]*T, error) {
 	list := make([]*T, 0)
 	query := r.buildQuery(ctx, opts...).Model(new(T))
 
@@ -238,7 +263,7 @@ func (r *BaseRepository[T]) FindAll(ctx context.Context, filter Filter, paginati
 	}
 
 	if pagination != nil {
-		query = query.Limit(pagination.Limit).Offset(pagination.Offset())
+		query = query.Limit(pagination.Limit()).Offset(pagination.Offset())
 	}
 
 	for _, order := range orders {

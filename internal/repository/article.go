@@ -2,6 +2,7 @@ package repository
 
 import (
 	"zero-backend/internal/model"
+	"zero-backend/pkg/baserepo"
 	"zero-backend/pkg/helper"
 
 	"gorm.io/gorm"
@@ -42,12 +43,12 @@ func (f *ArticleCategoryFilter) Apply(db *gorm.DB) *gorm.DB {
 
 // ArticleCategoryRepository 文章分类数据操作
 type ArticleCategoryRepository struct {
-	*BaseRepository[model.ArticleCategory]
+	*baserepo.BaseRepository[model.ArticleCategory]
 }
 
 // NewArticleCategoryRepository 创建文章分类数据操作
 func NewArticleCategoryRepository(db *gorm.DB) *ArticleCategoryRepository {
-	baseRepo := NewBaseRepository[model.ArticleCategory](db)
+	baseRepo := baserepo.NewBaseRepository[model.ArticleCategory](db)
 	return &ArticleCategoryRepository{
 		BaseRepository: baseRepo,
 	}
@@ -93,12 +94,12 @@ func (f *ArticleFilter) Apply(db *gorm.DB) *gorm.DB {
 
 // ArticleRepository 文章数据操作
 type ArticleRepository struct {
-	*BaseRepository[model.Article]
+	*baserepo.BaseRepository[model.Article]
 }
 
 // NewArticleRepository 创建文章数据操作
 func NewArticleRepository(db *gorm.DB) *ArticleRepository {
-	baseRepo := NewBaseRepository[model.Article](db)
+	baseRepo := baserepo.NewBaseRepository[model.Article](db)
 	return &ArticleRepository{
 		BaseRepository: baseRepo,
 	}

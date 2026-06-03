@@ -20,6 +20,7 @@ import (
 	"zero-backend/internal/repository"
 	"zero-backend/internal/service/uploader"
 	"zero-backend/pkg/apperror"
+	"zero-backend/pkg/baserepo"
 )
 
 // UploadGroupService 文件分组服务
@@ -181,12 +182,9 @@ func (s *UploadFileService) FindList(ctx context.Context, req *dto.UploadFileLis
 		FileName: req.FileName,
 	}
 
-	pagination := &repository.Pagination{
-		Page:  req.Page,
-		Limit: req.Limit,
-	}
+	pagination := baserepo.NewPagination(req.Page, req.Limit)
 
-	orders := repository.Orders{
+	orders := baserepo.Orders{
 		{Field: "id", Sort: "desc"},
 	}
 
