@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"zero-backend/pkg/logger"
-	"zero-backend/pkg/queue"
+	"github.com/241x/zero-kit/queue"
+
+	"github.com/241x/zero-kit/logger"
 )
 
 // Registry 任务处理器注册中心，根据任务类型分发到对应的处理器

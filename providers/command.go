@@ -3,7 +3,8 @@ package providers
 import (
 	"zero-backend/modules/cli/command"
 	"zero-backend/modules/cli/runner"
-	"zero-backend/pkg/queue"
+
+	"github.com/241x/zero-kit/queue"
 
 	"github.com/google/wire"
 )

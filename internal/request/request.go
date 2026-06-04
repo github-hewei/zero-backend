@@ -5,7 +5,8 @@ import (
 	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
-	"zero-backend/pkg/apperror"
+
+	"github.com/241x/zero-kit/apperror"
 
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"

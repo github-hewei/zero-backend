@@ -11,7 +11,7 @@ import (
 	"github.com/google/wire"
 )
 
-func wireApp() *server.HTTPServer {
+func wireApp() (*server.HTTPServer, error) {
 	panic(wire.Build(
 		config.New,
 		providers.RedisProviderSet,

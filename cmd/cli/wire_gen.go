@@ -7,26 +7,29 @@
 package main
 
 import (
+	"github.com/241x/zero-kit/locker"
+	"github.com/241x/zero-kit/mongodb"
+	"github.com/241x/zero-kit/mysql"
+	"github.com/241x/zero-kit/queue"
+	"github.com/241x/zero-kit/redis"
 	"zero-backend/internal/config"
 	"zero-backend/internal/repository"
 	"zero-backend/internal/service"
 	"zero-backend/modules/cli/command"
 	"zero-backend/modules/cli/runner"
-	"zero-backend/pkg/locker"
-	"zero-backend/pkg/mongodb"
-	"zero-backend/pkg/mysql"
-	"zero-backend/pkg/queue"
-	"zero-backend/pkg/redis"
 	"zero-backend/providers"
 )
 
 // Injectors from wire.go:
 
-func wireApp() *command.RootCommand {
+func wireApp() (*command.RootCommand, error) {
 	configConfig := config.New()
 	loggerConfig := configConfig.Logger
 	mongodbConfig := providers.NewMongoDBConfig(configConfig)
-	conn := mongodb.NewConn(mongodbConfig)
+	conn, err := mongodb.NewConn(mongodbConfig)
+	if err != nil {
+		return nil, err
+	}
 	database := conn.DB
 	zeroLogger := providers.ProvideLogger(loggerConfig, database)
 	redisConfig := providers.NewRedisConfig(configConfig)
@@ -34,7 +37,10 @@ func wireApp() *command.RootCommand {
 	redisLocker := locker.NewRedisLocker(client)
 	mysqlConfig := providers.NewMySQLConfig(configConfig)
 	logger := mysql.NewLogger(zeroLogger)
-	db := mysql.NewDB(mysqlConfig, logger)
+	db, err := mysql.NewDB(mysqlConfig, logger)
+	if err != nil {
+		return nil, err
+	}
 	userRepository := repository.NewUserRepository(db)
 	userPointsLogRepository := repository.NewUserPointsLogRepository(db)
 	userService := service.NewUserService(db, userRepository, userPointsLogRepository)
@@ -47,5 +53,5 @@ func wireApp() *command.RootCommand {
 	syncApiRunner := runner.NewSyncApiRunner(zeroLogger, rbacApiRepository)
 	syncApiCommand := command.NewSyncApiCommand(syncApiRunner)
 	rootCommand := command.NewRootCommand(zeroLogger, redisLocker, userCommand, migrateCommand, queueCommand, syncApiCommand)
-	return rootCommand
+	return rootCommand, nil
 }

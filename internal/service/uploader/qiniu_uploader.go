@@ -6,8 +6,8 @@ import (
 	"strings"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/errcode"
-	"zero-backend/pkg/apperror"
 
+	"github.com/241x/zero-kit/apperror"
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
 )

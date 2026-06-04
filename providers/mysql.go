@@ -2,7 +2,8 @@ package providers
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/pkg/mysql"
+
+	"github.com/241x/zero-kit/mysql"
 
 	"github.com/google/wire"
 	"gorm.io/gorm/logger"

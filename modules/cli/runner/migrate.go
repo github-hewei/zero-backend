@@ -8,9 +8,12 @@ import (
 	"path/filepath"
 
 	"zero-backend/internal/errcode"
-	"zero-backend/pkg/apperror"
-	"zero-backend/pkg/logger"
-	"zero-backend/pkg/migrate"
+
+	"github.com/241x/zero-kit/migrate"
+
+	"github.com/241x/zero-kit/logger"
+
+	"github.com/241x/zero-kit/apperror"
 
 	"gorm.io/gorm"
 )

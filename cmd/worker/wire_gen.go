@@ -7,29 +7,32 @@
 package main
 
 import (
+	"github.com/241x/zero-kit/mongodb"
+	"github.com/241x/zero-kit/queue"
+	"github.com/241x/zero-kit/redis"
 	"zero-backend/internal/config"
 	"zero-backend/modules/worker/handler"
 	"zero-backend/modules/worker/server"
-	"zero-backend/pkg/mongodb"
-	"zero-backend/pkg/queue"
-	"zero-backend/pkg/redis"
 	"zero-backend/providers"
 )
 
 // Injectors from wire.go:
 
-func wireApp() *server.WorkerServer {
+func wireApp() (*server.WorkerServer, error) {
 	configConfig := config.New()
 	redisConfig := providers.NewRedisConfig(configConfig)
 	client := redis.New(redisConfig)
 	queueManager := queue.NewQueueManager(client)
 	loggerConfig := configConfig.Logger
 	mongodbConfig := providers.NewMongoDBConfig(configConfig)
-	conn := mongodb.NewConn(mongodbConfig)
+	conn, err := mongodb.NewConn(mongodbConfig)
+	if err != nil {
+		return nil, err
+	}
 	database := conn.DB
 	zeroLogger := providers.ProvideLogger(loggerConfig, database)
 	exampleHandler := handler.NewExampleHandler(zeroLogger)
 	registry := providers.ProvideRegistry(zeroLogger, exampleHandler)
 	workerServer := server.NewWorkerServer(queueManager, registry, zeroLogger)
-	return workerServer
+	return workerServer, nil
 }

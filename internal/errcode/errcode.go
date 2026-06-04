@@ -1,6 +1,6 @@
 package errcode
 
-import "zero-backend/pkg/apperror"
+import "github.com/241x/zero-kit/apperror"
 
 var (
 	// InvalidInput 输入校验失败

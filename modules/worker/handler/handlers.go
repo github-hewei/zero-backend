@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
-	"zero-backend/pkg/logger"
-	"zero-backend/pkg/queue"
+	"github.com/241x/zero-kit/queue"
+
+	"github.com/241x/zero-kit/logger"
 )
 
 // ExampleHandler 示例任务处理器，处理 "example" 类型的任务

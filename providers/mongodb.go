@@ -2,7 +2,8 @@ package providers
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/pkg/mongodb"
+
+	"github.com/241x/zero-kit/mongodb"
 
 	"github.com/google/wire"
 )

@@ -7,8 +7,10 @@ import (
 	"syscall"
 
 	"zero-backend/internal/constants"
-	"zero-backend/pkg/logger"
-	"zero-backend/pkg/queue"
+
+	"github.com/241x/zero-kit/queue"
+
+	"github.com/241x/zero-kit/logger"
 
 	"zero-backend/modules/worker/handler"
 )

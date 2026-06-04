@@ -7,7 +7,8 @@ import (
 	"zero-backend/internal/request"
 	"zero-backend/internal/response"
 	"zero-backend/internal/service"
-	"zero-backend/pkg/apperror"
+
+	"github.com/241x/zero-kit/apperror"
 
 	"github.com/gin-gonic/gin"
 )

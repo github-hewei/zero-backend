@@ -12,9 +12,9 @@ import (
 	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
-	"zero-backend/pkg/apperror"
-	"zero-backend/pkg/helper"
 
+	"github.com/241x/zero-kit/apperror"
+	"github.com/241x/zero-kit/helper"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
 )

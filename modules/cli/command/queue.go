@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"zero-backend/internal/constants"
-	"zero-backend/pkg/queue"
 
+	"github.com/241x/zero-kit/queue"
 	"github.com/spf13/cobra"
 )
 

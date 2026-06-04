@@ -6,8 +6,10 @@ import (
 	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
-	"zero-backend/pkg/apperror"
-	"zero-backend/pkg/baserepo"
+
+	"github.com/241x/zero-kit/baserepo"
+
+	"github.com/241x/zero-kit/apperror"
 )
 
 // ArticleCategoryService 文章分类业务逻辑层

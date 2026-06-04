@@ -6,10 +6,10 @@ import (
 	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
-	"zero-backend/pkg/apperror"
-	"zero-backend/pkg/baserepo"
-	"zero-backend/pkg/helper"
 
+	"github.com/241x/zero-kit/apperror"
+	"github.com/241x/zero-kit/baserepo"
+	"github.com/241x/zero-kit/helper"
 	"gorm.io/gorm"
 )
 

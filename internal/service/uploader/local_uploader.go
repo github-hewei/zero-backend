@@ -7,7 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"zero-backend/internal/errcode"
-	"zero-backend/pkg/apperror"
+
+	"github.com/241x/zero-kit/apperror"
 )
 
 // LocalUploader 本地文件上传实现

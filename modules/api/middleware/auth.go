@@ -6,7 +6,8 @@ import (
 	"zero-backend/internal/errcode"
 	"zero-backend/internal/response"
 	"zero-backend/modules/api/service"
-	"zero-backend/pkg/apperror"
+
+	"github.com/241x/zero-kit/apperror"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"

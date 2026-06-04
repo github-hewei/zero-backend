@@ -9,7 +9,8 @@ import (
 	"syscall"
 	"time"
 	"zero-backend/internal/config"
-	"zero-backend/pkg/logger"
+
+	"github.com/241x/zero-kit/logger"
 
 	"github.com/gin-gonic/gin"
 )

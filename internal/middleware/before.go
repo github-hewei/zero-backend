@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"time"
 	"zero-backend/internal/ctxkeys"
-	"zero-backend/pkg/logger"
-	"zero-backend/pkg/mysql"
+
+	"github.com/241x/zero-kit/mysql"
+
+	"github.com/241x/zero-kit/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

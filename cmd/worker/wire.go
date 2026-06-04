@@ -10,7 +10,7 @@ import (
 	"github.com/google/wire"
 )
 
-func wireApp() *server.WorkerServer {
+func wireApp() (*server.WorkerServer, error) {
 	panic(wire.Build(
 		config.New,
 		providers.RedisProviderSet,

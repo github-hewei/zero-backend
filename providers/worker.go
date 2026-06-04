@@ -3,8 +3,10 @@ package providers
 import (
 	"zero-backend/modules/worker/handler"
 	"zero-backend/modules/worker/server"
-	"zero-backend/pkg/logger"
-	"zero-backend/pkg/queue"
+
+	"github.com/241x/zero-kit/queue"
+
+	"github.com/241x/zero-kit/logger"
 
 	"github.com/google/wire"
 )

@@ -19,8 +19,10 @@ import (
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
 	"zero-backend/internal/service/uploader"
-	"zero-backend/pkg/apperror"
-	"zero-backend/pkg/baserepo"
+
+	"github.com/241x/zero-kit/baserepo"
+
+	"github.com/241x/zero-kit/apperror"
 )
 
 // UploadGroupService 文件分组服务

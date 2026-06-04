@@ -2,8 +2,8 @@ package providers
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/pkg/logger"
 
+	"github.com/241x/zero-kit/logger"
 	"github.com/google/wire"
 	"go.mongodb.org/mongo-driver/mongo"
 )

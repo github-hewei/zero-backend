@@ -9,10 +9,10 @@ import (
 	"syscall"
 	"time"
 	"zero-backend/internal/ctxkeys"
-	"zero-backend/pkg/locker"
-	"zero-backend/pkg/logger"
-	"zero-backend/pkg/mysql"
 
+	"github.com/241x/zero-kit/locker"
+	"github.com/241x/zero-kit/logger"
+	"github.com/241x/zero-kit/mysql"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )

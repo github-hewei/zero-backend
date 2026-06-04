@@ -4,7 +4,8 @@ import (
 	"context"
 	"mime/multipart"
 	"zero-backend/internal/errcode"
-	"zero-backend/pkg/apperror"
+
+	"github.com/241x/zero-kit/apperror"
 )
 
 // Uploader 定义文件上传接口

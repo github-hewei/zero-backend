@@ -5,8 +5,8 @@ import (
 	"zero-backend/internal/dto"
 	"zero-backend/internal/model"
 	"zero-backend/internal/service"
-	"zero-backend/pkg/logger"
 
+	"github.com/241x/zero-kit/logger"
 	"github.com/spf13/cobra"
 )
 

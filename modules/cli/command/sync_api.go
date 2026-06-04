@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"zero-backend/modules/cli/runner"
-	"zero-backend/pkg/logger"
+
+	"github.com/241x/zero-kit/logger"
 
 	"github.com/spf13/cobra"
 )

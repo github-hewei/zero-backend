@@ -7,6 +7,9 @@
 package main
 
 import (
+	"github.com/241x/zero-kit/mongodb"
+	"github.com/241x/zero-kit/mysql"
+	"github.com/241x/zero-kit/redis"
 	"zero-backend/internal/config"
 	"zero-backend/internal/middleware"
 	"zero-backend/internal/repository"
@@ -16,15 +19,12 @@ import (
 	middleware2 "zero-backend/modules/admin/middleware"
 	"zero-backend/modules/admin/server"
 	"zero-backend/modules/admin/service"
-	"zero-backend/pkg/mongodb"
-	"zero-backend/pkg/mysql"
-	"zero-backend/pkg/redis"
 	"zero-backend/providers"
 )
 
 // Injectors from wire.go:
 
-func wireApp() *server.HTTPServer {
+func wireApp() (*server.HTTPServer, error) {
 	configConfig := config.New()
 	serverConfig := providers.NewAdminServerConfig(configConfig)
 	validate := request.NewValidate()
@@ -33,11 +33,17 @@ func wireApp() *server.HTTPServer {
 	mysqlConfig := providers.NewMySQLConfig(configConfig)
 	loggerConfig := configConfig.Logger
 	mongodbConfig := providers.NewMongoDBConfig(configConfig)
-	conn := mongodb.NewConn(mongodbConfig)
+	conn, err := mongodb.NewConn(mongodbConfig)
+	if err != nil {
+		return nil, err
+	}
 	database := conn.DB
 	zeroLogger := providers.ProvideLogger(loggerConfig, database)
 	logger := mysql.NewLogger(zeroLogger)
-	db := mysql.NewDB(mysqlConfig, logger)
+	db, err := mysql.NewDB(mysqlConfig, logger)
+	if err != nil {
+		return nil, err
+	}
 	rbacUserRepository := repository.NewRbacUserRepository(db)
 	rbacApiRepository := repository.NewRbacApiRepository(db)
 	rbacRoleRepository := repository.NewRbacRoleRepository(db)
@@ -115,5 +121,5 @@ func wireApp() *server.HTTPServer {
 	corsConfig := providers.NewAdminCorsConfig(configConfig)
 	engine := server.NewGin(controllers, middlewares, middlewareMiddlewares, corsConfig)
 	httpServer := server.NewHTTPServer(serverConfig, engine, zeroLogger, db)
-	return httpServer
+	return httpServer, nil
 }

@@ -2,7 +2,8 @@ package repository
 
 import (
 	"zero-backend/internal/model"
-	"zero-backend/pkg/baserepo"
+
+	"github.com/241x/zero-kit/baserepo"
 
 	"gorm.io/gorm"
 )

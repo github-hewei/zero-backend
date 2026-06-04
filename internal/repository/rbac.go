@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"zero-backend/internal/model"
-	"zero-backend/pkg/baserepo"
-	"zero-backend/pkg/helper"
+
+	"github.com/241x/zero-kit/helper"
+
+	"github.com/241x/zero-kit/baserepo"
 
 	"gorm.io/gorm"
 )

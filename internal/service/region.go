@@ -5,7 +5,8 @@ import (
 	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
-	"zero-backend/pkg/apperror"
+
+	"github.com/241x/zero-kit/apperror"
 )
 
 // RegionService 通用服务

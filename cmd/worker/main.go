@@ -1,6 +1,9 @@
 package main
 
 func main() {
-	app := wireApp()
+	app, err := wireApp()
+	if err != nil {
+		panic(err)
+	}
 	app.Run()
 }

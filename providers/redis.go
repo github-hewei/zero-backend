@@ -2,8 +2,8 @@ package providers
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/pkg/redis"
 
+	"github.com/241x/zero-kit/redis"
 	"github.com/google/wire"
 )
 
