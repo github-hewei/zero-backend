@@ -40,11 +40,18 @@ type CorsConfig struct {
 	AllowCredentials bool     `mapstructure:"allow_credentials"`
 }
 
+// CaptchaConfig 验证码配置
+type CaptchaConfig struct {
+	Enabled bool `mapstructure:"enabled"`
+	TTL     int  `mapstructure:"ttl"`
+}
+
 // AdminConfig 管理后台配置
 type AdminConfig struct {
-	Server ServerConfig    `mapstructure:"server"`
-	Auth   AdminAuthConfig `mapstructure:"auth"`
-	Cors   CorsConfig      `mapstructure:"cors"`
+	Server  ServerConfig    `mapstructure:"server"`
+	Auth    AdminAuthConfig `mapstructure:"auth"`
+	Cors    CorsConfig      `mapstructure:"cors"`
+	Captcha CaptchaConfig   `mapstructure:"captcha"`
 }
 
 // AdminAuthConfig 管理端认证配置

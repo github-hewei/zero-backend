@@ -9,4 +9,6 @@ const (
 	RedisUserLoginKey = "ZAG:USER:LOGIN"
 	// 用户刷新token缓存前缀
 	RedisUserRefreshTokenKey = "ZAG:USER:REFRESH:TOKEN"
+	// 验证码缓存前缀
+	RedisCaptchaKey = "ZAG:CAPTCHA"
 )

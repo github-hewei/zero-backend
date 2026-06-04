@@ -12,13 +12,35 @@
     }
   ],
   "paths": {
+    "/captcha/generate": {
+      "post": {
+        "tags": [
+          "验证码"
+        ],
+        "summary": "生成图形验证码",
+        "description": "生成点选验证码，返回验证码ID和两张base64编码的图片。\n- master_image：主图（含文字提示的大图）\n- thumb_image：缩略图（需要点击的小图）\n",
+        "operationId": "captchaGenerate",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptchaGenerateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "tags": [
           "认证管理"
         ],
         "summary": "管理员登录",
-        "description": "管理员使用用户名密码登录系统，获取JWT令牌",
+        "description": "管理员使用用户名密码登录系统，获取JWT令牌。\n登录前需先调用 `/captcha/generate` 获取验证码，并将验证码ID和用户点选坐标随登录请求一并提交。\n- `captcha_id`：验证码唯一标识\n- `captcha_code`：用户点选坐标的 JSON 字符串，前端需对坐标数组做 `JSON.stringify()` 后传入\n",
         "operationId": "adminLogin",
         "requestBody": {
           "required": true,
@@ -4173,7 +4195,9 @@
         "type": "object",
         "required": [
           "username",
-          "password"
+          "password",
+          "captcha_id",
+          "captcha_code"
         ],
         "properties": {
           "username": {
@@ -4185,6 +4209,16 @@
             "type": "string",
             "description": "密码",
             "example": "123456"
+          },
+          "captcha_id": {
+            "type": "string",
+            "description": "验证码唯一标识，通过 /captcha/generate 接口获取",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "captcha_code": {
+            "type": "string",
+            "description": "用户点选坐标的 JSON 字符串，格式为 `[{\"x\":120,\"y\":85},{\"x\":200,\"y\":150}]`。\n前端需要对点击坐标数组做 `JSON.stringify()` 后传入。\n",
+            "example": "[{\"x\":120,\"y\":85},{\"x\":200,\"y\":150}]"
           }
         }
       },
@@ -4767,6 +4801,62 @@
           "updated_at": {
             "type": "integer",
             "description": "更新时间"
+          }
+        }
+      },
+      "CaptchaGenerateResponse": {
+        "type": "object",
+        "properties": {
+          "errcode": {
+            "type": "integer",
+            "example": 0
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "captcha_id": {
+                "type": "string",
+                "description": "验证码唯一标识",
+                "example": "550e8400-e29b-41d4-a716-446655440000"
+              },
+              "master_image": {
+                "type": "string",
+                "description": "主图 base64（含文字提示的大图）",
+                "example": "data:image/png;base64,iVBORw0KGgo..."
+              },
+              "thumb_image": {
+                "type": "string",
+                "description": "缩略图 base64（需要点击的小图）",
+                "example": "data:image/png;base64,iVBORw0KGgo..."
+              }
+            }
+          },
+          "cost": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string"
+          }
+        }
+      },
+      "CaptchaClickPoint": {
+        "type": "object",
+        "required": [
+          "x",
+          "y"
+        ],
+        "properties": {
+          "x": {
+            "type": "integer",
+            "description": "点击坐标 X 值"
+          },
+          "y": {
+            "type": "integer",
+            "description": "点击坐标 Y 值"
           }
         }
       }

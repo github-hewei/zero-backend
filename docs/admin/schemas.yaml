@@ -22,6 +22,8 @@ schemas:
     required:
       - username
       - password
+      - captcha_id
+      - captcha_code
     properties:
       username:
         type: string
@@ -31,6 +33,16 @@ schemas:
         type: string
         description: 密码
         example: "123456"
+      captcha_id:
+        type: string
+        description: 验证码唯一标识，通过 /captcha/generate 接口获取
+        example: "550e8400-e29b-41d4-a716-446655440000"
+      captcha_code:
+        type: string
+        description: |
+          用户点选坐标的 JSON 字符串，格式为 `[{"x":120,"y":85},{"x":200,"y":150}]`。
+          前端需要对点击坐标数组做 `JSON.stringify()` 后传入。
+        example: '[{"x":120,"y":85},{"x":200,"y":150}]'
 
   AuthLoginResponse:
     type: object
@@ -538,3 +550,48 @@ schemas:
       created_at:
         type: integer
         description: 创建时间
+
+  CaptchaGenerateResponse:
+    type: object
+    properties:
+      errcode:
+        type: integer
+        example: 0
+      message:
+        type: string
+        example: success
+      data:
+        $ref: '#/schemas/CaptchaGenerateData'
+      cost:
+        type: string
+      traceId:
+        type: string
+
+  CaptchaGenerateData:
+    type: object
+    properties:
+      captcha_id:
+        type: string
+        description: 验证码唯一标识
+        example: "550e8400-e29b-41d4-a716-446655440000"
+      master_image:
+        type: string
+        description: 主图 base64（含文字提示的大图）
+        example: "data:image/png;base64,iVBORw0KGgo..."
+      thumb_image:
+        type: string
+        description: 缩略图 base64（需要点击的小图）
+        example: "data:image/png;base64,iVBORw0KGgo..."
+
+  CaptchaClickPoint:
+    type: object
+    required:
+      - x
+      - y
+    properties:
+      x:
+        type: integer
+        description: 点击坐标 X 值
+      y:
+        type: integer
+        description: 点击坐标 Y 值

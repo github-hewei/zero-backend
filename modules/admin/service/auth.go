@@ -12,6 +12,7 @@ import (
 	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
+	"zero-backend/internal/service"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/baserepo"
@@ -31,6 +32,7 @@ type AuthService struct {
 	menuApiRepo  *repository.RbacMenuApiRepository
 	cfg          config.AdminAuthConfig
 	rdb          *redis.Client
+	captchaServ  *service.CaptchaService
 }
 
 // NewAuthService 创建AuthService实例
@@ -44,6 +46,7 @@ func NewAuthService(
 	menuApiRepo *repository.RbacMenuApiRepository,
 	cfg config.AdminAuthConfig,
 	rdb *redis.Client,
+	captchaServ *service.CaptchaService,
 ) *AuthService {
 	return &AuthService{
 		userRepo:     userRepo,
@@ -55,11 +58,17 @@ func NewAuthService(
 		menuApiRepo:  menuApiRepo,
 		cfg:          cfg,
 		rdb:          rdb,
+		captchaServ:  captchaServ,
 	}
 }
 
 // Login 系统登录
 func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dto.AdminLoginResponse, string, error) {
+	// 验证码校验
+	if err := s.captchaServ.Verify(ctx, req.CaptchaID, req.CaptchaCode); err != nil {
+		return nil, "", err
+	}
+
 	filter := &repository.RbacUserUsernameFilterField{Username: req.Username}
 	item, err := s.userRepo.FindOne(ctx, filter)
 	if err != nil {

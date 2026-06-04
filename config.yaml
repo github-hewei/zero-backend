@@ -32,6 +32,10 @@ admin:
       - "Referer"
       - "User-Agent"
     allow_credentials: true
+  # 验证码配置
+  captcha:
+    enabled: true
+    ttl: 300
 
 # API模块配置
 api:

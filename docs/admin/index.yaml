@@ -8,6 +8,8 @@ servers:
     description: API Base Path
 
 paths:
+  /captcha/generate:
+    $ref: './paths/captcha.yaml#/~1captcha~1generate'
   /login:
     $ref: './paths/auth.yaml#/~1login'
   /refresh-token:
@@ -189,3 +191,7 @@ components:
       $ref: './schemas.yaml#/schemas/Setting'
     SettingDefault:
       $ref: './schemas.yaml#/schemas/SettingDefault'
+    CaptchaGenerateResponse:
+      $ref: './schemas.yaml#/schemas/CaptchaGenerateResponse'
+    CaptchaClickPoint:
+      $ref: './schemas.yaml#/schemas/CaptchaClickPoint'

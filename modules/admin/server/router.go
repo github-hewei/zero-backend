@@ -27,6 +27,9 @@ func NewGin(
 	apiGroup.POST("/login", ctrl.AuthController.Login)
 	apiGroup.POST("/refresh-token", ctrl.AuthController.RefreshToken)
 
+	// 验证码
+	apiGroup.POST("/captcha/generate", ctrl.CaptchaController.Generate)
+
 	// 注册中间件验证权限
 	apiGroup.Use(adminMiddlewares.Auth.JWTAuth())
 	apiGroup.Use(adminMiddlewares.Auth.CheckAPIPermission())

@@ -14,11 +14,11 @@ import (
 	"zero-backend/internal/middleware"
 	"zero-backend/internal/repository"
 	"zero-backend/internal/request"
-	service2 "zero-backend/internal/service"
+	"zero-backend/internal/service"
 	"zero-backend/modules/admin/controller"
 	middleware2 "zero-backend/modules/admin/middleware"
 	"zero-backend/modules/admin/server"
-	"zero-backend/modules/admin/service"
+	service2 "zero-backend/modules/admin/service"
 	"zero-backend/providers"
 )
 
@@ -54,47 +54,51 @@ func wireApp() (*server.HTTPServer, error) {
 	adminAuthConfig := providers.NewAdminAuthConfig(configConfig)
 	redisConfig := providers.NewRedisConfig(configConfig)
 	client := redis.New(redisConfig)
-	authService := service.NewAuthService(rbacUserRepository, rbacApiRepository, rbacRoleRepository, rbacMenuRepository, rbacRoleMenuRepository, rbacUserRoleRepository, rbacMenuApiRepository, adminAuthConfig, client)
+	captchaConfig := providers.NewCaptchaConfig(configConfig)
+	captchaService := service.NewCaptchaService(client, captchaConfig)
+	authService := service2.NewAuthService(rbacUserRepository, rbacApiRepository, rbacRoleRepository, rbacMenuRepository, rbacRoleMenuRepository, rbacUserRoleRepository, rbacMenuApiRepository, adminAuthConfig, client, captchaService)
 	authController := controller.NewAuthController(requestRequest, authService, adminAuthConfig)
-	rbacMenuService := service2.NewRbacMenuService(rbacMenuRepository, rbacMenuApiRepository, db)
+	captchaController := controller.NewCaptchaController(requestRequest, captchaService)
+	rbacMenuService := service.NewRbacMenuService(rbacMenuRepository, rbacMenuApiRepository, db)
 	rbacMenuController := controller.NewRbacMenuController(requestRequest, rbacMenuService)
-	rbacApiService := service2.NewRbacApiService(rbacApiRepository)
+	rbacApiService := service.NewRbacApiService(rbacApiRepository)
 	rbacApiController := controller.NewRbacApiController(requestRequest, rbacApiService)
-	rbacRoleService := service2.NewRbacRoleService(rbacRoleRepository, rbacRoleMenuRepository, db)
+	rbacRoleService := service.NewRbacRoleService(rbacRoleRepository, rbacRoleMenuRepository, db)
 	rbacRoleController := controller.NewRbacRoleController(rbacRoleService, requestRequest)
-	rbacUserService := service2.NewRbacUserService(db, rbacUserRepository, rbacUserRoleRepository)
+	rbacUserService := service.NewRbacUserService(db, rbacUserRepository, rbacUserRoleRepository)
 	rbacUserController := controller.NewRbacUserController(requestRequest, rbacUserService)
 	rbacStoreRepository := repository.NewRbacStoreRepository(db)
-	rbacStoreService := service2.NewRbacStoreService(rbacStoreRepository)
+	rbacStoreService := service.NewRbacStoreService(rbacStoreRepository)
 	rbacStoreController := controller.NewRbacStoreController(requestRequest, rbacStoreService)
 	uploadGroupRepository := repository.NewUploadGroupRepository(db)
-	uploadGroupService := service2.NewUploadGroupService(uploadGroupRepository)
+	uploadGroupService := service.NewUploadGroupService(uploadGroupRepository)
 	uploadGroupController := controller.NewUploadGroupController(requestRequest, uploadGroupService)
 	uploadFileRepository := repository.NewUploadFileRepository(db)
 	settingRepository := repository.NewSettingRepository(db)
 	settingDefaultRepository := repository.NewSettingDefaultRepository(db)
-	settingService := service2.NewSettingService(settingRepository, settingDefaultRepository)
-	uploadFileService := service2.NewUploadFileService(uploadFileRepository, settingService)
+	settingService := service.NewSettingService(settingRepository, settingDefaultRepository)
+	uploadFileService := service.NewUploadFileService(uploadFileRepository, settingService)
 	uploadFileController := controller.NewUploadFileController(requestRequest, uploadFileService)
 	userRepository := repository.NewUserRepository(db)
 	userPointsLogRepository := repository.NewUserPointsLogRepository(db)
-	userService := service2.NewUserService(db, userRepository, userPointsLogRepository)
+	userService := service.NewUserService(db, userRepository, userPointsLogRepository)
 	userController := controller.NewUserController(requestRequest, userService)
 	settingController := controller.NewSettingController(requestRequest, settingService)
-	settingDefaultService := service2.NewSettingDefaultService(settingDefaultRepository)
+	settingDefaultService := service.NewSettingDefaultService(settingDefaultRepository)
 	settingDefaultController := controller.NewSettingDefaultController(requestRequest, settingDefaultService)
 	articleCategoryRepository := repository.NewArticleCategoryRepository(db)
-	articleCategoryService := service2.NewArticleCategoryService(articleCategoryRepository)
+	articleCategoryService := service.NewArticleCategoryService(articleCategoryRepository)
 	articleCategoryController := controller.NewArticleCategoryController(requestRequest, articleCategoryService)
 	articleRepository := repository.NewArticleRepository(db)
-	articleService := service2.NewArticleService(articleRepository)
+	articleService := service.NewArticleService(articleRepository)
 	articleController := controller.NewArticleController(requestRequest, articleService)
 	regionRepository := repository.NewRegionRepository(db)
-	regionService := service2.NewRegionService(regionRepository, settingService)
+	regionService := service.NewRegionService(regionRepository, settingService)
 	regionController := controller.NewRegionController(regionService)
 	healthController := controller.NewHealthController()
 	controllers := &controller.Controllers{
 		AuthController:            authController,
+		CaptchaController:         captchaController,
 		RbacMenuController:        rbacMenuController,
 		RbacApiController:         rbacApiController,
 		RbacRoleController:        rbacRoleController,
