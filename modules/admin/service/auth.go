@@ -76,12 +76,12 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return nil, "", apperror.New(errcode.InvalidInput, apperror.WithMsg("用户名或密码错误"))
 		}
-		return nil, "", apperror.Wrap(errcode.Internal, err)
+		return nil, "", apperror.Wrap(errcode.Internal, err, apperror.WithMsg("登录失败"))
 	}
 
 	ok, err := helper.CheckPassword(req.Password, item.Password)
 	if err != nil {
-		return nil, "", apperror.Wrap(errcode.Internal, err)
+		return nil, "", apperror.Wrap(errcode.Internal, err, apperror.WithMsg("验证密码失败"))
 	}
 	if !ok {
 		return nil, "", apperror.New(errcode.InvalidInput, apperror.WithMsg("用户名或密码错误"))
@@ -94,7 +94,7 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 
 	itemBytes, err := json.Marshal(item)
 	if err != nil {
-		return nil, "", apperror.Wrap(errcode.Internal, err)
+		return nil, "", apperror.Wrap(errcode.Internal, err, apperror.WithMsg("登录失败"))
 	}
 
 	result := s.rdb.Set(ctx,
@@ -103,12 +103,12 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 		time.Duration(s.cfg.RefreshTokenTtl)*time.Second)
 
 	if result.Err() != nil {
-		return nil, "", apperror.Wrap(errcode.Internal, result.Err())
+		return nil, "", apperror.Wrap(errcode.Internal, result.Err(), apperror.WithMsg("登录失败"))
 	}
 
 	tokenString, err := s.getAccessToken(item)
 	if err != nil {
-		return nil, "", apperror.Wrap(errcode.Internal, err)
+		return nil, "", apperror.Wrap(errcode.Internal, err, apperror.WithMsg("登录失败"))
 	}
 
 	s.WithSU(item)
@@ -126,17 +126,17 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*d
 		fmt.Sprintf("%s:%s", constants.RedisAdminRefreshTokenKey, refreshToken)).Bytes()
 
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("刷新令牌失败"))
 	}
 
 	item := &model.RbacUser{}
 	if err := json.Unmarshal(itemBytes, item); err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("刷新令牌失败"))
 	}
 
 	token, err := s.getAccessToken(item)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("刷新令牌失败"))
 	}
 
 	return &dto.AdminLoginResponse{
@@ -192,7 +192,7 @@ func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*model.Rb
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return nil, apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 		}
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取用户信息失败"))
 	}
 
 	s.WithSU(user)
@@ -226,7 +226,7 @@ func (s *AuthService) GetPermissions(ctx context.Context, req *dto.AuthGetPermis
 	if user.SU {
 		menus, err := s.menuRepo.FindAll(ctx, nil, nil, nil, baserepo.WithScopes(nil))
 		if err != nil {
-			return nil, apperror.Wrap(errcode.Internal, err)
+			return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取菜单权限失败"))
 		}
 		if req.IsTree {
 			return model.RbacMenuList(menus).Tree(), nil
@@ -237,7 +237,7 @@ func (s *AuthService) GetPermissions(ctx context.Context, req *dto.AuthGetPermis
 	// 2. 获取用户角色
 	roles, err := s.GetUserRoles(ctx, user.ID)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取菜单权限失败"))
 	}
 	if len(roles) == 0 {
 		return nil, nil
@@ -248,7 +248,7 @@ func (s *AuthService) GetPermissions(ctx context.Context, req *dto.AuthGetPermis
 	for _, role := range roles {
 		roleMenus, err := s.GetRoleMenus(ctx, role.ID)
 		if err != nil {
-			return nil, apperror.Wrap(errcode.Internal, err)
+			return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取菜单权限失败"))
 		}
 		menus = append(menus, roleMenus...)
 	}
@@ -339,13 +339,13 @@ func (s *AuthService) ChangePassword(ctx context.Context, req *dto.ChangePasswor
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("修改密码失败"))
 	}
 
 	// 2. 验证旧密码
 	ok, err := helper.CheckPassword(req.OldPassword, user.Password)
 	if err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("验证密码失败"))
 	}
 	if !ok {
 		return apperror.New(errcode.InvalidInput, apperror.WithMsg("旧密码不正确"))
@@ -354,7 +354,7 @@ func (s *AuthService) ChangePassword(ctx context.Context, req *dto.ChangePasswor
 	// 3. 加密新密码
 	hashedPassword, err := helper.HashPassword(req.NewPassword)
 	if err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("修改密码失败"))
 	}
 
 	// 4. 更新密码
@@ -363,7 +363,7 @@ func (s *AuthService) ChangePassword(ctx context.Context, req *dto.ChangePasswor
 	}
 
 	if err := s.userRepo.Updates(ctx, user, updateData); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("修改密码失败"))
 	}
 
 	return nil

@@ -246,12 +246,12 @@ func (r *SyncApiRunner) parseOpenAPI(filePath string) (*OpenAPISpec, error) {
 		if os.IsNotExist(err) {
 			return nil, apperror.New(errcode.NotFound, apperror.WithMsg("找不到 OpenAPI 文档文件："+filePath))
 		}
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("读取OpenAPI文档失败"))
 	}
 
 	var spec OpenAPISpec
 	if err := json.Unmarshal(data, &spec); err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("解析OpenAPI文档失败"))
 	}
 
 	if spec.OpenAPI == "" {

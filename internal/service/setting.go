@@ -54,7 +54,7 @@ func (s *SettingService) FindList(ctx context.Context, req *dto.SettingListReque
 
 	total, err := s.repo.Count(ctx, filter)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取设置列表失败"))
 	}
 
 	if total == 0 {
@@ -65,7 +65,7 @@ func (s *SettingService) FindList(ctx context.Context, req *dto.SettingListReque
 
 	list, err := s.repo.FindAll(ctx, filter, pagination, orders)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取设置列表失败"))
 	}
 
 	result.List = list
@@ -87,7 +87,7 @@ func (s *SettingService) Create(ctx context.Context, req *dto.SettingCreateReque
 	}
 
 	if err := s.repo.Create(ctx, item); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("创建设置失败"))
 	}
 
 	return nil
@@ -104,7 +104,7 @@ func (s *SettingService) Update(ctx context.Context, req *dto.SettingUpdateReque
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("设置不存在或无权限访问"))
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新设置失败"))
 	}
 
 	if item.SettingKey != req.SettingKey {
@@ -121,7 +121,7 @@ func (s *SettingService) Update(ctx context.Context, req *dto.SettingUpdateReque
 	}
 
 	if err := s.repo.Updates(ctx, item, updateData); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新设置失败"))
 	}
 
 	return nil
@@ -138,11 +138,11 @@ func (s *SettingService) Delete(ctx context.Context, req *dto.SettingDeleteReque
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound)
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除设置失败"))
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除设置失败"))
 	}
 
 	return nil
@@ -156,7 +156,7 @@ func (s *SettingService) checkSettingKey(ctx context.Context, key string, storeI
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return nil
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("检查设置key失败"))
 	}
 
 	return apperror.New(errcode.Conflict, apperror.WithMsg("设置key已存在"))
@@ -170,7 +170,7 @@ func (s *SettingService) GetSettingValue(ctx context.Context, key string, out an
 	var settingValues string
 	if err != nil {
 		if !errors.Is(err, baserepo.ErrRecordNotFound) {
-			return apperror.Wrap(errcode.Internal, err)
+			return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取设置项失败"))
 		}
 		// 记录不存在，尝试从默认设置获取
 		filter := &repository.SettingDefaultFilterField{SettingKey: key}
@@ -179,7 +179,7 @@ func (s *SettingService) GetSettingValue(ctx context.Context, key string, out an
 			if errors.Is(err, baserepo.ErrRecordNotFound) {
 				return apperror.New(errcode.NotFound, apperror.WithMsg("设置项不存在"))
 			}
-			return apperror.Wrap(errcode.Internal, err)
+			return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取设置项失败"))
 		}
 		settingValues = defaultSetting.SettingValues
 	} else {
@@ -187,7 +187,7 @@ func (s *SettingService) GetSettingValue(ctx context.Context, key string, out an
 	}
 
 	if err := json.Unmarshal([]byte(settingValues), out); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("解析设置项失败"))
 	}
 	return nil
 }
@@ -260,7 +260,7 @@ func (s *SettingDefaultService) FindList(ctx context.Context, req *dto.SettingDe
 
 	total, err := s.repo.Count(ctx, filter, baserepo.WithScopes(nil))
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取默认设置列表失败"))
 	}
 
 	if total == 0 {
@@ -271,7 +271,7 @@ func (s *SettingDefaultService) FindList(ctx context.Context, req *dto.SettingDe
 
 	list, err := s.repo.FindAll(ctx, filter, pagination, orders, baserepo.WithScopes(nil))
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取默认设置列表失败"))
 	}
 
 	result.List = list
@@ -292,7 +292,7 @@ func (s *SettingDefaultService) Create(ctx context.Context, req *dto.SettingDefa
 	}
 
 	if err := s.repo.Create(ctx, item); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("创建默认设置失败"))
 	}
 
 	return nil
@@ -305,7 +305,7 @@ func (s *SettingDefaultService) Update(ctx context.Context, req *dto.SettingDefa
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound)
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新默认设置失败"))
 	}
 
 	if item.SettingKey != req.SettingKey {
@@ -321,7 +321,7 @@ func (s *SettingDefaultService) Update(ctx context.Context, req *dto.SettingDefa
 	}
 
 	if err := s.repo.Updates(ctx, item, updateData); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新默认设置失败"))
 	}
 
 	return nil
@@ -334,11 +334,11 @@ func (s *SettingDefaultService) Delete(ctx context.Context, req *dto.SettingDefa
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound)
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除默认设置失败"))
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除默认设置失败"))
 	}
 
 	return nil
@@ -352,7 +352,7 @@ func (s *SettingDefaultService) checkSettingKey(ctx context.Context, key string)
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return nil
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("检查默认设置key失败"))
 	}
 
 	return apperror.New(errcode.Conflict, apperror.WithMsg("默认设置key已存在"))

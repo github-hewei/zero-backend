@@ -61,14 +61,14 @@ func (u *QiniuUploader) Upload(ctx context.Context, file *multipart.FileHeader, 
 	// 执行上传
 	fileReader, err := file.Open()
 	if err != nil {
-		return "", apperror.Wrap(errcode.Internal, err)
+		return "", apperror.Wrap(errcode.Internal, err, apperror.WithMsg("打开文件失败"))
 	}
 	defer fileReader.Close()
 
 	savePath = strings.ReplaceAll(savePath, "\\", "/")
 	err = formUploader.Put(ctx, &ret, upToken, savePath, fileReader, file.Size, nil)
 	if err != nil {
-		return "", apperror.Wrap(errcode.Internal, err)
+		return "", apperror.Wrap(errcode.Internal, err, apperror.WithMsg("上传到七牛云失败"))
 	}
 
 	return u.config.Domain, nil

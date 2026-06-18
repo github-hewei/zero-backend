@@ -38,7 +38,7 @@ func (r *Request) ShouldBindJSON(ctx *gin.Context, data any) error {
 			return apperror.New(errcode.InvalidInput, apperror.WithMsg(validationErrors[0].Translate(r.trans)))
 		}
 
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("参数验证失败"))
 	}
 
 	return nil
@@ -59,7 +59,7 @@ func (r *Request) ShouldBindJSONArray(ctx *gin.Context, data any) error {
 				return apperror.New(errcode.InvalidInput, apperror.WithMsg(validationErrors[0].Translate(r.trans)))
 			}
 
-			return apperror.Wrap(errcode.Internal, err)
+			return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("参数验证失败"))
 		}
 	}
 

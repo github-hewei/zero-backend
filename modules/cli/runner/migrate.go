@@ -53,7 +53,7 @@ func (r *MigrateRunner) Up(ctx context.Context, filePath string) error {
 			return apperror.New(errcode.Internal, apperror.WithMsg(fmt.Sprintf("执行迁移失败：%s", migrationError.Error())))
 		}
 
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("执行迁移失败"))
 	}
 
 	r.logger.Info("数据库迁移完成")

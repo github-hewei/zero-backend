@@ -25,7 +25,7 @@ func (s *RegionService) Regions(ctx context.Context) ([]*model.Region, error) {
 	// 获取所有地区数据
 	regions, err := s.repo.FindAll(ctx)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取地区数据失败"))
 	}
 
 	// 转换为RegionList并构建树形结构

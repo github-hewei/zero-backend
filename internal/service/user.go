@@ -82,7 +82,7 @@ func (s *UserService) Create(ctx context.Context, req *dto.UserCreateRequest) er
 	// 密码加密
 	hashedPassword, err := helper.HashPassword(req.Password)
 	if err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("创建用户失败"))
 	}
 
 	user := &model.User{
@@ -97,7 +97,7 @@ func (s *UserService) Create(ctx context.Context, req *dto.UserCreateRequest) er
 	}
 
 	if err := s.repo.Create(ctx, user); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("创建用户失败"))
 	}
 
 	return nil
@@ -114,7 +114,7 @@ func (s *UserService) Update(ctx context.Context, req *dto.UserUpdateRequest) er
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在或无权限访问"))
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新用户失败"))
 	}
 
 	if user.Username != req.Username {
@@ -136,13 +136,13 @@ func (s *UserService) Update(ctx context.Context, req *dto.UserUpdateRequest) er
 	if req.Password != "" {
 		hashedPassword, err := helper.HashPassword(req.Password)
 		if err != nil {
-			return apperror.Wrap(errcode.Internal, err)
+			return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新用户失败"))
 		}
 		updateData["password"] = hashedPassword
 	}
 
 	if err := s.repo.Updates(ctx, user, updateData); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新用户失败"))
 	}
 
 	return nil
@@ -156,7 +156,7 @@ func (s *UserService) checkUsername(ctx context.Context, username string) error 
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return nil
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("检查用户名失败"))
 	}
 
 	return apperror.New(errcode.Conflict, apperror.WithMsg("用户名已存在"))
@@ -176,7 +176,7 @@ func (s *UserService) GetPointsLogs(ctx context.Context, req *dto.UserPointsLogL
 
 	total, err := s.pointsLogRepo.Count(ctx, filter)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取积分记录失败"))
 	}
 
 	result.Total = total
@@ -192,7 +192,7 @@ func (s *UserService) GetPointsLogs(ctx context.Context, req *dto.UserPointsLogL
 
 	list, err := s.pointsLogRepo.FindAll(ctx, filter, pagination, orders)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取积分记录失败"))
 	}
 
 	result.List = list
@@ -227,7 +227,7 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 			if errors.Is(err, baserepo.ErrRecordNotFound) {
 				return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 			}
-			return apperror.Wrap(errcode.Internal, err)
+			return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("变更用户积分失败"))
 		}
 
 		// 更新用户积分
@@ -236,7 +236,7 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 		}
 
 		if err := s.repo.Updates(ctx, user, updateData, baserepo.WithDB[*baserepo.UpdateConfig](tx)); err != nil {
-			return apperror.Wrap(errcode.Internal, err)
+			return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("变更用户积分失败"))
 		}
 
 		// 创建积分记录
@@ -251,7 +251,7 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 		}
 
 		if err := s.pointsLogRepo.Create(ctx, pointsLog, baserepo.WithDB[*baserepo.CreateConfig](tx)); err != nil {
-			return apperror.Wrap(errcode.Internal, err)
+			return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("变更用户积分失败"))
 		}
 
 		return nil
@@ -265,7 +265,7 @@ func (s *UserService) Detail(ctx context.Context, id uint32) (*model.User, error
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return nil, apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 		}
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取用户详情失败"))
 	}
 
 	return user, nil
@@ -282,11 +282,11 @@ func (s *UserService) Delete(ctx context.Context, req *dto.UserDeleteRequest) er
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在或无权限访问"))
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除用户失败"))
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除用户失败"))
 	}
 	return nil
 }

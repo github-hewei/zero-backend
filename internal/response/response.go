@@ -39,7 +39,7 @@ func Error(c *gin.Context, err error) {
 	// 非 apperror 错误兜底
 	output(c, err, Response{
 		ErrCode: errcode.Internal.Value(),
-		Message: errcode.Internal.Template(),
+		Message: errcode.Internal.DefaultMsg(),
 	})
 }
 

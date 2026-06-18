@@ -44,7 +44,7 @@ func (s *UploadGroupService) FindTreeList(ctx context.Context, storeId uint32) (
 	list, err := s.repo.FindAll(ctx, filter, nil, nil)
 
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取分组列表失败"))
 	}
 
 	if len(list) > 0 {
@@ -72,7 +72,7 @@ func (s *UploadGroupService) Create(ctx context.Context, req *dto.UploadGroupCre
 	}
 
 	if err := s.repo.Create(ctx, group); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("创建分组失败"))
 	}
 
 	return nil
@@ -86,7 +86,7 @@ func (s *UploadGroupService) checkName(ctx context.Context, name string, storeId
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return nil
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("检查分组名称失败"))
 	}
 
 	return apperror.New(errcode.Conflict, apperror.WithMsg("分组名称已存在"))
@@ -104,7 +104,7 @@ func (s *UploadGroupService) Update(ctx context.Context, req *dto.UploadGroupUpd
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("分组不存在或无权限访问"))
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新分组失败"))
 	}
 
 	// 检查名称是否重复(排除自身)
@@ -123,7 +123,7 @@ func (s *UploadGroupService) Update(ctx context.Context, req *dto.UploadGroupUpd
 	}
 
 	if err := s.repo.Updates(ctx, item, updateData); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新分组失败"))
 	}
 
 	return nil
@@ -141,12 +141,12 @@ func (s *UploadGroupService) Delete(ctx context.Context, req *dto.UploadGroupDel
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("分组不存在或无权限访问"))
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除分组失败"))
 	}
 
 	// 执行删除
 	if err := s.repo.Delete(ctx, req.ID); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除分组失败"))
 	}
 
 	return nil
@@ -191,7 +191,7 @@ func (s *UploadFileService) FindList(ctx context.Context, req *dto.UploadFileLis
 
 	total, err := s.repo.Count(ctx, filter)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取文件列表失败"))
 	}
 
 	if total == 0 {
@@ -202,7 +202,7 @@ func (s *UploadFileService) FindList(ctx context.Context, req *dto.UploadFileLis
 
 	list, err := s.repo.FindAll(ctx, filter, pagination, orders)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取文件列表失败"))
 	}
 
 	result.List = list
@@ -315,7 +315,7 @@ func (s *UploadFileService) Upload(ctx context.Context, req *dto.UploadFileReque
 	// 获取上传配置
 	config, err := s.getUploadConfig(ctx)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取上传配置失败"))
 	}
 
 	// 验证文件大小
@@ -335,11 +335,11 @@ func (s *UploadFileService) Upload(ctx context.Context, req *dto.UploadFileReque
 	fileHeader := make([]byte, 512)
 	src, err := req.File.Open()
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("读取文件失败"))
 	}
 	if _, err = src.Read(fileHeader); err != nil {
 		src.Close()
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("读取文件失败"))
 	}
 	src.Close()
 
@@ -357,7 +357,7 @@ func (s *UploadFileService) Upload(ctx context.Context, req *dto.UploadFileReque
 	// 生成存储路径
 	savePath, err := s.generateFilePath(req.File)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("生成文件路径失败"))
 	}
 
 	// 创建文件记录
@@ -410,7 +410,7 @@ func (s *UploadFileService) Upload(ctx context.Context, req *dto.UploadFileReque
 	uploadFile.Domain = domain
 
 	if err := s.repo.Create(ctx, uploadFile); err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("创建文件记录失败"))
 	}
 
 	return uploadFile, nil
@@ -454,12 +454,12 @@ func (s *UploadFileService) Delete(ctx context.Context, req *dto.UploadFileDelet
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("文件不存在"))
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除文件失败"))
 	}
 
 	// 执行删除
 	if err := s.repo.Delete(ctx, req.ID); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除文件失败"))
 	}
 
 	return nil

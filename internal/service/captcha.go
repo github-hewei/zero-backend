@@ -58,7 +58,7 @@ func NewCaptchaService(rdb *redis.Client, cfg config.CaptchaConfig) *CaptchaServ
 func (s *CaptchaService) Generate(ctx context.Context) (*dto.CaptchaGenerateResponse, error) {
 	captData, err := s.capt.Generate()
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("生成验证码失败"))
 	}
 
 	// 获取点选坐标数据（正确答案）
@@ -70,7 +70,7 @@ func (s *CaptchaService) Generate(ctx context.Context) (*dto.CaptchaGenerateResp
 	// 序列化正确答案
 	dotsJSON, err := json.Marshal(dots)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("生成验证码失败"))
 	}
 
 	// 生成唯一 ID，存入 Redis
@@ -78,18 +78,18 @@ func (s *CaptchaService) Generate(ctx context.Context) (*dto.CaptchaGenerateResp
 	key := fmt.Sprintf("%s:%s", constants.RedisCaptchaKey, captchaID)
 
 	if err := s.rdb.Set(ctx, key, dotsJSON, time.Duration(s.cfg.TTL)*time.Second).Err(); err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("生成验证码失败"))
 	}
 
 	// 生成 base64 图片
 	masterImage, err := captData.GetMasterImage().ToBase64()
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("生成验证码图片失败"))
 	}
 
 	thumbImage, err := captData.GetThumbImage().ToBase64()
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("生成验证码图片失败"))
 	}
 
 	return &dto.CaptchaGenerateResponse{
@@ -109,7 +109,7 @@ func (s *CaptchaService) Verify(ctx context.Context, captchaID string, captchaCo
 		if err == redis.Nil {
 			return apperror.New(errcode.InvalidInput, apperror.WithMsg("验证码已过期，请刷新重试"))
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("验证验证码失败"))
 	}
 
 	// 验证后立即删除（一次性消费，防重放）
@@ -118,7 +118,7 @@ func (s *CaptchaService) Verify(ctx context.Context, captchaID string, captchaCo
 	// 反序列化正确答案
 	var dots map[int]*click.Dot
 	if err := json.Unmarshal(dotsJSON, &dots); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("验证验证码失败"))
 	}
 
 	// 反序列化前端提交的点击坐标

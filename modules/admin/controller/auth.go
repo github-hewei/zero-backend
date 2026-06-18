@@ -56,7 +56,7 @@ func (c *AuthController) Logout(ctx *gin.Context) {
 func (c *AuthController) RefreshToken(ctx *gin.Context) {
 	cookie, err := ctx.Request.Cookie("token")
 	if err != nil {
-		response.Error(ctx, apperror.Wrap(errcode.Internal, err))
+		response.Error(ctx, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("读取Cookie失败")))
 		return
 	}
 

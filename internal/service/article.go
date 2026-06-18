@@ -40,7 +40,7 @@ func (s *ArticleCategoryService) List(ctx context.Context, req *dto.ArticleCateg
 
 	total, err := s.repo.Count(ctx, filter)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取文章分类列表失败"))
 	}
 
 	result.Total = total
@@ -57,7 +57,7 @@ func (s *ArticleCategoryService) List(ctx context.Context, req *dto.ArticleCateg
 
 	list, err := s.repo.FindAll(ctx, filter, pagination, orders)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取文章分类列表失败"))
 	}
 
 	result.List = list
@@ -74,7 +74,7 @@ func (s *ArticleCategoryService) Create(ctx context.Context, req *dto.ArticleCat
 	}
 
 	if err := s.repo.Create(ctx, category); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("创建文章分类失败"))
 	}
 
 	return nil
@@ -91,7 +91,7 @@ func (s *ArticleCategoryService) Update(ctx context.Context, req *dto.ArticleCat
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("文章分类不存在"))
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新文章分类失败"))
 	}
 
 	updateData := map[string]any{
@@ -101,7 +101,7 @@ func (s *ArticleCategoryService) Update(ctx context.Context, req *dto.ArticleCat
 	}
 
 	if err := s.repo.Updates(ctx, category, updateData); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新文章分类失败"))
 	}
 
 	return nil
@@ -118,11 +118,11 @@ func (s *ArticleCategoryService) Delete(ctx context.Context, req *dto.ArticleCat
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("文章分类不存在或无权限访问"))
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除文章分类失败"))
 	}
 
 	if err := s.repo.Delete(ctx, category.ID); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除文章分类失败"))
 	}
 
 	return nil
@@ -156,7 +156,7 @@ func (s *ArticleService) List(ctx context.Context, req *dto.ArticleListRequest) 
 
 	total, err := s.repo.Count(ctx, filter)
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取文章列表失败"))
 	}
 
 	result.Total = total
@@ -174,7 +174,7 @@ func (s *ArticleService) List(ctx context.Context, req *dto.ArticleListRequest) 
 	// 预加载图片信息
 	list, err := s.repo.FindAll(ctx, filter, pagination, orders, baserepo.WithPreloads("Image"))
 	if err != nil {
-		return nil, apperror.Wrap(errcode.Internal, err)
+		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取文章列表失败"))
 	}
 
 	result.List = list
@@ -196,7 +196,7 @@ func (s *ArticleService) Create(ctx context.Context, req *dto.ArticleCreateReque
 	}
 
 	if err := s.repo.Create(ctx, article); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("创建文章失败"))
 	}
 
 	return nil
@@ -213,7 +213,7 @@ func (s *ArticleService) Update(ctx context.Context, req *dto.ArticleUpdateReque
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("文章不存在或无权限访问"))
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新文章失败"))
 	}
 
 	updateData := map[string]any{
@@ -227,7 +227,7 @@ func (s *ArticleService) Update(ctx context.Context, req *dto.ArticleUpdateReque
 	}
 
 	if err := s.repo.Updates(ctx, article, updateData); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("更新文章失败"))
 	}
 
 	return nil
@@ -244,11 +244,11 @@ func (s *ArticleService) Delete(ctx context.Context, req *dto.ArticleDeleteReque
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("文章不存在或无权限访问"))
 		}
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除文章失败"))
 	}
 
 	if err := s.repo.Delete(ctx, article.ID); err != nil {
-		return apperror.Wrap(errcode.Internal, err)
+		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("删除文章失败"))
 	}
 
 	return nil
