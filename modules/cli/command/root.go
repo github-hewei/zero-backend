@@ -10,9 +10,9 @@ import (
 	"time"
 	"zero-backend/internal/ctxkeys"
 
+	"github.com/241x/zero-kit/gormutil"
 	"github.com/241x/zero-kit/locker"
 	"github.com/241x/zero-kit/logger"
-	"github.com/241x/zero-kit/mysql"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
@@ -66,7 +66,7 @@ func (c *RootCommand) Configure(log logger.Logger, redisLocker *locker.RedisLock
 		// 将日志组件注入上下文
 		ctx := log.WithContext(cmd.Context())
 		ctx = ctxkeys.WithTraceID(ctx, traceId)
-		ctx = mysql.WithTraceID(ctx, traceId)
+		ctx = gormutil.WithTraceID(ctx, traceId)
 		ctx = ctxkeys.WithBeginTime(ctx, time.Now())
 
 		// 为进程加锁逻辑

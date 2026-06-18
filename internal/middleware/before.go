@@ -8,7 +8,7 @@ import (
 	"time"
 	"zero-backend/internal/ctxkeys"
 
-	"github.com/241x/zero-kit/mysql"
+	"github.com/241x/zero-kit/gormutil"
 
 	"github.com/241x/zero-kit/logger"
 
@@ -32,7 +32,7 @@ func (m *BeforeMiddleware) Handle() gin.HandlerFunc {
 		traceId := uuid.New().String()
 		ctx := c.Request.Context()
 		ctx = ctxkeys.WithTraceID(ctx, traceId)
-		ctx = mysql.WithTraceID(ctx, traceId)
+		ctx = gormutil.WithTraceID(ctx, traceId)
 		ctx = ctxkeys.WithBeginTime(ctx, time.Now())
 
 		// 添加日志上下文

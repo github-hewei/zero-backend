@@ -7,6 +7,7 @@
 package main
 
 import (
+	"github.com/241x/zero-kit/gormutil"
 	"github.com/241x/zero-kit/mongodb"
 	"github.com/241x/zero-kit/mysql"
 	"github.com/241x/zero-kit/redis"
@@ -39,7 +40,7 @@ func wireApp() (*server.HTTPServer, error) {
 	}
 	database := conn.DB
 	zeroLogger := providers.ProvideLogger(loggerConfig, database)
-	logger := mysql.NewLogger(zeroLogger)
+	logger := gormutil.NewLogger(zeroLogger)
 	db, err := mysql.NewDB(mysqlConfig, logger)
 	if err != nil {
 		return nil, err

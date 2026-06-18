@@ -7,6 +7,7 @@
 package main
 
 import (
+	"github.com/241x/zero-kit/gormutil"
 	"github.com/241x/zero-kit/locker"
 	"github.com/241x/zero-kit/mongodb"
 	"github.com/241x/zero-kit/mysql"
@@ -36,7 +37,7 @@ func wireApp() (*command.RootCommand, error) {
 	client := redis.New(redisConfig)
 	redisLocker := locker.NewRedisLocker(client)
 	mysqlConfig := providers.NewMySQLConfig(configConfig)
-	logger := mysql.NewLogger(zeroLogger)
+	logger := gormutil.NewLogger(zeroLogger)
 	db, err := mysql.NewDB(mysqlConfig, logger)
 	if err != nil {
 		return nil, err

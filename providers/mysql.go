@@ -3,6 +3,7 @@ package providers
 import (
 	"zero-backend/internal/config"
 
+	"github.com/241x/zero-kit/gormutil"
 	"github.com/241x/zero-kit/mysql"
 
 	"github.com/google/wire"
@@ -21,6 +22,6 @@ func NewMySQLConfig(cfg *config.Config) mysql.Config {
 var MySQLProviderSet = wire.NewSet(
 	NewMySQLConfig,
 	mysql.NewDB,
-	mysql.NewLogger,
-	wire.Bind(new(logger.Interface), new(*mysql.Logger)),
+	gormutil.NewLogger,
+	wire.Bind(new(logger.Interface), new(*gormutil.Logger)),
 )
