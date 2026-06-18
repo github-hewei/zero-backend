@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 	"zero-backend/internal/config"
@@ -72,14 +73,17 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 	filter := &repository.RbacUserUsernameFilterField{Username: req.Username}
 	item, err := s.userRepo.FindOne(ctx, filter)
 	if err != nil {
-		return nil, "", err
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return nil, "", apperror.New(errcode.InvalidInput, apperror.WithMsg("用户名或密码错误"))
+		}
+		return nil, "", apperror.Wrap(errcode.Internal, err)
 	}
 
-	if item.ID == 0 {
-		return nil, "", apperror.New(errcode.InvalidInput, apperror.WithMsg("用户名或密码错误"))
+	ok, err := helper.CheckPassword(req.Password, item.Password)
+	if err != nil {
+		return nil, "", apperror.Wrap(errcode.Internal, err)
 	}
-
-	if ok := helper.CheckPassword(req.Password, item.Password); !ok {
+	if !ok {
 		return nil, "", apperror.New(errcode.InvalidInput, apperror.WithMsg("用户名或密码错误"))
 	}
 
@@ -185,10 +189,10 @@ func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*model.Rb
 	// 3. 缓存未命中，查询数据库
 	user, err := s.userRepo.FindOne(ctx, userId)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return nil, apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
+		}
 		return nil, apperror.Wrap(errcode.Internal, err)
-	}
-	if user == nil || user.ID == 0 {
-		return nil, apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 	}
 
 	s.WithSU(user)
@@ -332,14 +336,18 @@ func (s *AuthService) ChangePassword(ctx context.Context, req *dto.ChangePasswor
 	// 1. 获取用户信息
 	user, err := s.userRepo.FindOne(ctx, user.ID)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-	if user == nil || user.ID == 0 {
-		return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 	}
 
 	// 2. 验证旧密码
-	if ok := helper.CheckPassword(req.OldPassword, user.Password); !ok {
+	ok, err := helper.CheckPassword(req.OldPassword, user.Password)
+	if err != nil {
+		return apperror.Wrap(errcode.Internal, err)
+	}
+	if !ok {
 		return apperror.New(errcode.InvalidInput, apperror.WithMsg("旧密码不正确"))
 	}
 

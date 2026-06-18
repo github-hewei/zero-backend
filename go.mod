@@ -3,7 +3,7 @@ module zero-backend
 go 1.26.4
 
 require (
-	github.com/241x/zero-kit v1.1.0
+	github.com/241x/zero-kit v1.2.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
