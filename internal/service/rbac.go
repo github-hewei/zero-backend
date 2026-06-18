@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
@@ -106,10 +107,13 @@ func (s *RbacUserService) Create(ctx context.Context, req *dto.RbacUserCreateReq
 func (s *RbacUserService) Update(ctx context.Context, req *dto.RbacUserUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if item.ID == 0 || item.StoreId != req.StoreId {
+	if item.StoreId != req.StoreId {
 		return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 	}
 
@@ -138,10 +142,13 @@ func (s *RbacUserService) Update(ctx context.Context, req *dto.RbacUserUpdateReq
 func (s *RbacUserService) Delete(ctx context.Context, req *dto.RbacUserDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if item.ID == 0 || item.StoreId != req.StoreId {
+	if item.StoreId != req.StoreId {
 		return apperror.New(errcode.NotFound)
 	}
 
@@ -160,12 +167,15 @@ func (s *RbacUserService) Delete(ctx context.Context, req *dto.RbacUserDeleteReq
 func (s *RbacUserService) SetRoles(ctx context.Context, req *dto.RbacUserRoleSetRequest) error {
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		// 验证用户存在
-		user, err := s.repo.FindOne(ctx, req.UserID, baserepo.WithTx[*baserepo.QueryConfig](tx), baserepo.WithScopes(nil))
+		user, err := s.repo.FindOne(ctx, req.UserID, baserepo.WithDB[*baserepo.QueryConfig](tx), baserepo.WithScopes(nil))
 		if err != nil {
+			if errors.Is(err, baserepo.ErrRecordNotFound) {
+				return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
+			}
 			return apperror.Wrap(errcode.Internal, err)
 		}
 
-		if user.ID == 0 || user.StoreId != req.StoreId {
+		if user.StoreId != req.StoreId {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 		}
 
@@ -173,7 +183,7 @@ func (s *RbacUserService) SetRoles(ctx context.Context, req *dto.RbacUserRoleSet
 		filter := &repository.RbacUserRoleFilterField{UserId: user.ID}
 		existingRoles, err := s.userRoleRepo.FindAll(ctx, filter, nil, nil,
 			baserepo.WithScopes(nil),
-			baserepo.WithTx[*baserepo.QueryConfig](tx),
+			baserepo.WithDB[*baserepo.QueryConfig](tx),
 		)
 		if err != nil {
 			return apperror.Wrap(errcode.Internal, err)
@@ -198,7 +208,7 @@ func (s *RbacUserService) SetRoles(ctx context.Context, req *dto.RbacUserRoleSet
 			}
 		}
 		if len(deleteIds) > 0 {
-			if err := s.userRoleRepo.Delete(ctx, deleteIds, baserepo.WithTx[*baserepo.DeleteConfig](tx)); err != nil {
+			if err := s.userRoleRepo.Delete(ctx, deleteIds, baserepo.WithDB[*baserepo.DeleteConfig](tx)); err != nil {
 				return apperror.Wrap(errcode.Internal, err)
 			}
 		}
@@ -215,7 +225,7 @@ func (s *RbacUserService) SetRoles(ctx context.Context, req *dto.RbacUserRoleSet
 			}
 		}
 
-		if err := s.userRoleRepo.CreateBatch(ctx, createUserRoles, baserepo.WithTx[*baserepo.CreateConfig](tx)); err != nil {
+		if err := s.userRoleRepo.CreateBatch(ctx, createUserRoles, baserepo.WithDB[*baserepo.CreateConfig](tx)); err != nil {
 			return apperror.Wrap(errcode.Internal, err)
 		}
 
@@ -226,27 +236,28 @@ func (s *RbacUserService) SetRoles(ctx context.Context, req *dto.RbacUserRoleSet
 // checkUsername 检查用户名是否已存在
 func (s *RbacUserService) checkUsername(ctx context.Context, username string, storeId uint32) error {
 	filter := &repository.RbacUserUsernameFilterField{Username: username, StoreId: storeId}
-	item, err := s.repo.FindOne(ctx, filter)
-
+	_, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return nil
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if item.ID > 0 {
-		return apperror.New(errcode.Conflict, apperror.WithMsg("用户名已存在"))
-	}
-
-	return nil
+	return apperror.New(errcode.Conflict, apperror.WithMsg("用户名已存在"))
 }
 
 // ResetPassword 重置用户密码
 func (s *RbacUserService) ResetPassword(ctx context.Context, req *dto.RbacUserResetPasswordRequest) (string, error) {
 	user, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return "", apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
+		}
 		return "", apperror.Wrap(errcode.Internal, err)
 	}
 
-	if user.ID == 0 || user.StoreId != req.StoreId {
+	if user.StoreId != req.StoreId {
 		return "", apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 	}
 
@@ -332,11 +343,10 @@ func (s *RbacMenuService) Create(ctx context.Context, req *dto.RbacMenuCreateReq
 func (s *RbacMenuService) Update(ctx context.Context, req *dto.RbacMenuUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if item.ID == 0 {
-		return apperror.New(errcode.NotFound)
 	}
 
 	if item.Name != req.Name {
@@ -367,11 +377,10 @@ func (s *RbacMenuService) Update(ctx context.Context, req *dto.RbacMenuUpdateReq
 func (s *RbacMenuService) Delete(ctx context.Context, req *dto.RbacMenuDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if item.ID == 0 {
-		return apperror.New(errcode.NotFound)
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
@@ -386,7 +395,7 @@ func (s *RbacMenuService) Sync(ctx context.Context, req []dto.RbacMenuSyncReques
 	// 开启事务
 	return s.Db.Transaction(func(tx *gorm.DB) error {
 		list, err := s.repo.FindAll(ctx, &repository.RbacMenuFilterField{Type: 10}, nil, nil,
-			baserepo.WithTx[*baserepo.QueryConfig](tx),
+			baserepo.WithDB[*baserepo.QueryConfig](tx),
 			baserepo.WithScopes(nil),
 		)
 		if err != nil {
@@ -403,7 +412,7 @@ func (s *RbacMenuService) Sync(ctx context.Context, req []dto.RbacMenuSyncReques
 		}
 
 		for _, item := range menuMap {
-			if err := s.repo.Delete(ctx, item.ID, baserepo.WithTx[*baserepo.DeleteConfig](tx)); err != nil {
+			if err := s.repo.Delete(ctx, item.ID, baserepo.WithDB[*baserepo.DeleteConfig](tx)); err != nil {
 				return apperror.Wrap(errcode.Internal, err)
 			}
 		}
@@ -425,7 +434,7 @@ func (s *RbacMenuService) SyncMenuList(ctx context.Context, req []dto.RbacMenuSy
 				"parent_id":  parentId,
 			}
 
-			if err := s.repo.Updates(ctx, menu, updateData, baserepo.WithTx[*baserepo.UpdateConfig](tx)); err != nil {
+			if err := s.repo.Updates(ctx, menu, updateData, baserepo.WithDB[*baserepo.UpdateConfig](tx)); err != nil {
 				return apperror.Wrap(errcode.Internal, err)
 			}
 			delete(menuMap, item.Path)
@@ -441,7 +450,7 @@ func (s *RbacMenuService) SyncMenuList(ctx context.Context, req []dto.RbacMenuSy
 				Sort:      item.Sort,
 			}
 
-			if err := s.repo.Create(ctx, menu, baserepo.WithTx[*baserepo.CreateConfig](tx)); err != nil {
+			if err := s.repo.Create(ctx, menu, baserepo.WithDB[*baserepo.CreateConfig](tx)); err != nil {
 				return apperror.Wrap(errcode.Internal, err)
 			}
 		}
@@ -459,17 +468,15 @@ func (s *RbacMenuService) SyncMenuList(ctx context.Context, req []dto.RbacMenuSy
 // checkName 检查菜单名称
 func (s *RbacMenuService) checkName(ctx context.Context, name string) error {
 	filter := &repository.RbacMenuFilterField{Name: name}
-	item, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))
-
+	_, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return nil
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if item.ID > 0 {
-		return apperror.New(errcode.Conflict, apperror.WithMsg("菜单名已存在"))
-	}
-
-	return nil
+	return apperror.New(errcode.Conflict, apperror.WithMsg("菜单名已存在"))
 }
 
 // FindApiList 查询菜单关联的api
@@ -498,7 +505,7 @@ func (s *RbacMenuService) SaveApiList(ctx context.Context, req *dto.RbacMenuApiS
 	return s.Db.Transaction(func(tx *gorm.DB) error {
 		filter := &repository.RbacMenuApiFilterField{MenuId: req.MenuID}
 		list, err := s.apiRepo.FindAll(ctx, filter, nil, nil,
-			baserepo.WithTx[*baserepo.QueryConfig](tx),
+			baserepo.WithDB[*baserepo.QueryConfig](tx),
 			baserepo.WithScopes(nil),
 		)
 
@@ -517,7 +524,7 @@ func (s *RbacMenuService) SaveApiList(ctx context.Context, req *dto.RbacMenuApiS
 					MenuId: req.MenuID,
 					ApiId:  apiId,
 				}
-				err := s.apiRepo.Create(ctx, item, baserepo.WithTx[*baserepo.CreateConfig](tx))
+				err := s.apiRepo.Create(ctx, item, baserepo.WithDB[*baserepo.CreateConfig](tx))
 				if err != nil {
 					return apperror.Wrap(errcode.Internal, err)
 				}
@@ -528,7 +535,7 @@ func (s *RbacMenuService) SaveApiList(ctx context.Context, req *dto.RbacMenuApiS
 
 		for apiId := range apiIds {
 			filter := &repository.RbacMenuApiFilterField{ApiId: apiId, MenuId: req.MenuID}
-			err := s.apiRepo.Delete(ctx, filter, baserepo.WithTx[*baserepo.DeleteConfig](tx))
+			err := s.apiRepo.Delete(ctx, filter, baserepo.WithDB[*baserepo.DeleteConfig](tx))
 
 			if err != nil {
 				return apperror.Wrap(errcode.Internal, err)
@@ -611,10 +618,13 @@ func (s *RbacRoleService) Create(ctx context.Context, req *dto.RbacRoleCreateReq
 func (s *RbacRoleService) Update(ctx context.Context, req *dto.RbacRoleUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if item.ID == 0 || item.StoreId != req.StoreId {
+	if item.StoreId != req.StoreId {
 		return apperror.New(errcode.NotFound)
 	}
 
@@ -642,10 +652,13 @@ func (s *RbacRoleService) Update(ctx context.Context, req *dto.RbacRoleUpdateReq
 func (s *RbacRoleService) Delete(ctx context.Context, req *dto.RbacRoleDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if item.ID == 0 || item.StoreId != req.StoreId {
+	if item.StoreId != req.StoreId {
 		return apperror.New(errcode.NotFound)
 	}
 
@@ -660,19 +673,22 @@ func (s *RbacRoleService) Delete(ctx context.Context, req *dto.RbacRoleDeleteReq
 func (s *RbacRoleService) SetMenus(ctx context.Context, req *dto.RbacRoleMenuSetRequest) error {
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		// 验证角色存在
-		role, err := s.repo.FindOne(ctx, req.RoleID, baserepo.WithTx[*baserepo.QueryConfig](tx), baserepo.WithScopes(nil))
+		role, err := s.repo.FindOne(ctx, req.RoleID, baserepo.WithDB[*baserepo.QueryConfig](tx), baserepo.WithScopes(nil))
 
 		if err != nil {
+			if errors.Is(err, baserepo.ErrRecordNotFound) {
+				return apperror.New(errcode.NotFound, apperror.WithMsg("角色不存在"))
+			}
 			return apperror.Wrap(errcode.Internal, err)
 		}
 
-		if role.ID == 0 || role.StoreId != req.StoreId {
+		if role.StoreId != req.StoreId {
 			return apperror.New(errcode.NotFound, apperror.WithMsg("角色不存在"))
 		}
 
 		filter := &repository.RbacRoleMenuFilterField{RoleId: role.ID}
 		existingMenus, err := s.roleMenuRepo.FindAll(ctx, filter, nil, nil,
-			baserepo.WithTx[*baserepo.QueryConfig](tx),
+			baserepo.WithDB[*baserepo.QueryConfig](tx),
 			baserepo.WithScopes(nil),
 		)
 
@@ -699,7 +715,7 @@ func (s *RbacRoleService) SetMenus(ctx context.Context, req *dto.RbacRoleMenuSet
 			}
 		}
 		if len(deleteIds) > 0 {
-			if err := s.roleMenuRepo.Delete(ctx, deleteIds, baserepo.WithTx[*baserepo.DeleteConfig](tx)); err != nil {
+			if err := s.roleMenuRepo.Delete(ctx, deleteIds, baserepo.WithDB[*baserepo.DeleteConfig](tx)); err != nil {
 				return err
 			}
 		}
@@ -716,7 +732,7 @@ func (s *RbacRoleService) SetMenus(ctx context.Context, req *dto.RbacRoleMenuSet
 			}
 		}
 
-		if err := s.roleMenuRepo.CreateBatch(ctx, roleMenus, baserepo.WithTx[*baserepo.CreateConfig](tx)); err != nil {
+		if err := s.roleMenuRepo.CreateBatch(ctx, roleMenus, baserepo.WithDB[*baserepo.CreateConfig](tx)); err != nil {
 			return err
 		}
 
@@ -726,27 +742,25 @@ func (s *RbacRoleService) SetMenus(ctx context.Context, req *dto.RbacRoleMenuSet
 
 // checkName 检查角色名称
 func (s *RbacRoleService) checkName(ctx context.Context, name string, StoreId uint32) error {
-	item, err := s.repo.FindByName(ctx, name, StoreId)
+	_, err := s.repo.FindByName(ctx, name, StoreId)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return nil
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if item.ID > 0 {
-		return apperror.New(errcode.Conflict, apperror.WithMsg("角色名已存在"))
-	}
-
-	return nil
+	return apperror.New(errcode.Conflict, apperror.WithMsg("角色名已存在"))
 }
 
 // checkParent 检查父级角色
 func (s *RbacRoleService) checkParent(ctx context.Context, parentId uint32, StoreId uint32) error {
 	parent, err := s.repo.FindOne(ctx, parentId)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("父级角色不存在"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if parent.ID == 0 {
-		return apperror.New(errcode.NotFound, apperror.WithMsg("父级角色不存在"))
 	}
 
 	if parent.StoreId != StoreId {
@@ -809,6 +823,9 @@ func (s *RbacApiService) Create(ctx context.Context, req *dto.RbacApiCreateReque
 func (s *RbacApiService) Update(ctx context.Context, req *dto.RbacApiUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
@@ -836,11 +853,10 @@ func (s *RbacApiService) Update(ctx context.Context, req *dto.RbacApiUpdateReque
 func (s *RbacApiService) Delete(ctx context.Context, req *dto.RbacApiDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if item.ID == 0 {
-		return apperror.New(errcode.NotFound)
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
@@ -853,17 +869,15 @@ func (s *RbacApiService) Delete(ctx context.Context, req *dto.RbacApiDeleteReque
 // checkName 检查接口名称
 func (s *RbacApiService) checkName(ctx context.Context, name string) error {
 	filter := &repository.RbacApiFilterField{Name: name}
-	item, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))
-
+	_, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return nil
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if item.ID > 0 {
-		return apperror.New(errcode.Conflict, apperror.WithMsg("接口名已存在"))
-	}
-
-	return nil
+	return apperror.New(errcode.Conflict, apperror.WithMsg("接口名已存在"))
 }
 
 // RbacStoreService 企业服务
@@ -942,23 +956,24 @@ func (s *RbacStoreService) Create(ctx context.Context, req *dto.RbacStoreCreateR
 // checkName 检查企业名称
 func (s *RbacStoreService) checkName(ctx context.Context, name string) error {
 	filter := &repository.RbacStoreNameFilterField{Name: name}
-	item, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))
-
+	_, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return nil
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if item.ID > 0 {
-		return apperror.New(errcode.Conflict, apperror.WithMsg("企业名已存在"))
-	}
-
-	return nil
+	return apperror.New(errcode.Conflict, apperror.WithMsg("企业名已存在"))
 }
 
 // Update 更新企业信息
 func (s *RbacStoreService) Update(ctx context.Context, req *dto.RbacStoreUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
@@ -989,11 +1004,10 @@ func (s *RbacStoreService) Update(ctx context.Context, req *dto.RbacStoreUpdateR
 func (s *RbacStoreService) Delete(ctx context.Context, req *dto.RbacStoreDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if item.ID == 0 {
-		return apperror.New(errcode.NotFound)
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
@@ -1007,11 +1021,10 @@ func (s *RbacStoreService) Delete(ctx context.Context, req *dto.RbacStoreDeleteR
 func (s *RbacStoreService) Recycle(ctx context.Context, req *dto.RbacStoreDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if item.ID == 0 {
-		return apperror.New(errcode.NotFound)
 	}
 
 	updateData := map[string]any{
@@ -1028,11 +1041,10 @@ func (s *RbacStoreService) Recycle(ctx context.Context, req *dto.RbacStoreDelete
 func (s *RbacStoreService) Restore(ctx context.Context, req *dto.RbacStoreDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if item.ID == 0 {
-		return apperror.New(errcode.NotFound)
 	}
 
 	updateData := map[string]any{

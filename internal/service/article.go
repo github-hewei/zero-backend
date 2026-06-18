@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
@@ -87,11 +88,10 @@ func (s *ArticleCategoryService) Update(ctx context.Context, req *dto.ArticleCat
 	}
 	category, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("文章分类不存在"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if category.ID == 0 {
-		return apperror.New(errcode.NotFound, apperror.WithMsg("文章分类不存在"))
 	}
 
 	updateData := map[string]any{
@@ -115,11 +115,10 @@ func (s *ArticleCategoryService) Delete(ctx context.Context, req *dto.ArticleCat
 	}
 	category, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("文章分类不存在或无权限访问"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if category.ID == 0 {
-		return apperror.New(errcode.NotFound, apperror.WithMsg("文章分类不存在或无权限访问"))
 	}
 
 	if err := s.repo.Delete(ctx, category.ID); err != nil {
@@ -211,11 +210,10 @@ func (s *ArticleService) Update(ctx context.Context, req *dto.ArticleUpdateReque
 	}
 	article, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("文章不存在或无权限访问"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if article.ID == 0 {
-		return apperror.New(errcode.NotFound, apperror.WithMsg("文章不存在或无权限访问"))
 	}
 
 	updateData := map[string]any{
@@ -243,11 +241,10 @@ func (s *ArticleService) Delete(ctx context.Context, req *dto.ArticleDeleteReque
 	}
 	article, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("文章不存在或无权限访问"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if article.ID == 0 {
-		return apperror.New(errcode.NotFound, apperror.WithMsg("文章不存在或无权限访问"))
 	}
 
 	if err := s.repo.Delete(ctx, article.ID); err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -80,17 +81,15 @@ func (s *UploadGroupService) Create(ctx context.Context, req *dto.UploadGroupCre
 // checkName 检查分组名称是否已存在
 func (s *UploadGroupService) checkName(ctx context.Context, name string, storeId uint32) error {
 	filter := &repository.UploadGroupFilterField{Name: name, StoreId: storeId}
-	group, err := s.repo.FindOne(ctx, filter)
-
+	_, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return nil
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if group.ID > 0 {
-		return apperror.New(errcode.Conflict, apperror.WithMsg("分组名称已存在"))
-	}
-
-	return nil
+	return apperror.New(errcode.Conflict, apperror.WithMsg("分组名称已存在"))
 }
 
 // Update 更新分组
@@ -102,10 +101,10 @@ func (s *UploadGroupService) Update(ctx context.Context, req *dto.UploadGroupUpd
 	}
 	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("分组不存在或无权限访问"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-	if item.ID == 0 {
-		return apperror.New(errcode.NotFound, apperror.WithMsg("分组不存在或无权限访问"))
 	}
 
 	// 检查名称是否重复(排除自身)
@@ -137,12 +136,12 @@ func (s *UploadGroupService) Delete(ctx context.Context, req *dto.UploadGroupDel
 		Id:      req.ID,
 		StoreId: req.StoreId,
 	}
-	item, err := s.repo.FindOne(ctx, filter)
+	_, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("分组不存在或无权限访问"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-	if item.ID == 0 {
-		return apperror.New(errcode.NotFound, apperror.WithMsg("分组不存在或无权限访问"))
 	}
 
 	// 执行删除
@@ -450,12 +449,12 @@ func (s *UploadFileService) Delete(ctx context.Context, req *dto.UploadFileDelet
 		Id:      req.ID,
 		StoreId: req.StoreId,
 	}
-	item, err := s.repo.FindOne(ctx, filter)
+	_, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("文件不存在"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-	if item.ID == 0 {
-		return apperror.New(errcode.NotFound, apperror.WithMsg("文件不存在"))
 	}
 
 	// 执行删除

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"zero-backend/internal/constants"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/errcode"
@@ -110,11 +111,10 @@ func (s *UserService) Update(ctx context.Context, req *dto.UserUpdateRequest) er
 	}
 	user, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在或无权限访问"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if user.ID == 0 {
-		return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在或无权限访问"))
 	}
 
 	if user.Username != req.Username {
@@ -151,16 +151,15 @@ func (s *UserService) Update(ctx context.Context, req *dto.UserUpdateRequest) er
 // checkUsername 检查用户名是否已存在(同一企业内)
 func (s *UserService) checkUsername(ctx context.Context, username string) error {
 	filter := &repository.UserFilterField{Username: username}
-	user, err := s.repo.FindOne(ctx, filter)
+	_, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return nil
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if user.ID > 0 {
-		return apperror.New(errcode.Conflict, apperror.WithMsg("用户名已存在"))
-	}
-
-	return nil
+	return apperror.New(errcode.Conflict, apperror.WithMsg("用户名已存在"))
 }
 
 // GetPointsLogs 获取用户积分记录
@@ -223,12 +222,12 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 			Id:      req.UserId,
 			StoreId: req.StoreId,
 		}
-		user, err := s.repo.FindOne(ctx, userFilter, baserepo.WithTx[*baserepo.QueryConfig](tx))
+		user, err := s.repo.FindOne(ctx, userFilter, baserepo.WithDB[*baserepo.QueryConfig](tx))
 		if err != nil {
+			if errors.Is(err, baserepo.ErrRecordNotFound) {
+				return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
+			}
 			return apperror.Wrap(errcode.Internal, err)
-		}
-		if user.ID == 0 {
-			return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 		}
 
 		// 更新用户积分
@@ -236,7 +235,7 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 			"points": gorm.Expr("points + ?", points),
 		}
 
-		if err := s.repo.Updates(ctx, user, updateData, baserepo.WithTx[*baserepo.UpdateConfig](tx)); err != nil {
+		if err := s.repo.Updates(ctx, user, updateData, baserepo.WithDB[*baserepo.UpdateConfig](tx)); err != nil {
 			return apperror.Wrap(errcode.Internal, err)
 		}
 
@@ -251,7 +250,7 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 			StoreId:    req.StoreId,
 		}
 
-		if err := s.pointsLogRepo.Create(ctx, pointsLog, baserepo.WithTx[*baserepo.CreateConfig](tx)); err != nil {
+		if err := s.pointsLogRepo.Create(ctx, pointsLog, baserepo.WithDB[*baserepo.CreateConfig](tx)); err != nil {
 			return apperror.Wrap(errcode.Internal, err)
 		}
 
@@ -263,11 +262,10 @@ func (s *UserService) ChangeUserPoints(ctx context.Context, req *dto.UserPointsC
 func (s *UserService) Detail(ctx context.Context, id uint32) (*model.User, error) {
 	user, err := s.repo.FindOne(ctx, id)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return nil, apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
+		}
 		return nil, apperror.Wrap(errcode.Internal, err)
-	}
-
-	if user == nil || user.ID == 0 {
-		return nil, apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 	}
 
 	return user, nil
@@ -281,11 +279,10 @@ func (s *UserService) Delete(ctx context.Context, req *dto.UserDeleteRequest) er
 	}
 	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在或无权限访问"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if item == nil || item.ID == 0 {
-		return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在或无权限访问"))
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {

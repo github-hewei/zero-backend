@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
@@ -100,10 +101,10 @@ func (s *SettingService) Update(ctx context.Context, req *dto.SettingUpdateReque
 	}
 	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound, apperror.WithMsg("设置不存在或无权限访问"))
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-	if item == nil || item.ID == 0 {
-		return apperror.New(errcode.NotFound, apperror.WithMsg("设置不存在或无权限访问"))
 	}
 
 	if item.SettingKey != req.SettingKey {
@@ -134,11 +135,10 @@ func (s *SettingService) Delete(ctx context.Context, req *dto.SettingDeleteReque
 	}
 	item, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if item.ID == 0 {
-		return apperror.New(errcode.NotFound)
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
@@ -151,17 +151,15 @@ func (s *SettingService) Delete(ctx context.Context, req *dto.SettingDeleteReque
 // checkSettingKey 检查设置key是否已存在
 func (s *SettingService) checkSettingKey(ctx context.Context, key string, storeId uint32) error {
 	filter := repository.SettingFilterField{SettingKey: key, StoreId: storeId}
-	item, err := s.repo.FindOne(ctx, filter)
-
+	_, err := s.repo.FindOne(ctx, filter)
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return nil
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if item.ID > 0 {
-		return apperror.New(errcode.Conflict, apperror.WithMsg("设置key已存在"))
-	}
-
-	return nil
+	return apperror.New(errcode.Conflict, apperror.WithMsg("设置key已存在"))
 }
 
 // GetSettingValue 获取并解析设置项
@@ -169,25 +167,23 @@ func (s *SettingService) GetSettingValue(ctx context.Context, key string, out an
 	filter := repository.SettingFilterField{SettingKey: key}
 	setting, err := s.repo.FindOne(ctx, filter)
 
-	if err != nil {
-		return apperror.Wrap(errcode.Internal, err)
-	}
-
 	var settingValues string
-	if setting.ID > 0 {
-		settingValues = setting.SettingValues
-	} else {
-		// 尝试从默认设置获取
-		filter := &repository.SettingDefaultFilterField{SettingKey: key}
-		defaultSetting, err := s.defaultRepo.FindOne(ctx, filter, baserepo.WithScopes(nil))
-
-		if err != nil {
+	if err != nil {
+		if !errors.Is(err, baserepo.ErrRecordNotFound) {
 			return apperror.Wrap(errcode.Internal, err)
 		}
-		if defaultSetting.ID == 0 {
-			return apperror.New(errcode.NotFound, apperror.WithMsg("设置项不存在"))
+		// 记录不存在，尝试从默认设置获取
+		filter := &repository.SettingDefaultFilterField{SettingKey: key}
+		defaultSetting, err := s.defaultRepo.FindOne(ctx, filter, baserepo.WithScopes(nil))
+		if err != nil {
+			if errors.Is(err, baserepo.ErrRecordNotFound) {
+				return apperror.New(errcode.NotFound, apperror.WithMsg("设置项不存在"))
+			}
+			return apperror.Wrap(errcode.Internal, err)
 		}
 		settingValues = defaultSetting.SettingValues
+	} else {
+		settingValues = setting.SettingValues
 	}
 
 	if err := json.Unmarshal([]byte(settingValues), out); err != nil {
@@ -306,6 +302,9 @@ func (s *SettingDefaultService) Create(ctx context.Context, req *dto.SettingDefa
 func (s *SettingDefaultService) Update(ctx context.Context, req *dto.SettingDefaultUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
@@ -332,11 +331,10 @@ func (s *SettingDefaultService) Update(ctx context.Context, req *dto.SettingDefa
 func (s *SettingDefaultService) Delete(ctx context.Context, req *dto.SettingDefaultDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return apperror.New(errcode.NotFound)
+		}
 		return apperror.Wrap(errcode.Internal, err)
-	}
-
-	if item.ID == 0 {
-		return apperror.New(errcode.NotFound)
 	}
 
 	if err := s.repo.Delete(ctx, item.ID); err != nil {
@@ -349,15 +347,13 @@ func (s *SettingDefaultService) Delete(ctx context.Context, req *dto.SettingDefa
 // checkSettingKey 检查默认设置key是否已存在
 func (s *SettingDefaultService) checkSettingKey(ctx context.Context, key string) error {
 	filter := &repository.SettingDefaultFilterField{SettingKey: key}
-	item, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))
-
+	_, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))
 	if err != nil {
+		if errors.Is(err, baserepo.ErrRecordNotFound) {
+			return nil
+		}
 		return apperror.Wrap(errcode.Internal, err)
 	}
 
-	if item.ID > 0 {
-		return apperror.New(errcode.Conflict, apperror.WithMsg("默认设置key已存在"))
-	}
-
-	return nil
+	return apperror.New(errcode.Conflict, apperror.WithMsg("默认设置key已存在"))
 }
