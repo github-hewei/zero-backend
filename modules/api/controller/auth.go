@@ -42,7 +42,7 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 
-	response.SetCookie(ctx, "token", refreshToken, c.cfg.RefreshTokenTtl, "/api/refresh-token")
+	ctx.SetCookie("token", refreshToken, c.cfg.RefreshTokenTtl, "/api/refresh-token", "", true, true)
 	response.Success(ctx, "请求成功", result)
 }
 

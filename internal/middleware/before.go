@@ -6,12 +6,11 @@ import (
 	"io"
 	"net/http"
 	"time"
+
 	"zero-backend/internal/ctxkeys"
 
 	"github.com/241x/zero-kit/gormutil"
-
 	"github.com/241x/zero-kit/logger"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -21,23 +20,20 @@ type BeforeMiddleware struct {
 }
 
 func NewBeforeMiddleware(logger logger.Logger) *BeforeMiddleware {
-	return &BeforeMiddleware{
-		logger: logger,
-	}
+	return &BeforeMiddleware{logger: logger}
 }
 
 // Handle 请求前置处理
 func (m *BeforeMiddleware) Handle() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		traceId := uuid.New().String()
+		traceID := uuid.New().String()
 		ctx := c.Request.Context()
-		ctx = ctxkeys.WithTraceID(ctx, traceId)
-		ctx = gormutil.WithTraceID(ctx, traceId)
+		ctx = ctxkeys.WithTraceID(ctx, traceID)
+		ctx = gormutil.WithTraceID(ctx, traceID)
 		ctx = ctxkeys.WithBeginTime(ctx, time.Now())
 
-		// 添加日志上下文
-		logger := m.logger.With("traceId", traceId)
-		ctx = logger.WithContext(ctx)
+		l := m.logger.With("traceId", traceID)
+		ctx = l.WithContext(ctx)
 		c.Request = c.Request.WithContext(ctx)
 
 		buffer, err := io.ReadAll(c.Request.Body)
@@ -46,14 +42,12 @@ func (m *BeforeMiddleware) Handle() gin.HandlerFunc {
 			return
 		}
 
-		// 解析请求参数
 		postData := map[string]any{}
 		if c.Request.Method == http.MethodPost && c.Request.Header.Get("Content-Type") == "application/json" {
 			_ = json.Unmarshal(buffer, &postData)
 		}
 
-		// 记录请求日志
-		logger.Info("Request",
+		l.Info("Request",
 			"url", c.Request.URL.Path,
 			"method", c.Request.Method,
 			"query", c.Request.URL.RawQuery,

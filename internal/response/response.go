@@ -9,10 +9,8 @@ import (
 	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/errcode"
 
-	"github.com/241x/zero-kit/logger"
-
 	"github.com/241x/zero-kit/apperror"
-
+	"github.com/241x/zero-kit/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -54,16 +52,6 @@ func Success(c *gin.Context, message string, data any) {
 		Message: message,
 		Data:    data,
 	})
-}
-
-// SetCookie 设置cookie
-func SetCookie(c *gin.Context, name, value string, maxAge int, path string) {
-	// 设置 SameSite 允许Cookie跨站
-	c.SetSameSite(http.SameSiteNoneMode)
-	// 设置 Secure 强制Https请求（本地localhost除外）
-	c.SetCookie(name, value, maxAge, path, "", true, true)
-	// 接口调试模式
-	//c.SetCookie(name, value, maxAge, "", "", false, false)
 }
 
 // output 输出响应JSON
