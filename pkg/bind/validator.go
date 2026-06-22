@@ -1,4 +1,4 @@
-package request
+package bind
 
 import (
 	"github.com/go-playground/locales/zh"
@@ -7,12 +7,12 @@ import (
 	translations "github.com/go-playground/validator/v10/translations/zh"
 )
 
-// NewValidate 创建验证器
+// NewValidate 创建 validator 实例。
 func NewValidate() *validator.Validate {
 	return validator.New()
 }
 
-// NewTrans 创建翻译器
+// NewTrans 创建中文翻译器，注册默认翻译规则。
 func NewTrans(v *validator.Validate) ut.Translator {
 	zt := zh.New()
 	uni := ut.New(zt, zt)

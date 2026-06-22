@@ -2,11 +2,12 @@ package controller
 
 import (
 	"strconv"
+	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/errcode"
-	"zero-backend/internal/request"
 	"zero-backend/internal/response"
 	"zero-backend/internal/service"
+	"zero-backend/pkg/bind"
 
 	"github.com/241x/zero-kit/apperror"
 
@@ -15,18 +16,18 @@ import (
 
 // UploadGroupController 文件分组控制器
 type UploadGroupController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.UploadGroupService
 }
 
 // NewUploadGroupController 创建文件分组控制器
-func NewUploadGroupController(req *request.Request, serv *service.UploadGroupService) *UploadGroupController {
+func NewUploadGroupController(req *bind.Binder, serv *service.UploadGroupService) *UploadGroupController {
 	return &UploadGroupController{req: req, serv: serv}
 }
 
 // List 获取分组列表(树形结构)
 func (c *UploadGroupController) List(ctx *gin.Context) {
-	storeId := request.GetStoreId(ctx)
+	storeId := ctxkeys.StoreID(ctx.Request.Context())
 	result, err := c.serv.FindTreeList(ctx.Request.Context(), storeId)
 	if err != nil {
 		response.Error(ctx, err)
@@ -44,7 +45,7 @@ func (c *UploadGroupController) Create(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Create(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -61,7 +62,7 @@ func (c *UploadGroupController) Update(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Update(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -78,7 +79,7 @@ func (c *UploadGroupController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Delete(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -89,12 +90,12 @@ func (c *UploadGroupController) Delete(ctx *gin.Context) {
 
 // UploadFileController 文件控制器
 type UploadFileController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.UploadFileService
 }
 
 // NewUploadFileController 创建文件控制器
-func NewUploadFileController(req *request.Request, serv *service.UploadFileService) *UploadFileController {
+func NewUploadFileController(req *bind.Binder, serv *service.UploadFileService) *UploadFileController {
 	return &UploadFileController{req: req, serv: serv}
 }
 
@@ -106,7 +107,7 @@ func (c *UploadFileController) List(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	result, err := c.serv.FindList(ctx.Request.Context(), req)
 	if err != nil {
 		response.Error(ctx, err)
@@ -128,8 +129,8 @@ func (c *UploadFileController) Upload(ctx *gin.Context) {
 	req := &dto.UploadFileRequest{
 		File:       file,
 		GroupId:    uint32(groupId),
-		StoreId:    request.GetStoreId(ctx),
-		UploaderId: request.GetUserID(ctx),
+		StoreId:    ctxkeys.StoreID(ctx.Request.Context()),
+		UploaderId: ctxkeys.UserID(ctx.Request.Context()),
 	}
 
 	result, err := c.serv.Upload(ctx.Request.Context(), req)
@@ -149,7 +150,7 @@ func (c *UploadFileController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Delete(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return

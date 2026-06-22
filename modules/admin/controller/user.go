@@ -2,22 +2,23 @@ package controller
 
 import (
 	"zero-backend/internal/constants"
+	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/dto"
-	"zero-backend/internal/request"
 	"zero-backend/internal/response"
 	"zero-backend/internal/service"
+	"zero-backend/pkg/bind"
 
 	"github.com/gin-gonic/gin"
 )
 
 // UserController 用户控制器
 type UserController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.UserService
 }
 
 // NewUserController 创建用户控制器
-func NewUserController(req *request.Request, serv *service.UserService) *UserController {
+func NewUserController(req *bind.Binder, serv *service.UserService) *UserController {
 	return &UserController{req: req, serv: serv}
 }
 
@@ -46,7 +47,7 @@ func (c *UserController) Create(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Create(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -63,7 +64,7 @@ func (c *UserController) Update(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Update(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -114,7 +115,7 @@ func (c *UserController) ChangePoints(ctx *gin.Context) {
 	}
 
 	req.SourceType = int8(constants.PointsSourceAdmin)
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.ChangeUserPoints(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return

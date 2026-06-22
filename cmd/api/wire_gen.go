@@ -14,12 +14,12 @@ import (
 	"zero-backend/internal/config"
 	"zero-backend/internal/middleware"
 	"zero-backend/internal/repository"
-	"zero-backend/internal/request"
 	service2 "zero-backend/internal/service"
 	"zero-backend/modules/api/controller"
 	middleware2 "zero-backend/modules/api/middleware"
 	"zero-backend/modules/api/server"
 	"zero-backend/modules/api/service"
+	"zero-backend/pkg/bind"
 	"zero-backend/providers"
 )
 
@@ -28,9 +28,10 @@ import (
 func wireApp() (*server.HTTPServer, error) {
 	configConfig := config.New()
 	serverConfig := providers.NewApiServerConfig(configConfig)
-	validate := request.NewValidate()
-	translator := request.NewTrans(validate)
-	requestRequest := request.NewRequest(validate, translator)
+	validate := bind.NewValidate()
+	translator := bind.NewTrans(validate)
+	code := providers.ProvideBindErrCode()
+	binder := bind.New(validate, translator, code)
 	mysqlConfig := providers.NewMySQLConfig(configConfig)
 	loggerConfig := configConfig.Logger
 	mongodbConfig := providers.NewMongoDBConfig(configConfig)
@@ -50,13 +51,13 @@ func wireApp() (*server.HTTPServer, error) {
 	redisConfig := providers.NewRedisConfig(configConfig)
 	client := redis.New(redisConfig)
 	authService := service.NewAuthService(userRepository, apiAuthConfig, client)
-	authController := controller.NewAuthController(requestRequest, authService, apiAuthConfig)
+	authController := controller.NewAuthController(binder, authService, apiAuthConfig)
 	uploadFileRepository := repository.NewUploadFileRepository(db)
 	settingRepository := repository.NewSettingRepository(db)
 	settingDefaultRepository := repository.NewSettingDefaultRepository(db)
 	settingService := service2.NewSettingService(settingRepository, settingDefaultRepository)
 	uploadFileService := service2.NewUploadFileService(uploadFileRepository, settingService)
-	uploadFileController := controller.NewUploadFileController(requestRequest, uploadFileService)
+	uploadFileController := controller.NewUploadFileController(binder, uploadFileService)
 	regionRepository := repository.NewRegionRepository(db)
 	regionService := service2.NewRegionService(regionRepository, settingService)
 	regionController := controller.NewRegionController(regionService)

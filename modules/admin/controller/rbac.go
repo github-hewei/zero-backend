@@ -1,22 +1,23 @@
 package controller
 
 import (
+	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/dto"
-	"zero-backend/internal/request"
 	"zero-backend/internal/response"
 	"zero-backend/internal/service"
+	"zero-backend/pkg/bind"
 
 	"github.com/gin-gonic/gin"
 )
 
 // RbacUserController 用户控制器
 type RbacUserController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.RbacUserService
 }
 
 // NewRbacUserController 创建用户控制器
-func NewRbacUserController(req *request.Request, serv *service.RbacUserService) *RbacUserController {
+func NewRbacUserController(req *bind.Binder, serv *service.RbacUserService) *RbacUserController {
 	return &RbacUserController{req: req, serv: serv}
 }
 
@@ -28,8 +29,8 @@ func (c *RbacUserController) List(ctx *gin.Context) {
 		return
 	}
 
-	if !request.IsSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = request.GetStoreId(ctx)
+	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
 	result, err := c.serv.FindList(ctx.Request.Context(), req)
@@ -50,8 +51,8 @@ func (c *RbacUserController) Create(ctx *gin.Context) {
 	}
 
 	// 如果不是超级管理员，或者未指定企业，则使用当前用户所属企业
-	if !request.IsSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = request.GetStoreId(ctx)
+	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
 	if err := c.serv.Create(ctx.Request.Context(), req); err != nil {
@@ -71,8 +72,8 @@ func (c *RbacUserController) Update(ctx *gin.Context) {
 	}
 
 	// 如果不是超级管理员，或者未指定企业，则使用当前用户所属企业
-	if !request.IsSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = request.GetStoreId(ctx)
+	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
 	if err := c.serv.Update(ctx.Request.Context(), req); err != nil {
@@ -92,8 +93,8 @@ func (c *RbacUserController) Delete(ctx *gin.Context) {
 	}
 
 	// 如果不是超级管理员，或者未指定企业，则使用当前用户所属企业
-	if !request.IsSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = request.GetStoreId(ctx)
+	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
 	if err := c.serv.Delete(ctx.Request.Context(), req); err != nil {
@@ -112,8 +113,8 @@ func (c *RbacUserController) SetRoles(ctx *gin.Context) {
 		return
 	}
 
-	if !request.IsSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = request.GetStoreId(ctx)
+	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
 	if err := c.serv.SetRoles(ctx.Request.Context(), req); err != nil {
@@ -132,8 +133,8 @@ func (c *RbacUserController) ResetPassword(ctx *gin.Context) {
 		return
 	}
 
-	if !request.IsSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = request.GetStoreId(ctx)
+	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
 	newPassword, err := c.serv.ResetPassword(ctx.Request.Context(), req)
@@ -149,12 +150,12 @@ func (c *RbacUserController) ResetPassword(ctx *gin.Context) {
 
 // RbacMenuController 菜单控制器
 type RbacMenuController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.RbacMenuService
 }
 
 // NewRbacMenuController 创建菜单控制器
-func NewRbacMenuController(req *request.Request, serv *service.RbacMenuService) *RbacMenuController {
+func NewRbacMenuController(req *bind.Binder, serv *service.RbacMenuService) *RbacMenuController {
 	return &RbacMenuController{req: req, serv: serv}
 }
 
@@ -269,12 +270,12 @@ func (c *RbacMenuController) ApiSave(ctx *gin.Context) {
 
 // RbacRoleController 角色控制器
 type RbacRoleController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.RbacRoleService
 }
 
 // NewRbacRoleController 创建角色控制器
-func NewRbacRoleController(serv *service.RbacRoleService, req *request.Request) *RbacRoleController {
+func NewRbacRoleController(serv *service.RbacRoleService, req *bind.Binder) *RbacRoleController {
 	return &RbacRoleController{req: req, serv: serv}
 }
 
@@ -286,8 +287,8 @@ func (c *RbacRoleController) List(ctx *gin.Context) {
 		return
 	}
 
-	if !request.IsSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = request.GetStoreId(ctx)
+	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
 	result, err := c.serv.FindTreeList(ctx.Request.Context(), req)
@@ -307,8 +308,8 @@ func (c *RbacRoleController) Create(ctx *gin.Context) {
 		return
 	}
 
-	if !request.IsSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = request.GetStoreId(ctx)
+	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
 	if err := c.serv.Create(ctx.Request.Context(), req); err != nil {
@@ -327,8 +328,8 @@ func (c *RbacRoleController) Update(ctx *gin.Context) {
 		return
 	}
 
-	if !request.IsSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = request.GetStoreId(ctx)
+	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
 	if err := c.serv.Update(ctx.Request.Context(), req); err != nil {
@@ -347,8 +348,8 @@ func (c *RbacRoleController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	if !request.IsSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = request.GetStoreId(ctx)
+	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
 	if err := c.serv.Delete(ctx.Request.Context(), req); err != nil {
@@ -361,12 +362,12 @@ func (c *RbacRoleController) Delete(ctx *gin.Context) {
 
 // RbacApiController API权限控制器
 type RbacApiController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.RbacApiService
 }
 
 // NewRbacApiController 创建API权限控制器
-func NewRbacApiController(req *request.Request, serv *service.RbacApiService) *RbacApiController {
+func NewRbacApiController(req *bind.Binder, serv *service.RbacApiService) *RbacApiController {
 	return &RbacApiController{req: req, serv: serv}
 }
 
@@ -431,12 +432,12 @@ func (c *RbacApiController) Delete(ctx *gin.Context) {
 
 // RbacStoreController 企业控制器
 type RbacStoreController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.RbacStoreService
 }
 
 // NewRbacStoreController 创建企业控制器
-func NewRbacStoreController(req *request.Request, serv *service.RbacStoreService) *RbacStoreController {
+func NewRbacStoreController(req *bind.Binder, serv *service.RbacStoreService) *RbacStoreController {
 	return &RbacStoreController{req: req, serv: serv}
 }
 
@@ -545,8 +546,8 @@ func (c *RbacRoleController) SetMenus(ctx *gin.Context) {
 		return
 	}
 
-	if !request.IsSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = request.GetStoreId(ctx)
+	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
 	if err := c.serv.SetMenus(ctx.Request.Context(), req); err != nil {

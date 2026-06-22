@@ -1,22 +1,23 @@
 package controller
 
 import (
+	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/dto"
-	"zero-backend/internal/request"
 	"zero-backend/internal/response"
 	"zero-backend/internal/service"
+	"zero-backend/pkg/bind"
 
 	"github.com/gin-gonic/gin"
 )
 
 // ArticleCategoryController 文章分类控制器
 type ArticleCategoryController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.ArticleCategoryService
 }
 
 // NewArticleCategoryController 创建文章分类控制器
-func NewArticleCategoryController(req *request.Request, serv *service.ArticleCategoryService) *ArticleCategoryController {
+func NewArticleCategoryController(req *bind.Binder, serv *service.ArticleCategoryService) *ArticleCategoryController {
 	return &ArticleCategoryController{req: req, serv: serv}
 }
 
@@ -28,7 +29,7 @@ func (c *ArticleCategoryController) List(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	result, err := c.serv.List(ctx.Request.Context(), req)
 	if err != nil {
 		response.Error(ctx, err)
@@ -46,7 +47,7 @@ func (c *ArticleCategoryController) Create(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Create(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -63,7 +64,7 @@ func (c *ArticleCategoryController) Update(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Update(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -80,7 +81,7 @@ func (c *ArticleCategoryController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Delete(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -91,12 +92,12 @@ func (c *ArticleCategoryController) Delete(ctx *gin.Context) {
 
 // ArticleController 文章控制器
 type ArticleController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.ArticleService
 }
 
 // NewArticleController 创建文章控制器
-func NewArticleController(req *request.Request, serv *service.ArticleService) *ArticleController {
+func NewArticleController(req *bind.Binder, serv *service.ArticleService) *ArticleController {
 	return &ArticleController{req: req, serv: serv}
 }
 
@@ -108,7 +109,7 @@ func (c *ArticleController) List(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	result, err := c.serv.List(ctx.Request.Context(), req)
 	if err != nil {
 		response.Error(ctx, err)
@@ -126,7 +127,7 @@ func (c *ArticleController) Create(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Create(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -143,7 +144,7 @@ func (c *ArticleController) Update(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Update(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -160,7 +161,7 @@ func (c *ArticleController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Delete(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return

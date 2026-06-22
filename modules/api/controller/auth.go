@@ -4,8 +4,8 @@ import (
 	"zero-backend/internal/config"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/errcode"
-	"zero-backend/internal/request"
 	"zero-backend/internal/response"
+	"zero-backend/pkg/bind"
 	"zero-backend/modules/api/service"
 
 	"github.com/241x/zero-kit/apperror"
@@ -14,13 +14,13 @@ import (
 
 // AuthController 权限控制器
 type AuthController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.AuthService
 	cfg  config.ApiAuthConfig
 }
 
 // NewAuthController 创建权限控制器实例
-func NewAuthController(req *request.Request, serv *service.AuthService, cfg config.ApiAuthConfig) *AuthController {
+func NewAuthController(req *bind.Binder, serv *service.AuthService, cfg config.ApiAuthConfig) *AuthController {
 	return &AuthController{
 		req:  req,
 		serv: serv,

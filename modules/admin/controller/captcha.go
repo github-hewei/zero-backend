@@ -1,21 +1,21 @@
 package controller
 
 import (
-	"zero-backend/internal/request"
 	"zero-backend/internal/response"
 	"zero-backend/internal/service"
+	"zero-backend/pkg/bind"
 
 	"github.com/gin-gonic/gin"
 )
 
 // CaptchaController 验证码控制器
 type CaptchaController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.CaptchaService
 }
 
 // NewCaptchaController 创建验证码控制器实例
-func NewCaptchaController(req *request.Request, serv *service.CaptchaService) *CaptchaController {
+func NewCaptchaController(req *bind.Binder, serv *service.CaptchaService) *CaptchaController {
 	return &CaptchaController{
 		req:  req,
 		serv: serv,

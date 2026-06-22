@@ -4,9 +4,9 @@ import (
 	"strconv"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/errcode"
-	"zero-backend/internal/request"
 	"zero-backend/internal/response"
 	"zero-backend/internal/service"
+	"zero-backend/pkg/bind"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/gin-gonic/gin"
@@ -14,12 +14,12 @@ import (
 
 // UploadFileController 文件控制器
 type UploadFileController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.UploadFileService
 }
 
 // NewUploadFileController 创建文件控制器
-func NewUploadFileController(req *request.Request, serv *service.UploadFileService) *UploadFileController {
+func NewUploadFileController(req *bind.Binder, serv *service.UploadFileService) *UploadFileController {
 	return &UploadFileController{req: req, serv: serv}
 }
 

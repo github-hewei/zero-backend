@@ -1,22 +1,23 @@
 package controller
 
 import (
+	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/dto"
-	"zero-backend/internal/request"
 	"zero-backend/internal/response"
 	"zero-backend/internal/service"
+	"zero-backend/pkg/bind"
 
 	"github.com/gin-gonic/gin"
 )
 
 // SettingController 设置控制器
 type SettingController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.SettingService
 }
 
 // NewSettingController 创建设置控制器
-func NewSettingController(req *request.Request, serv *service.SettingService) *SettingController {
+func NewSettingController(req *bind.Binder, serv *service.SettingService) *SettingController {
 	return &SettingController{req: req, serv: serv}
 }
 
@@ -45,7 +46,7 @@ func (c *SettingController) Create(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Create(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -62,7 +63,7 @@ func (c *SettingController) Update(ctx *gin.Context) {
 		return
 	}
 
-	req.StoreId = request.GetStoreId(ctx)
+	req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	if err := c.serv.Update(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -95,7 +96,7 @@ func (c *SettingController) FormConfigs(ctx *gin.Context) {
 		return
 	}
 
-	if !request.IsSuperUser(ctx) {
+	if !ctxkeys.IsSuperUser(ctx.Request.Context()) {
 		req.OnlyPlatform = true
 	}
 
@@ -120,12 +121,12 @@ func (c *SettingController) QiniuToken(ctx *gin.Context) {
 
 // SettingDefaultController 默认设置控制器
 type SettingDefaultController struct {
-	req  *request.Request
+	req  *bind.Binder
 	serv *service.SettingDefaultService
 }
 
 // NewSettingDefaultController 创建默认设置控制器
-func NewSettingDefaultController(req *request.Request, serv *service.SettingDefaultService) *SettingDefaultController {
+func NewSettingDefaultController(req *bind.Binder, serv *service.SettingDefaultService) *SettingDefaultController {
 	return &SettingDefaultController{req: req, serv: serv}
 }
 
