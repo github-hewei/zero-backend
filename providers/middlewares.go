@@ -10,7 +10,8 @@ import (
 
 // MiddlewaresProviderSet 提供中间件依赖集合
 var MiddlewaresProviderSet = wire.NewSet(
-	middleware.NewBeforeMiddleware,
+	middleware.NewTraceMiddleware,
+	middleware.NewRequestLogger,
 	wire.Struct(new(middleware.Middlewares), "*"),
 )
 

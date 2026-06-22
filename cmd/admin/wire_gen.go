@@ -119,9 +119,11 @@ func wireApp() (*server.HTTPServer, error) {
 		RegionController:          regionController,
 		HealthController:          healthController,
 	}
-	beforeMiddleware := middleware.NewBeforeMiddleware(zeroLogger)
+	traceMiddleware := middleware.NewTraceMiddleware(zeroLogger)
+	requestLogger := middleware.NewRequestLogger()
 	middlewares := &middleware.Middlewares{
-		Before: beforeMiddleware,
+		Trace:         traceMiddleware,
+		RequestLogger: requestLogger,
 	}
 	authMiddleware := middleware2.NewAuthMiddleware(adminAuthConfig, authService)
 	middlewareMiddlewares := &middleware2.Middlewares{

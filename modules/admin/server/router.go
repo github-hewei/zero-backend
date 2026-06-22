@@ -19,7 +19,8 @@ func NewGin(
 	r := gin.Default()
 	cors := middleware.NewCorsMiddleware(coreConfig)
 	r.Use(cors.Handle())
-	r.Use(middlewares.Before.Handle())
+	r.Use(middlewares.Trace.Handle())
+	r.Use(middlewares.RequestLogger.Handle())
 
 	apiGroup := r.Group("/api")
 

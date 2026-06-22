@@ -1,6 +1,7 @@
 package middleware
 
-// Middlewares 中间键集合
+// Middlewares 中间件集合
 type Middlewares struct {
-	Before *BeforeMiddleware
+	Trace         *TraceMiddleware
+	RequestLogger *RequestLogger
 }
