@@ -5,10 +5,10 @@ import (
 	"zero-backend/internal/dto"
 	"zero-backend/internal/errcode"
 	"zero-backend/internal/response"
-	"zero-backend/pkg/bind"
 	"zero-backend/modules/admin/service"
 
 	"github.com/241x/zero-kit/apperror"
+	"github.com/241x/zero-kit/bind"
 	"github.com/gin-gonic/gin"
 )
 

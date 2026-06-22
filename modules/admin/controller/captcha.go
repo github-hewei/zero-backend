@@ -3,8 +3,8 @@ package controller
 import (
 	"zero-backend/internal/response"
 	"zero-backend/internal/service"
-	"zero-backend/pkg/bind"
 
+	"github.com/241x/zero-kit/bind"
 	"github.com/gin-gonic/gin"
 )
 

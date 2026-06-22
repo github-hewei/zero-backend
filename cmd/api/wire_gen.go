@@ -7,6 +7,7 @@
 package main
 
 import (
+	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/gormutil"
 	"github.com/241x/zero-kit/mongodb"
 	"github.com/241x/zero-kit/mysql"
@@ -19,7 +20,6 @@ import (
 	middleware2 "zero-backend/modules/api/middleware"
 	"zero-backend/modules/api/server"
 	"zero-backend/modules/api/service"
-	"zero-backend/pkg/bind"
 	"zero-backend/providers"
 )
 
@@ -29,7 +29,10 @@ func wireApp() (*server.HTTPServer, error) {
 	configConfig := config.New()
 	serverConfig := providers.NewApiServerConfig(configConfig)
 	validate := bind.NewValidate()
-	translator := bind.NewTrans(validate)
+	translator, err := bind.NewTrans(validate)
+	if err != nil {
+		return nil, err
+	}
 	code := providers.ProvideBindErrCode()
 	binder := bind.New(validate, translator, code)
 	mysqlConfig := providers.NewMySQLConfig(configConfig)
