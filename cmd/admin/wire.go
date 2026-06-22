@@ -22,7 +22,7 @@ func wireApp() (*server.HTTPServer, error) {
 		providers.ServiceProviderSet,
 		providers.AdminServiceProviderSet,
 		providers.AdminServerProviderSet,
-		providers.RequestProviderSet,
+		providers.BindProviderSet,
 		providers.LoggerProviderSet,
 		providers.MySQLProviderSet,
 		providers.MongoDBProviderSet,

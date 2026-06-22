@@ -8,8 +8,8 @@ import (
 	"github.com/google/wire"
 )
 
-// RequestProviderSet 提供请求相关依赖集合。
-var RequestProviderSet = wire.NewSet(
+// BindProviderSet 提供请求相关依赖集合。
+var BindProviderSet = wire.NewSet(
 	bind.New,
 	bind.NewValidate,
 	bind.NewTrans,
