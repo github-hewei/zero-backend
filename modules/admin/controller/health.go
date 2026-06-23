@@ -1,8 +1,7 @@
 package controller
 
 import (
-	"zero-backend/internal/response"
-
+	"github.com/241x/zero-web/response"
 	"github.com/gin-gonic/gin"
 )
 

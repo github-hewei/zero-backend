@@ -3,12 +3,12 @@ package controller
 import (
 	"zero-backend/internal/config"
 	"zero-backend/internal/dto"
-	"zero-backend/internal/response"
 	"zero-backend/modules/api/service"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-web/errcode"
+	"github.com/241x/zero-web/response"
 	"github.com/gin-gonic/gin"
 )
 

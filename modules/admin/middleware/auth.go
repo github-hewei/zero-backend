@@ -5,11 +5,11 @@ import (
 	"zero-backend/internal/config"
 	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/model"
-	"zero-backend/internal/response"
 	"zero-backend/modules/admin/service"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-web/errcode"
+	"github.com/241x/zero-web/response"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )

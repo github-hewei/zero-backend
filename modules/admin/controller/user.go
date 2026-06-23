@@ -4,10 +4,10 @@ import (
 	"zero-backend/internal/constants"
 	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/dto"
-	"zero-backend/internal/response"
 	"zero-backend/internal/service"
 
 	"github.com/241x/zero-kit/bind"
+	"github.com/241x/zero-web/response"
 	"github.com/gin-gonic/gin"
 )
 
