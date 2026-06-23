@@ -2,10 +2,10 @@ package server
 
 import (
 	"net/http"
-	"zero-backend/internal/config"
 	"zero-backend/modules/admin/controller"
 	adminMiddleware "zero-backend/modules/admin/middleware"
 
+	"github.com/241x/zero-web/config"
 	"github.com/241x/zero-web/middleware"
 	"github.com/gin-gonic/gin"
 )

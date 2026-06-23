@@ -5,26 +5,27 @@ import (
 	"zero-backend/modules/admin/server"
 	server2 "zero-backend/modules/api/server"
 
+	baseconfig "github.com/241x/zero-web/config"
 	"github.com/google/wire"
 )
 
 // NewAdminServerConfig 提取管理端服务配置
-func NewAdminServerConfig(cfg *config.Config) config.ServerConfig {
+func NewAdminServerConfig(cfg *config.Config) baseconfig.ServerConfig {
 	return cfg.Admin.Server
 }
 
 // NewApiServerConfig 提取API端服务配置
-func NewApiServerConfig(cfg *config.Config) config.ServerConfig {
+func NewApiServerConfig(cfg *config.Config) baseconfig.ServerConfig {
 	return cfg.Api.Server
 }
 
 // NewAdminCorsConfig 提取管理端跨域配置
-func NewAdminCorsConfig(cfg *config.Config) config.CorsConfig {
+func NewAdminCorsConfig(cfg *config.Config) baseconfig.CorsConfig {
 	return cfg.Admin.Cors
 }
 
 // NewApiCorsConfig 提取API端跨域配置
-func NewApiCorsConfig(cfg *config.Config) config.CorsConfig {
+func NewApiCorsConfig(cfg *config.Config) baseconfig.CorsConfig {
 	return cfg.Api.Cors
 }
 

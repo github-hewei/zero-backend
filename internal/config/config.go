@@ -8,29 +8,17 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 
-	webconfig "github.com/241x/zero-web/config"
-)
-
-// 基础配置类型，引用自 zero-web
-type (
-	ServerConfig   = webconfig.ServerConfig
-	CorsConfig     = webconfig.CorsConfig
-	AuthConfig     = webconfig.AuthConfig
-	LoggerConfig   = webconfig.LoggerConfig
-	FileLogConfig  = webconfig.FileLogConfig
-	MySQLConfig    = webconfig.MySQLConfig
-	RedisConfig    = webconfig.RedisConfig
-	MongoDBConfig  = webconfig.MongoDBConfig
+	"github.com/241x/zero-web/config"
 )
 
 // Config 全局配置
 type Config struct {
-	Admin   AdminConfig  `mapstructure:"admin"`
-	Api     ApiConfig    `mapstructure:"api"`
-	Logger  LoggerConfig `mapstructure:"logger"`
-	MySQL   MySQLConfig  `mapstructure:"mysql"`
-	Redis   RedisConfig  `mapstructure:"redis"`
-	MongoDB MongoDBConfig `mapstructure:"mongodb"`
+	Admin   AdminConfig          `mapstructure:"admin"`
+	Api     ApiConfig            `mapstructure:"api"`
+	Logger  config.LoggerConfig  `mapstructure:"logger"`
+	MySQL   config.MySQLConfig   `mapstructure:"mysql"`
+	Redis   config.RedisConfig   `mapstructure:"redis"`
+	MongoDB config.MongoDBConfig `mapstructure:"mongodb"`
 }
 
 // CaptchaConfig 验证码配置
@@ -41,28 +29,28 @@ type CaptchaConfig struct {
 
 // AdminConfig 管理后台配置
 type AdminConfig struct {
-	Server  ServerConfig    `mapstructure:"server"`
-	Auth    AdminAuthConfig `mapstructure:"auth"`
-	Cors    CorsConfig      `mapstructure:"cors"`
-	Captcha CaptchaConfig   `mapstructure:"captcha"`
+	Server  config.ServerConfig `mapstructure:"server"`
+	Auth    AdminAuthConfig     `mapstructure:"auth"`
+	Cors    config.CorsConfig   `mapstructure:"cors"`
+	Captcha CaptchaConfig       `mapstructure:"captcha"`
 }
 
 // AdminAuthConfig 管理端认证配置
 type AdminAuthConfig struct {
-	AuthConfig  `mapstructure:",squash"`
-	SuperUserId int `mapstructure:"super_user_id"`
+	config.AuthConfig `mapstructure:",squash"`
+	SuperUserId       int `mapstructure:"super_user_id"`
 }
 
 // ApiConfig API模块配置
 type ApiConfig struct {
-	Server ServerConfig  `mapstructure:"server"`
-	Auth   ApiAuthConfig `mapstructure:"auth"`
-	Cors   CorsConfig    `mapstructure:"cors"`
+	Server config.ServerConfig `mapstructure:"server"`
+	Auth   ApiAuthConfig       `mapstructure:"auth"`
+	Cors   config.CorsConfig   `mapstructure:"cors"`
 }
 
 // ApiAuthConfig API端认证配置
 type ApiAuthConfig struct {
-	AuthConfig `mapstructure:",squash"`
+	config.AuthConfig `mapstructure:",squash"`
 }
 
 // New 加载配置（支持 YAML + 环境变量覆盖）

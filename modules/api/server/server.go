@@ -8,10 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"zero-backend/internal/config"
 
 	"github.com/241x/zero-kit/logger"
-
+	"github.com/241x/zero-web/config"
 	"github.com/gin-gonic/gin"
 )
 

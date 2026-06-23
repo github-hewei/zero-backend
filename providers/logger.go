@@ -4,12 +4,13 @@ import (
 	"zero-backend/internal/config"
 
 	"github.com/241x/zero-kit/logger"
+	baseconfig "github.com/241x/zero-web/config"
 	"github.com/google/wire"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // ProvideLogger 提供日志实例
-func ProvideLogger(cfg config.LoggerConfig, db *mongo.Database) *logger.ZeroLogger {
+func ProvideLogger(cfg baseconfig.LoggerConfig, db *mongo.Database) *logger.ZeroLogger {
 	options := []logger.Option{}
 	for _, writer := range cfg.Writers {
 		switch writer {
