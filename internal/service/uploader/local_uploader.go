@@ -6,9 +6,9 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
-	"zero-backend/internal/errcode"
 
 	"github.com/241x/zero-kit/apperror"
+	"github.com/241x/zero-web/errcode"
 )
 
 // LocalUploader 本地文件上传实现

@@ -7,14 +7,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
 
-	"github.com/241x/zero-kit/logger"
-
 	"github.com/241x/zero-kit/apperror"
+	"github.com/241x/zero-kit/logger"
+	"github.com/241x/zero-web/errcode"
 )
 
 // OpenAPISpec OpenAPI 3.x 规范结构

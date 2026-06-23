@@ -3,9 +3,9 @@ package uploader
 import (
 	"context"
 	"mime/multipart"
-	"zero-backend/internal/errcode"
 
 	"github.com/241x/zero-kit/apperror"
+	"github.com/241x/zero-web/errcode"
 )
 
 // Uploader 定义文件上传接口

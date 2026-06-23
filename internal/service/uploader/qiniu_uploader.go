@@ -5,9 +5,9 @@ import (
 	"mime/multipart"
 	"strings"
 	"zero-backend/internal/dto"
-	"zero-backend/internal/errcode"
 
 	"github.com/241x/zero-kit/apperror"
+	"github.com/241x/zero-web/errcode"
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
 )

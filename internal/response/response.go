@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"zero-backend/internal/ctxkeys"
-	"zero-backend/internal/errcode"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/logger"
+	"github.com/241x/zero-web/errcode"
 	"github.com/gin-gonic/gin"
 )
 

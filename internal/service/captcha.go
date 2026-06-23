@@ -8,9 +8,9 @@ import (
 	"zero-backend/internal/config"
 	"zero-backend/internal/constants"
 	"zero-backend/internal/dto"
-	"zero-backend/internal/errcode"
 
 	"github.com/241x/zero-kit/apperror"
+	"github.com/241x/zero-web/errcode"
 	"github.com/golang/freetype/truetype"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"

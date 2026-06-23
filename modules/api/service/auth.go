@@ -10,13 +10,13 @@ import (
 	"zero-backend/internal/constants"
 	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/dto"
-	"zero-backend/internal/errcode"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/baserepo"
 	"github.com/241x/zero-kit/helper"
+	"github.com/241x/zero-web/errcode"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
 )

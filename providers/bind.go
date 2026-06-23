@@ -1,10 +1,9 @@
 package providers
 
 import (
-	"zero-backend/internal/errcode"
-
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/bind"
+	"github.com/241x/zero-web/errcode"
 	"github.com/google/wire"
 )
 
