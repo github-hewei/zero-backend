@@ -2,27 +2,18 @@ package ctxkeys
 
 import (
 	"context"
-	"time"
 
 	"zero-backend/internal/model"
 
-	webctx "github.com/241x/zero-web/ctxkeys"
+	"github.com/241x/zero-web/ctxkeys"
 )
-
-// 委托到 zero-web/ctxkeys
-func WithTraceID(ctx context.Context, id string) context.Context { return webctx.WithTraceID(ctx, id) }
-func TraceID(ctx context.Context) string                         { return webctx.TraceID(ctx) }
-func WithBeginTime(ctx context.Context, t time.Time) context.Context { return webctx.WithBeginTime(ctx, t) }
-func BeginTime(ctx context.Context) (time.Time, bool)               { return webctx.BeginTime(ctx) }
-func WithUser(ctx context.Context, user any) context.Context        { return webctx.WithUser(ctx, user) }
-func User(ctx context.Context) any                                  { return webctx.User(ctx) }
 
 // UserID 从上下文中获取用户 ID，兼容 RbacUser 与 User 两种模型。
 func UserID(ctx context.Context) uint32 {
-	if user, ok := User(ctx).(*model.RbacUser); ok {
+	if user, ok := ctxkeys.User(ctx).(*model.RbacUser); ok {
 		return user.ID
 	}
-	if user, ok := User(ctx).(*model.User); ok {
+	if user, ok := ctxkeys.User(ctx).(*model.User); ok {
 		return user.ID
 	}
 	return 0
@@ -30,7 +21,7 @@ func UserID(ctx context.Context) uint32 {
 
 // IsSuperUser 判断当前用户是否为超级管理员。
 func IsSuperUser(ctx context.Context) bool {
-	if user, ok := User(ctx).(*model.RbacUser); ok {
+	if user, ok := ctxkeys.User(ctx).(*model.RbacUser); ok {
 		return user.SU
 	}
 	return false
