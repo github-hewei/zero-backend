@@ -1,11 +1,12 @@
 package controller
 
 import (
-	"zero-backend/internal/ctxkeys"
+	authctx "zero-backend/internal/ctxkeys"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/service"
 
 	"github.com/241x/zero-kit/bind"
+	"github.com/241x/zero-web/ctxkeys"
 	"github.com/241x/zero-web/response"
 	"github.com/gin-gonic/gin"
 )
@@ -96,7 +97,7 @@ func (c *SettingController) FormConfigs(ctx *gin.Context) {
 		return
 	}
 
-	if !ctxkeys.IsSuperUser(ctx.Request.Context()) {
+	if !authctx.IsSuperUser(ctx.Request.Context()) {
 		req.OnlyPlatform = true
 	}
 

@@ -3,12 +3,11 @@ package middleware
 import (
 	"strings"
 	"zero-backend/internal/config"
-	"zero-backend/internal/ctxkeys"
 	"zero-backend/internal/model"
 	"zero-backend/modules/admin/service"
 
 	"github.com/241x/zero-kit/apperror"
-	basectxkeys "github.com/241x/zero-web/ctxkeys"
+	"github.com/241x/zero-web/ctxkeys"
 	"github.com/241x/zero-web/errcode"
 	"github.com/241x/zero-web/response"
 	"github.com/gin-gonic/gin"
@@ -72,7 +71,7 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 			return
 		}
 
-		ctx = basectxkeys.WithUser(ctx, user)
+		ctx = ctxkeys.WithUser(ctx, user)
 		ctx = ctxkeys.WithStoreID(ctx, user.StoreId)
 		c.Request = c.Request.WithContext(ctx)
 	}
@@ -84,7 +83,7 @@ func (m *AuthMiddleware) CheckAPIPermission() gin.HandlerFunc {
 		ctx := c.Request.Context()
 
 		// 1. 获取当前用户
-		user, ok := basectxkeys.User(ctx).(*model.RbacUser)
+		user, ok := ctxkeys.User(ctx).(*model.RbacUser)
 		if !ok || user == nil {
 			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()

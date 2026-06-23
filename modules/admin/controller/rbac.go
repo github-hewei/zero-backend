@@ -1,11 +1,12 @@
 package controller
 
 import (
-	"zero-backend/internal/ctxkeys"
+	authctx "zero-backend/internal/ctxkeys"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/service"
 
 	"github.com/241x/zero-kit/bind"
+	"github.com/241x/zero-web/ctxkeys"
 	"github.com/241x/zero-web/response"
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +30,7 @@ func (c *RbacUserController) List(ctx *gin.Context) {
 		return
 	}
 
-	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+	if !authctx.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
 		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
@@ -51,7 +52,7 @@ func (c *RbacUserController) Create(ctx *gin.Context) {
 	}
 
 	// 如果不是超级管理员，或者未指定企业，则使用当前用户所属企业
-	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+	if !authctx.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
 		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
@@ -72,7 +73,7 @@ func (c *RbacUserController) Update(ctx *gin.Context) {
 	}
 
 	// 如果不是超级管理员，或者未指定企业，则使用当前用户所属企业
-	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+	if !authctx.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
 		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
@@ -93,7 +94,7 @@ func (c *RbacUserController) Delete(ctx *gin.Context) {
 	}
 
 	// 如果不是超级管理员，或者未指定企业，则使用当前用户所属企业
-	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+	if !authctx.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
 		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
@@ -113,7 +114,7 @@ func (c *RbacUserController) SetRoles(ctx *gin.Context) {
 		return
 	}
 
-	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+	if !authctx.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
 		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
@@ -133,7 +134,7 @@ func (c *RbacUserController) ResetPassword(ctx *gin.Context) {
 		return
 	}
 
-	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+	if !authctx.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
 		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
@@ -287,7 +288,7 @@ func (c *RbacRoleController) List(ctx *gin.Context) {
 		return
 	}
 
-	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+	if !authctx.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
 		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
@@ -308,7 +309,7 @@ func (c *RbacRoleController) Create(ctx *gin.Context) {
 		return
 	}
 
-	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+	if !authctx.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
 		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
@@ -328,7 +329,7 @@ func (c *RbacRoleController) Update(ctx *gin.Context) {
 		return
 	}
 
-	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+	if !authctx.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
 		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
@@ -348,7 +349,7 @@ func (c *RbacRoleController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+	if !authctx.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
 		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 
@@ -546,7 +547,7 @@ func (c *RbacRoleController) SetMenus(ctx *gin.Context) {
 		return
 	}
 
-	if !ctxkeys.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
+	if !authctx.IsSuperUser(ctx.Request.Context()) || req.StoreId == 0 {
 		req.StoreId = ctxkeys.StoreID(ctx.Request.Context())
 	}
 

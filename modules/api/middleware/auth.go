@@ -2,11 +2,10 @@ package middleware
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/internal/ctxkeys"
 	"zero-backend/modules/api/service"
 
 	"github.com/241x/zero-kit/apperror"
-	basectxkeys "github.com/241x/zero-web/ctxkeys"
+	"github.com/241x/zero-web/ctxkeys"
 	"github.com/241x/zero-web/errcode"
 	"github.com/241x/zero-web/response"
 	"github.com/gin-gonic/gin"
@@ -71,7 +70,7 @@ func (m *AuthMiddleware) JWTAuth() gin.HandlerFunc {
 			return
 		}
 
-		ctx = basectxkeys.WithUser(ctx, user)
+		ctx = ctxkeys.WithUser(ctx, user)
 		ctx = ctxkeys.WithStoreID(ctx, user.StoreId)
 		c.Request = c.Request.WithContext(ctx)
 	}

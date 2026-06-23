@@ -2,12 +2,13 @@ package controller
 
 import (
 	"strconv"
-	"zero-backend/internal/ctxkeys"
+	authctx "zero-backend/internal/ctxkeys"
 	"zero-backend/internal/dto"
 	"zero-backend/internal/service"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/bind"
+	"github.com/241x/zero-web/ctxkeys"
 	"github.com/241x/zero-web/errcode"
 	"github.com/241x/zero-web/response"
 	"github.com/gin-gonic/gin"
@@ -129,7 +130,7 @@ func (c *UploadFileController) Upload(ctx *gin.Context) {
 		File:       file,
 		GroupId:    uint32(groupId),
 		StoreId:    ctxkeys.StoreID(ctx.Request.Context()),
-		UploaderId: ctxkeys.UserID(ctx.Request.Context()),
+		UploaderId: authctx.UserID(ctx.Request.Context()),
 	}
 
 	result, err := c.serv.Upload(ctx.Request.Context(), req)
