@@ -5,53 +5,19 @@ import (
 	"time"
 
 	"zero-backend/internal/model"
+
+	webctx "github.com/241x/zero-web/ctxkeys"
 )
 
-// traceIDKey 上下文传递请求链路ID
-type traceIDKey struct{}
-
-// WithTraceID 注入 traceID
-func WithTraceID(ctx context.Context, id string) context.Context {
-	return context.WithValue(ctx, traceIDKey{}, id)
-}
-
-// TraceID 读取 traceID
-func TraceID(ctx context.Context) string {
-	if v, ok := ctx.Value(traceIDKey{}).(string); ok {
-		return v
-	}
-	return ""
-}
-
-// beginTimeKey 上下文传递请求开始时间
-type beginTimeKey struct{}
-
-// WithBeginTime 注入请求开始时间
-func WithBeginTime(ctx context.Context, t time.Time) context.Context {
-	return context.WithValue(ctx, beginTimeKey{}, t)
-}
-
-// BeginTime 读取请求开始时间
-func BeginTime(ctx context.Context) (time.Time, bool) {
-	v, ok := ctx.Value(beginTimeKey{}).(time.Time)
-	return v, ok
-}
-
-// userKey 上下文传递用户信息
-type userKey struct{}
-
-// WithUser 注入用户信息
-func WithUser(ctx context.Context, user any) context.Context {
-	return context.WithValue(ctx, userKey{}, user)
-}
-
-// User 读取用户信息，调用方需自行类型断言
-func User(ctx context.Context) any {
-	return ctx.Value(userKey{})
-}
+// 委托到 zero-web/ctxkeys
+func WithTraceID(ctx context.Context, id string) context.Context { return webctx.WithTraceID(ctx, id) }
+func TraceID(ctx context.Context) string                         { return webctx.TraceID(ctx) }
+func WithBeginTime(ctx context.Context, t time.Time) context.Context { return webctx.WithBeginTime(ctx, t) }
+func BeginTime(ctx context.Context) (time.Time, bool)               { return webctx.BeginTime(ctx) }
+func WithUser(ctx context.Context, user any) context.Context        { return webctx.WithUser(ctx, user) }
+func User(ctx context.Context) any                                  { return webctx.User(ctx) }
 
 // UserID 从上下文中获取用户 ID，兼容 RbacUser 与 User 两种模型。
-// 未登录时返回 0。
 func UserID(ctx context.Context) uint32 {
 	if user, ok := User(ctx).(*model.RbacUser); ok {
 		return user.ID

@@ -7,37 +7,30 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
+
+	webconfig "github.com/241x/zero-web/config"
+)
+
+// 基础配置类型，引用自 zero-web
+type (
+	ServerConfig   = webconfig.ServerConfig
+	CorsConfig     = webconfig.CorsConfig
+	AuthConfig     = webconfig.AuthConfig
+	LoggerConfig   = webconfig.LoggerConfig
+	FileLogConfig  = webconfig.FileLogConfig
+	MySQLConfig    = webconfig.MySQLConfig
+	RedisConfig    = webconfig.RedisConfig
+	MongoDBConfig  = webconfig.MongoDBConfig
 )
 
 // Config 全局配置
 type Config struct {
-	Admin   AdminConfig   `mapstructure:"admin"`
-	Api     ApiConfig     `mapstructure:"api"`
-	Logger  LoggerConfig  `mapstructure:"logger"`
-	MySQL   MySQLConfig   `mapstructure:"mysql"`
-	Redis   RedisConfig   `mapstructure:"redis"`
+	Admin   AdminConfig  `mapstructure:"admin"`
+	Api     ApiConfig    `mapstructure:"api"`
+	Logger  LoggerConfig `mapstructure:"logger"`
+	MySQL   MySQLConfig  `mapstructure:"mysql"`
+	Redis   RedisConfig  `mapstructure:"redis"`
 	MongoDB MongoDBConfig `mapstructure:"mongodb"`
-}
-
-// AuthConfig 认证配置（Admin 和 Api 共用字段）
-type AuthConfig struct {
-	RefreshTokenTtl int    `mapstructure:"refresh_token_ttl"`
-	AccessTokenTtl  int    `mapstructure:"access_token_ttl"`
-	HmacSecret      string `mapstructure:"hmac_secret"`
-}
-
-// ServerConfig 服务配置
-type ServerConfig struct {
-	Host string `mapstructure:"host"`
-	Port int    `mapstructure:"port"`
-}
-
-// CorsConfig 跨域配置
-type CorsConfig struct {
-	AllowOrigins     []string `mapstructure:"allow_origins"`
-	AllowMethods     []string `mapstructure:"allow_methods"`
-	AllowHeaders     []string `mapstructure:"allow_headers"`
-	AllowCredentials bool     `mapstructure:"allow_credentials"`
 }
 
 // CaptchaConfig 验证码配置
@@ -70,45 +63,6 @@ type ApiConfig struct {
 // ApiAuthConfig API端认证配置
 type ApiAuthConfig struct {
 	AuthConfig `mapstructure:",squash"`
-}
-
-// LoggerConfig 日志配置
-type LoggerConfig struct {
-	Level   string        `mapstructure:"level"`
-	Writers []string      `mapstructure:"writers"`
-	File    FileLogConfig `mapstructure:"file"`
-}
-
-// FileLogConfig 文件日志配置
-type FileLogConfig struct {
-	Path       string `mapstructure:"path"`
-	Filename   string `mapstructure:"filename"`
-	MaxSize    int    `mapstructure:"max_size"`
-	MaxAge     int    `mapstructure:"max_age"`
-	MaxBackups int    `mapstructure:"max_backups"`
-	Compress   bool   `mapstructure:"compress"`
-	LocalTime  bool   `mapstructure:"local_time"`
-}
-
-// MySQLConfig MySQL配置
-type MySQLConfig struct {
-	Dsn    string `mapstructure:"dsn"`
-	Prefix string `mapstructure:"prefix"`
-}
-
-// RedisConfig Redis配置
-type RedisConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	Password string `mapstructure:"password"`
-	DB       int    `mapstructure:"db"`
-}
-
-// MongoDBConfig MongoDB配置
-type MongoDBConfig struct {
-	URI      string `mapstructure:"uri"`
-	Database string `mapstructure:"database"`
-	Enabled  bool   `mapstructure:"enabled"`
 }
 
 // New 加载配置（支持 YAML + 环境变量覆盖）

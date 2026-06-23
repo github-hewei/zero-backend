@@ -1,10 +1,10 @@
 package providers
 
 import (
-	"zero-backend/internal/middleware"
 	middleware2 "zero-backend/modules/admin/middleware"
 	middleware3 "zero-backend/modules/api/middleware"
 
+	"github.com/241x/zero-web/middleware"
 	"github.com/google/wire"
 )
 
