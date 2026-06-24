@@ -83,7 +83,7 @@ func wireApp() (*server.Server, error) {
 		Auth: authMiddleware,
 	}
 	corsConfig := providers.NewApiCorsConfig(configConfig)
-	engine := router.NewGin(controllers, middlewares, middlewareMiddlewares, corsConfig)
+	engine := router.NewGin(controllers, middlewares, middlewareMiddlewares, corsConfig, apiAuthConfig)
 	v := providers.ProvideServerOptions()
 	serverServer := server.New(serverConfig, engine, zeroLogger, v...)
 	return serverServer, nil

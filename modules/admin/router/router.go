@@ -5,7 +5,9 @@ import (
 	"zero-backend/modules/admin/controller"
 	adminMiddleware "zero-backend/modules/admin/middleware"
 
-	"github.com/241x/zero-web/config"
+	"zero-backend/internal/config"
+
+	basecfg "github.com/241x/zero-web/config"
 	"github.com/241x/zero-web/middleware"
 	"github.com/gin-gonic/gin"
 )
@@ -14,10 +16,11 @@ func NewGin(
 	ctrl *controller.Controllers,
 	middlewares *middleware.Middlewares,
 	adminMiddlewares *adminMiddleware.Middlewares,
-	coreConfig config.CorsConfig,
+	corsConfig basecfg.CorsConfig,
+	authConfig config.AdminAuthConfig,
 ) *gin.Engine {
 	r := gin.Default()
-	cors := middleware.NewCorsMiddleware(coreConfig)
+	cors := middleware.NewCorsMiddleware(corsConfig)
 	r.Use(cors.Handle())
 	r.Use(middlewares.Trace.Handle())
 	r.Use(middlewares.RequestLogger.Handle())
@@ -32,7 +35,8 @@ func NewGin(
 	apiGroup.POST("/captcha/generate", ctrl.CaptchaController.Generate)
 
 	// 注册中间件验证权限
-	apiGroup.Use(adminMiddlewares.Auth.JWTAuth())
+	apiGroup.Use(middleware.JWTGuard(authConfig.HmacSecret))
+	apiGroup.Use(adminMiddlewares.Auth.LoadUser())
 	apiGroup.Use(adminMiddlewares.Auth.CheckAPIPermission())
 
 	// 鉴权相关接口

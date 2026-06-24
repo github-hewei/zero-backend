@@ -1,10 +1,11 @@
 package router
 
 import (
+	"zero-backend/internal/config"
 	"zero-backend/modules/api/controller"
 	apiMiddleware "zero-backend/modules/api/middleware"
 
-	"github.com/241x/zero-web/config"
+	basecfg "github.com/241x/zero-web/config"
 	"github.com/241x/zero-web/middleware"
 	"github.com/gin-gonic/gin"
 )
@@ -12,8 +13,9 @@ import (
 func NewGin(
 	ctrl *controller.Controllers,
 	middlewares *middleware.Middlewares,
-	apiMiddleware *apiMiddleware.Middlewares,
-	corsConfig config.CorsConfig,
+	apiMiddlewares *apiMiddleware.Middlewares,
+	corsConfig basecfg.CorsConfig,
+	authConfig config.ApiAuthConfig,
 ) *gin.Engine {
 	r := gin.Default()
 	cors := middleware.NewCorsMiddleware(corsConfig)
@@ -28,7 +30,8 @@ func NewGin(
 	apiGroup.POST("/refresh-token", ctrl.AuthController.RefreshToken)
 
 	// 注册中间件验证权限
-	apiGroup.Use(apiMiddleware.Auth.JWTAuth())
+	apiGroup.Use(middleware.JWTGuard(authConfig.HmacSecret))
+	apiGroup.Use(apiMiddlewares.Auth.LoadUser())
 
 	// 鉴权相关接口
 	apiGroup.POST("/logout", ctrl.AuthController.Logout)
