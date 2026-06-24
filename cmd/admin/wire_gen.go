@@ -12,13 +12,12 @@ import (
 	"github.com/241x/zero-kit/mongodb"
 	"github.com/241x/zero-kit/mysql"
 	"github.com/241x/zero-kit/redis"
-	"github.com/241x/zero-web/middleware"
 	"github.com/241x/zero-web/server"
 	"zero-backend/internal/config"
 	"zero-backend/internal/repository"
 	"zero-backend/internal/service"
 	"zero-backend/modules/admin/controller"
-	middleware2 "zero-backend/modules/admin/middleware"
+	"zero-backend/modules/admin/middleware"
 	"zero-backend/modules/admin/router"
 	service2 "zero-backend/modules/admin/service"
 	"zero-backend/providers"
@@ -29,14 +28,6 @@ import (
 func wireApp() (*server.Server, error) {
 	configConfig := config.New()
 	serverConfig := providers.NewAdminServerConfig(configConfig)
-	validate := bind.NewValidate()
-	translator, err := bind.NewTrans(validate)
-	if err != nil {
-		return nil, err
-	}
-	code := providers.ProvideBindErrCode()
-	binder := bind.New(validate, translator, code)
-	mysqlConfig := providers.NewMySQLConfig(configConfig)
 	loggerConfig := configConfig.Logger
 	mongodbConfig := providers.NewMongoDBConfig(configConfig)
 	conn, err := mongodb.NewConn(mongodbConfig)
@@ -45,6 +36,14 @@ func wireApp() (*server.Server, error) {
 	}
 	database := conn.DB
 	zeroLogger := providers.ProvideLogger(loggerConfig, database)
+	validate := bind.NewValidate()
+	translator, err := bind.NewTrans(validate)
+	if err != nil {
+		return nil, err
+	}
+	code := providers.ProvideBindErrCode()
+	binder := bind.New(validate, translator, code)
+	mysqlConfig := providers.NewMySQLConfig(configConfig)
 	logger := gormutil.NewLogger(zeroLogger)
 	db, err := mysql.NewDB(mysqlConfig, logger)
 	if err != nil {
@@ -120,18 +119,12 @@ func wireApp() (*server.Server, error) {
 		RegionController:          regionController,
 		HealthController:          healthController,
 	}
-	traceMiddleware := middleware.NewTraceMiddleware(zeroLogger)
-	requestLogger := middleware.NewRequestLogger()
+	authMiddleware := middleware.NewAuthMiddleware(adminAuthConfig, authService)
 	middlewares := &middleware.Middlewares{
-		Trace:         traceMiddleware,
-		RequestLogger: requestLogger,
-	}
-	authMiddleware := middleware2.NewAuthMiddleware(adminAuthConfig, authService)
-	middlewareMiddlewares := &middleware2.Middlewares{
 		Auth: authMiddleware,
 	}
 	corsConfig := providers.NewAdminCorsConfig(configConfig)
-	engine := router.NewGin(controllers, middlewares, middlewareMiddlewares, corsConfig, adminAuthConfig)
+	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, adminAuthConfig)
 	v := providers.ProvideServerOptions()
 	serverServer := server.New(serverConfig, engine, zeroLogger, v...)
 	return serverServer, nil

@@ -15,7 +15,6 @@ func wireApp() (*webserver.Server, error) {
 		config.New,
 		providers.RedisProviderSet,
 		providers.AdminControllersProviderSet,
-		providers.MiddlewaresProviderSet,
 		providers.AdminMiddlewaresProviderSet,
 		providers.RepositoryProviderSet,
 		providers.ServiceProviderSet,

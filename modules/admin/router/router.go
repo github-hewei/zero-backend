@@ -7,23 +7,26 @@ import (
 
 	"zero-backend/internal/config"
 
+	"github.com/241x/zero-kit/logger"
 	basecfg "github.com/241x/zero-web/config"
 	"github.com/241x/zero-web/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func NewGin(
+	log logger.Logger,
 	ctrl *controller.Controllers,
-	middlewares *middleware.Middlewares,
 	adminMiddlewares *adminMiddleware.Middlewares,
 	corsConfig basecfg.CorsConfig,
 	authConfig config.AdminAuthConfig,
 ) *gin.Engine {
 	r := gin.Default()
-	cors := middleware.NewCorsMiddleware(corsConfig)
-	r.Use(cors.Handle())
-	r.Use(middlewares.Trace.Handle())
-	r.Use(middlewares.RequestLogger.Handle())
+	// CORS 跨域配置
+	r.Use(middleware.CORS(corsConfig))
+	// Trace 跟踪配置
+	r.Use(middleware.Trace(log))
+	// Request 日志配置
+	r.Use(middleware.RequestLog())
 
 	apiGroup := r.Group("/api")
 
