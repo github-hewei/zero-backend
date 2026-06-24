@@ -1,4 +1,4 @@
-package server
+package router
 
 import (
 	"zero-backend/modules/api/controller"

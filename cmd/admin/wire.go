@@ -4,14 +4,13 @@ package main
 
 import (
 	"zero-backend/internal/config"
-
-	"zero-backend/modules/admin/server"
 	"zero-backend/providers"
 
+	webserver "github.com/241x/zero-web/server"
 	"github.com/google/wire"
 )
 
-func wireApp() (*server.HTTPServer, error) {
+func wireApp() (*webserver.Server, error) {
 	panic(wire.Build(
 		config.New,
 		providers.RedisProviderSet,

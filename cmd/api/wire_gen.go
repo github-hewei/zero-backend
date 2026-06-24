@@ -13,19 +13,20 @@ import (
 	"github.com/241x/zero-kit/mysql"
 	"github.com/241x/zero-kit/redis"
 	"github.com/241x/zero-web/middleware"
+	"github.com/241x/zero-web/server"
 	"zero-backend/internal/config"
 	"zero-backend/internal/repository"
 	service2 "zero-backend/internal/service"
 	"zero-backend/modules/api/controller"
 	middleware2 "zero-backend/modules/api/middleware"
-	"zero-backend/modules/api/server"
+	"zero-backend/modules/api/router"
 	"zero-backend/modules/api/service"
 	"zero-backend/providers"
 )
 
 // Injectors from wire.go:
 
-func wireApp() (*server.HTTPServer, error) {
+func wireApp() (*server.Server, error) {
 	configConfig := config.New()
 	serverConfig := providers.NewApiServerConfig(configConfig)
 	validate := bind.NewValidate()
@@ -82,7 +83,8 @@ func wireApp() (*server.HTTPServer, error) {
 		Auth: authMiddleware,
 	}
 	corsConfig := providers.NewApiCorsConfig(configConfig)
-	engine := server.NewGin(controllers, middlewares, middlewareMiddlewares, corsConfig)
-	httpServer := server.NewHTTPServer(serverConfig, engine, zeroLogger)
-	return httpServer, nil
+	engine := router.NewGin(controllers, middlewares, middlewareMiddlewares, corsConfig)
+	v := providers.ProvideServerOptions()
+	serverServer := server.New(serverConfig, engine, zeroLogger, v...)
+	return serverServer, nil
 }

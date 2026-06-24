@@ -4,7 +4,7 @@ go 1.26.4
 
 require (
 	github.com/241x/zero-kit v1.5.0
-	github.com/241x/zero-web v0.0.3
+	github.com/241x/zero-web v0.0.4
 	github.com/gin-gonic/gin v1.12.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
