@@ -8,6 +8,7 @@ import (
 	"zero-backend/modules/captcha"
 	"zero-backend/modules/region"
 	"zero-backend/modules/upload"
+	"zero-backend/modules/user"
 
 	"zero-backend/internal/config"
 	"zero-backend/internal/service"
@@ -94,13 +95,7 @@ func NewGin(
 	article.Register(apiGroup, article.Deps{DB: db, Binder: binder})
 	upload.RegisterAdmin(apiGroup, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
 
-	apiGroup.POST("/user/user/list", ctrl.UserController.List)
-	apiGroup.POST("/user/user/create", ctrl.UserController.Create)
-	apiGroup.POST("/user/user/update", ctrl.UserController.Update)
-	apiGroup.POST("/user/user/delete", ctrl.UserController.Delete)
-	apiGroup.POST("/user/user/detail", ctrl.UserController.Detail)
-	apiGroup.POST("/user/points/logs", ctrl.UserController.GetPointsLogs)
-	apiGroup.POST("/user/points/change", ctrl.UserController.ChangePoints)
+	user.Register(apiGroup, user.Deps{DB: db, Binder: binder})
 
 	region.Register(apiGroup, region.Deps{DB: db, Binder: binder})
 

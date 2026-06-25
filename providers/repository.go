@@ -16,8 +16,6 @@ var RepositoryProviderSet = wire.NewSet(
 	repository.NewRbacRoleMenuRepository,
 	repository.NewRbacUserRoleRepository,
 	repository.NewRbacMenuApiRepository,
-	repository.NewUserRepository,
 	repository.NewSettingRepository,
 	repository.NewSettingDefaultRepository,
-	repository.NewUserPointsLogRepository,
 )

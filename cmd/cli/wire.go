@@ -19,7 +19,6 @@ func wireApp() (*command.RootCommand, error) {
 		locker.NewRedisLocker,
 		providers.LoggerProviderSet,
 		providers.MongoDBProviderSet,
-		providers.ServiceProviderSet,
 		providers.RepositoryProviderSet,
 		providers.MySQLProviderSet,
 		providers.CliCommandProviderSet,

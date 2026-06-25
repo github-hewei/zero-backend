@@ -8,7 +8,6 @@ type Controllers struct {
 	RbacRoleController        *RbacRoleController
 	RbacUserController        *RbacUserController
 	RbacStoreController       *RbacStoreController
-	UserController            *UserController
 	SettingController         *SettingController
 	SettingDefaultController  *SettingDefaultController
 	HealthController          *HealthController

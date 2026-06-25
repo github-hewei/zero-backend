@@ -15,7 +15,6 @@ import (
 	"github.com/241x/zero-kit/redis"
 	"zero-backend/internal/config"
 	"zero-backend/internal/repository"
-	"zero-backend/internal/service"
 	"zero-backend/modules/cli/command"
 	"zero-backend/modules/cli/runner"
 	"zero-backend/providers"
@@ -42,17 +41,12 @@ func wireApp() (*command.RootCommand, error) {
 	if err != nil {
 		return nil, err
 	}
-	userRepository := repository.NewUserRepository(db)
-	userPointsLogRepository := repository.NewUserPointsLogRepository(db)
-	userService := service.NewUserService(db, userRepository, userPointsLogRepository)
-	userListCommand := command.NewUserListCommand(userService)
-	userCommand := command.NewUserCommand(userListCommand)
 	migrateCommand := command.NewMigrateCommand(db)
 	queueManager := queue.NewQueueManager(client)
 	queueCommand := command.NewQueueCommand(queueManager)
 	rbacApiRepository := repository.NewRbacApiRepository(db)
 	syncApiRunner := runner.NewSyncApiRunner(zeroLogger, rbacApiRepository)
 	syncApiCommand := command.NewSyncApiCommand(syncApiRunner)
-	rootCommand := command.NewRootCommand(zeroLogger, redisLocker, userCommand, migrateCommand, queueCommand, syncApiCommand)
+	rootCommand := command.NewRootCommand(zeroLogger, redisLocker, migrateCommand, queueCommand, syncApiCommand)
 	return rootCommand, nil
 }

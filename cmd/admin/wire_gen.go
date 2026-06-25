@@ -74,10 +74,6 @@ func wireApp() (*server.Server, error) {
 	rbacStoreRepository := repository.NewRbacStoreRepository(db)
 	rbacStoreService := service2.NewRbacStoreService(rbacStoreRepository)
 	rbacStoreController := controller.NewRbacStoreController(binder, rbacStoreService)
-	userRepository := repository.NewUserRepository(db)
-	userPointsLogRepository := repository.NewUserPointsLogRepository(db)
-	userService := service2.NewUserService(db, userRepository, userPointsLogRepository)
-	userController := controller.NewUserController(binder, userService)
 	settingRepository := repository.NewSettingRepository(db)
 	settingDefaultRepository := repository.NewSettingDefaultRepository(db)
 	settingService := service2.NewSettingService(settingRepository, settingDefaultRepository)
@@ -92,7 +88,6 @@ func wireApp() (*server.Server, error) {
 		RbacRoleController:       rbacRoleController,
 		RbacUserController:       rbacUserController,
 		RbacStoreController:      rbacStoreController,
-		UserController:           userController,
 		SettingController:        settingController,
 		SettingDefaultController: settingDefaultController,
 		HealthController:         healthController,

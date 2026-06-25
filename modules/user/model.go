@@ -1,9 +1,8 @@
-package model
+package user
 
-import (
-	"gorm.io/gorm"
-	"gorm.io/plugin/soft_delete"
-)
+import "gorm.io/plugin/soft_delete"
+
+const tablePrefix = "gaz_"
 
 // User 用户表模型
 type User struct {
@@ -29,13 +28,10 @@ type User struct {
 	Avatar    *UploadFile           `json:"avatar" gorm:"foreignKey:AvatarId"`
 }
 
-// TableName 指定数据表名称
-func (m *User) TableName() string {
-	return TableNamePrefix + "user"
-}
+func (User) TableName() string { return tablePrefix + "user" }
 
-// UserPointsLog 用户积分变更记录模型
-type UserPointsLog struct {
+// PointsLog 用户积分变更记录模型
+type PointsLog struct {
 	ID         uint32 `json:"id" gorm:"primaryKey"`
 	StoreId    uint32 `json:"store_id" gorm:"not null;default:0;comment:企业ID;index:idx_store_user,priority:1"`
 	UserId     uint32 `json:"user_id" gorm:"not null;default:0;comment:用户ID;index:idx_store_user,priority:2"`
@@ -49,13 +45,4 @@ type UserPointsLog struct {
 	SourceTypeText string `json:"source_type_text" gorm:"-"`
 }
 
-// TableName 指定数据表名称
-func (m *UserPointsLog) TableName() string {
-	return TableNamePrefix + "user_points_log"
-}
-
-// AfterFind 查询后处理
-func (m *UserPointsLog) AfterFind(tx *gorm.DB) (err error) {
-	// m.SourceTypeText = constants.PointsSourceType(m.SourceType).String()
-	return nil
-}
+func (PointsLog) TableName() string { return tablePrefix + "user_points_log" }

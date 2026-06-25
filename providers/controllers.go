@@ -15,7 +15,6 @@ var AdminControllersProviderSet = wire.NewSet(
 	controller.NewRbacRoleController,
 	controller.NewRbacUserController,
 	controller.NewRbacStoreController,
-	controller.NewUserController,
 	controller.NewSettingController,
 	controller.NewSettingDefaultController,
 	controller.NewHealthController,

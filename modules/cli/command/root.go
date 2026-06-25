@@ -28,7 +28,6 @@ type RootCommand struct {
 func NewRootCommand(
 	logger logger.Logger,
 	locker *locker.RedisLocker,
-	user *UserCommand,
 	migrate *MigrateCommand,
 	queue *QueueCommand,
 	syncApi *SyncApiCommand,
@@ -42,7 +41,7 @@ func NewRootCommand(
 	}
 
 	cmd.Configure(logger, locker)
-	cmd.AddCommand(user.Command)
+	cmd.AddCommand(migrate.Command)
 	cmd.AddCommand(migrate.Command)
 	cmd.AddCommand(queue.Command)
 	cmd.AddCommand(syncApi.Command)

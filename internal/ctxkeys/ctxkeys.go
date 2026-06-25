@@ -9,11 +9,11 @@ import (
 
 // UserID 从上下文中获取用户 ID，兼容 RbacUser 与 User 两种模型。
 func UserID(ctx context.Context) uint32 {
-	if user, ok := ctxkeys.User(ctx).(*model.RbacUser); ok {
-		return user.ID
+	if u, ok := ctxkeys.User(ctx).(*model.RbacUser); ok {
+		return u.ID
 	}
-	if user, ok := ctxkeys.User(ctx).(*model.User); ok {
-		return user.ID
+	if u, ok := ctxkeys.User(ctx).(*model.User); ok {
+		return u.ID
 	}
 	return 0
 }
