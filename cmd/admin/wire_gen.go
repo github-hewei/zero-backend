@@ -85,9 +85,6 @@ func wireApp() (*server.Server, error) {
 	settingController := controller.NewSettingController(binder, settingService)
 	settingDefaultService := service.NewSettingDefaultService(settingDefaultRepository)
 	settingDefaultController := controller.NewSettingDefaultController(binder, settingDefaultService)
-	regionRepository := repository.NewRegionRepository(db)
-	regionService := service.NewRegionService(regionRepository, settingService)
-	regionController := controller.NewRegionController(regionService)
 	healthController := controller.NewHealthController()
 	controllers := &controller.Controllers{
 		AuthController:           authController,
@@ -100,7 +97,6 @@ func wireApp() (*server.Server, error) {
 		UserController:           userController,
 		SettingController:        settingController,
 		SettingDefaultController: settingDefaultController,
-		RegionController:         regionController,
 		HealthController:         healthController,
 	}
 	authMiddleware := middleware.NewAuthMiddleware(adminAuthConfig, authService)

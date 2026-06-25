@@ -5,6 +5,7 @@ import (
 	"zero-backend/modules/admin/controller"
 	adminMiddleware "zero-backend/modules/admin/middleware"
 	"zero-backend/modules/article"
+	"zero-backend/modules/region"
 	"zero-backend/modules/upload"
 
 	"zero-backend/internal/config"
@@ -113,7 +114,7 @@ func NewGin(
 	upload.RegisterAdmin(apiGroup, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
 
 	// 区划管理
-	apiGroup.POST("/region/tree", ctrl.RegionController.Tree)
+	region.Register(apiGroup, region.Deps{DB: db, Binder: binder})
 
 	// 检测服务健康接口
 	r.GET("/health", ctrl.HealthController.Health)

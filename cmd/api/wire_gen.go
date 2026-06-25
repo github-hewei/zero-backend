@@ -55,16 +55,12 @@ func wireApp() (*server.Server, error) {
 	client := redis.New(redisConfig)
 	authService := service.NewAuthService(userRepository, apiAuthConfig, client)
 	authController := controller.NewAuthController(binder, authService, apiAuthConfig)
-	regionRepository := repository.NewRegionRepository(db)
 	settingRepository := repository.NewSettingRepository(db)
 	settingDefaultRepository := repository.NewSettingDefaultRepository(db)
 	settingService := service2.NewSettingService(settingRepository, settingDefaultRepository)
-	regionService := service2.NewRegionService(regionRepository, settingService)
-	regionController := controller.NewRegionController(regionService)
 	settingController := controller.NewSettingController(settingService)
 	controllers := &controller.Controllers{
 		AuthController:    authController,
-		RegionController:  regionController,
 		SettingController: settingController,
 	}
 	authMiddleware := middleware.NewAuthMiddleware(apiAuthConfig, authService)

@@ -5,6 +5,7 @@ import (
 	"zero-backend/internal/service"
 	"zero-backend/modules/api/controller"
 	apiMiddleware "zero-backend/modules/api/middleware"
+	"zero-backend/modules/region"
 	"zero-backend/modules/upload"
 
 	"github.com/241x/zero-kit/bind"
@@ -44,7 +45,7 @@ func NewGin(
 	upload.RegisterApi(apiGroup, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
 
 	apiGroup.POST("/setting/qiniu-token", ctrl.SettingController.QiniuToken)
-	apiGroup.POST("/region/tree", ctrl.RegionController.Regions)
+	region.Register(apiGroup, region.Deps{DB: db, Binder: binder})
 
 	return r
 }

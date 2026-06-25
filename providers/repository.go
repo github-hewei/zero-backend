@@ -19,6 +19,5 @@ var RepositoryProviderSet = wire.NewSet(
 	repository.NewUserRepository,
 	repository.NewSettingRepository,
 	repository.NewSettingDefaultRepository,
-	repository.NewRegionRepository,
 	repository.NewUserPointsLogRepository,
 )

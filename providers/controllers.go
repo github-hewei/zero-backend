@@ -19,7 +19,6 @@ var AdminControllersProviderSet = wire.NewSet(
 	controller.NewUserController,
 	controller.NewSettingController,
 	controller.NewSettingDefaultController,
-	controller.NewRegionController,
 	controller.NewHealthController,
 	wire.Struct(new(controller.Controllers), "*"),
 )
@@ -27,7 +26,6 @@ var AdminControllersProviderSet = wire.NewSet(
 // ApiControllersProviderSet 提供API控制器依赖集合
 var ApiControllersProviderSet = wire.NewSet(
 	controller2.NewAuthController,
-	controller2.NewRegionController,
 	controller2.NewSettingController,
 	wire.Struct(new(controller2.Controllers), "*"),
 )
