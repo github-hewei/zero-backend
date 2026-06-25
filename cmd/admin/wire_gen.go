@@ -14,12 +14,7 @@ import (
 	"github.com/241x/zero-kit/redis"
 	"github.com/241x/zero-web/server"
 	"zero-backend/internal/config"
-	"zero-backend/internal/repository"
-	service2 "zero-backend/internal/service"
-	"zero-backend/modules/admin/controller"
-	"zero-backend/modules/admin/middleware"
 	"zero-backend/modules/admin/router"
-	"zero-backend/modules/admin/service"
 	"zero-backend/providers"
 )
 
@@ -36,6 +31,12 @@ func wireApp() (*server.Server, error) {
 	}
 	database := conn.DB
 	zeroLogger := providers.ProvideLogger(loggerConfig, database)
+	mysqlConfig := providers.NewMySQLConfig(configConfig)
+	logger := gormutil.NewLogger(zeroLogger)
+	db, err := mysql.NewDB(mysqlConfig, logger)
+	if err != nil {
+		return nil, err
+	}
 	validate := bind.NewValidate()
 	translator, err := bind.NewTrans(validate)
 	if err != nil {
@@ -43,52 +44,14 @@ func wireApp() (*server.Server, error) {
 	}
 	code := providers.ProvideBindErrCode()
 	binder := bind.New(validate, translator, code)
-	mysqlConfig := providers.NewMySQLConfig(configConfig)
-	logger := gormutil.NewLogger(zeroLogger)
-	db, err := mysql.NewDB(mysqlConfig, logger)
-	if err != nil {
-		return nil, err
-	}
-	rbacUserRepository := repository.NewRbacUserRepository(db)
-	rbacApiRepository := repository.NewRbacApiRepository(db)
-	rbacRoleRepository := repository.NewRbacRoleRepository(db)
-	rbacMenuRepository := repository.NewRbacMenuRepository(db)
-	rbacRoleMenuRepository := repository.NewRbacRoleMenuRepository(db)
-	rbacUserRoleRepository := repository.NewRbacUserRoleRepository(db)
-	rbacMenuApiRepository := repository.NewRbacMenuApiRepository(db)
 	adminAuthConfig := providers.NewAdminAuthConfig(configConfig)
+	corsConfig := providers.NewAdminCorsConfig(configConfig)
+	service := providers.NewSettingService(db)
 	redisConfig := providers.NewRedisConfig(configConfig)
 	client := redis.New(redisConfig)
 	captchaConfig := providers.NewCaptchaConfig(configConfig)
 	captchaService := providers.NewCaptchaService(client, captchaConfig)
-	authService := service.NewAuthService(rbacUserRepository, rbacApiRepository, rbacRoleRepository, rbacMenuRepository, rbacRoleMenuRepository, rbacUserRoleRepository, rbacMenuApiRepository, adminAuthConfig, client, captchaService)
-	authController := controller.NewAuthController(binder, authService, adminAuthConfig)
-	rbacMenuService := service2.NewRbacMenuService(rbacMenuRepository, rbacMenuApiRepository, db)
-	rbacMenuController := controller.NewRbacMenuController(binder, rbacMenuService)
-	rbacApiService := service2.NewRbacApiService(rbacApiRepository)
-	rbacApiController := controller.NewRbacApiController(binder, rbacApiService)
-	rbacRoleService := service2.NewRbacRoleService(rbacRoleRepository, rbacRoleMenuRepository, db)
-	rbacRoleController := controller.NewRbacRoleController(rbacRoleService, binder)
-	rbacUserService := service2.NewRbacUserService(db, rbacUserRepository, rbacUserRoleRepository)
-	rbacUserController := controller.NewRbacUserController(binder, rbacUserService)
-	rbacStoreRepository := repository.NewRbacStoreRepository(db)
-	rbacStoreService := service2.NewRbacStoreService(rbacStoreRepository)
-	rbacStoreController := controller.NewRbacStoreController(binder, rbacStoreService)
-	controllers := &controller.Controllers{
-		AuthController:      authController,
-		RbacMenuController:  rbacMenuController,
-		RbacApiController:   rbacApiController,
-		RbacRoleController:  rbacRoleController,
-		RbacUserController:  rbacUserController,
-		RbacStoreController: rbacStoreController,
-	}
-	authMiddleware := middleware.NewAuthMiddleware(adminAuthConfig, authService)
-	middlewares := &middleware.Middlewares{
-		Auth: authMiddleware,
-	}
-	corsConfig := providers.NewAdminCorsConfig(configConfig)
-	settingService := providers.NewSettingService(db)
-	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, adminAuthConfig, db, binder, settingService, captchaService)
+	engine := router.NewGin(zeroLogger, db, binder, adminAuthConfig, corsConfig, service, captchaService)
 	v := providers.ProvideServerOptions()
 	serverServer := server.New(serverConfig, engine, zeroLogger, v...)
 	return serverServer, nil

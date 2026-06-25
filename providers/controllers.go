@@ -1,21 +1,9 @@
 package providers
 
 import (
-	"zero-backend/modules/admin/controller"
 	controller2 "zero-backend/modules/api/controller"
 
 	"github.com/google/wire"
-)
-
-// AdminControllersProviderSet 提供管理端控制器依赖集合
-var AdminControllersProviderSet = wire.NewSet(
-	controller.NewAuthController,
-	controller.NewRbacMenuController,
-	controller.NewRbacApiController,
-	controller.NewRbacRoleController,
-	controller.NewRbacUserController,
-	controller.NewRbacStoreController,
-	wire.Struct(new(controller.Controllers), "*"),
 )
 
 // ApiControllersProviderSet 提供API控制器依赖集合

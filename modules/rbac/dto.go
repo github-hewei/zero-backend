@@ -1,4 +1,10 @@
-package dto
+package rbac
+
+// ListResult 列表数据结构体
+type ListResult struct {
+	List  any   `json:"list"`
+	Total int64 `json:"total"`
+}
 
 // RbacMenuCreateRequest 创建菜单请求参数
 type RbacMenuCreateRequest struct {

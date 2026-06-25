@@ -7,8 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"zero-backend/internal/model"
-	"zero-backend/internal/repository"
+	"zero-backend/modules/rbac"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/logger"
@@ -40,11 +39,11 @@ type Operation struct {
 // SyncApiRunner API同步执行器
 type SyncApiRunner struct {
 	logger logger.Logger
-	repo   *repository.RbacApiRepository
+	repo   *rbac.RbacApiRepository
 }
 
 // NewSyncApiRunner 创建API同步执行器
-func NewSyncApiRunner(l logger.Logger, repo *repository.RbacApiRepository) *SyncApiRunner {
+func NewSyncApiRunner(l logger.Logger, repo *rbac.RbacApiRepository) *SyncApiRunner {
 	return &SyncApiRunner{
 		logger: l,
 		repo:   repo,
@@ -178,7 +177,7 @@ func (r *SyncApiRunner) syncSingleAPI(ctx context.Context, url, name string, par
 }
 
 // updateExistingAPI 更新已存在的API（如需更新）
-func (r *SyncApiRunner) updateExistingAPI(ctx context.Context, existing *model.RbacApi, name string, parentID uint32, url string, result *SyncResult) error {
+func (r *SyncApiRunner) updateExistingAPI(ctx context.Context, existing *rbac.RbacApi, name string, parentID uint32, url string, result *SyncResult) error {
 	if existing.Name == name && existing.ParentId == parentID {
 		result.Skipped++
 		return nil
@@ -222,7 +221,7 @@ func (r *SyncApiRunner) ensureParentCategory(ctx context.Context, tag string) (u
 		return existing.ID, nil
 	}
 
-	api := &model.RbacApi{
+	api := &rbac.RbacApi{
 		Name:     tag,
 		Url:      "-",
 		ParentId: 0,
@@ -267,7 +266,7 @@ func (r *SyncApiRunner) parseOpenAPI(filePath string) (*OpenAPISpec, error) {
 
 // createAPI 创建新API
 func (r *SyncApiRunner) createAPI(ctx context.Context, url, name string, parentID uint32) error {
-	api := &model.RbacApi{
+	api := &rbac.RbacApi{
 		Name:     name,
 		Url:      url,
 		ParentId: parentID,
@@ -278,7 +277,7 @@ func (r *SyncApiRunner) createAPI(ctx context.Context, url, name string, parentI
 
 // updateAPI 更新API
 func (r *SyncApiRunner) updateAPI(ctx context.Context, id uint32, name string, parentID uint32) error {
-	api := &model.RbacApi{ID: id}
+	api := &rbac.RbacApi{ID: id}
 	return r.repo.Updates(ctx, api, map[string]any{
 		"name":      name,
 		"parent_id": parentID,

@@ -2,7 +2,7 @@ package controller
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/internal/dto"
+	"zero-backend/modules/rbac"
 	"zero-backend/modules/api/service"
 
 	"github.com/241x/zero-kit/apperror"
@@ -30,7 +30,7 @@ func NewAuthController(req *bind.Binder, serv *service.AuthService, cfg config.A
 
 // Login 系统登录
 func (c *AuthController) Login(ctx *gin.Context) {
-	req := &dto.AuthLoginRequest{}
+	req := &rbac.AuthLoginRequest{}
 	if err := c.req.ShouldBindJSON(ctx, req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -71,7 +71,7 @@ func (c *AuthController) RefreshToken(ctx *gin.Context) {
 
 // ChangePassword 修改密码
 func (c *AuthController) ChangePassword(ctx *gin.Context) {
-	req := &dto.ChangePasswordRequest{}
+	req := &rbac.ChangePasswordRequest{}
 	if err := c.req.ShouldBindJSON(ctx, req); err != nil {
 		response.Error(ctx, err)
 		return

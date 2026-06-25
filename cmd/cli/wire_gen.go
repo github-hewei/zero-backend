@@ -14,9 +14,9 @@ import (
 	"github.com/241x/zero-kit/queue"
 	"github.com/241x/zero-kit/redis"
 	"zero-backend/internal/config"
-	"zero-backend/internal/repository"
 	"zero-backend/modules/cli/command"
 	"zero-backend/modules/cli/runner"
+	"zero-backend/modules/rbac"
 	"zero-backend/providers"
 )
 
@@ -44,7 +44,7 @@ func wireApp() (*command.RootCommand, error) {
 	migrateCommand := command.NewMigrateCommand(db)
 	queueManager := queue.NewQueueManager(client)
 	queueCommand := command.NewQueueCommand(queueManager)
-	rbacApiRepository := repository.NewRbacApiRepository(db)
+	rbacApiRepository := rbac.NewRbacApiRepository(db)
 	syncApiRunner := runner.NewSyncApiRunner(zeroLogger, rbacApiRepository)
 	syncApiCommand := command.NewSyncApiCommand(syncApiRunner)
 	rootCommand := command.NewRootCommand(zeroLogger, redisLocker, migrateCommand, queueCommand, syncApiCommand)

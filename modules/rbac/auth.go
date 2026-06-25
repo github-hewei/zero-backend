@@ -1,4 +1,4 @@
-package service
+package rbac
 
 import (
 	"context"
@@ -8,10 +8,6 @@ import (
 	"time"
 	"zero-backend/internal/config"
 	"zero-backend/internal/constants"
-	"zero-backend/internal/dto"
-	"zero-backend/internal/model"
-	"zero-backend/internal/repository"
-	"zero-backend/modules/captcha"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/baserepo"
@@ -22,32 +18,36 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// AuthService 管理员认证服务
-type AuthService struct {
-	userRepo     *repository.RbacUserRepository
-	apiRepo      *repository.RbacApiRepository
-	roleRepo     *repository.RbacRoleRepository
-	menuRepo     *repository.RbacMenuRepository
-	roleMenuRepo *repository.RbacRoleMenuRepository
-	userRoleRepo *repository.RbacUserRoleRepository
-	menuApiRepo  *repository.RbacMenuApiRepository
-	cfg          config.AdminAuthConfig
-	rdb          *redis.Client
-	captchaServ  *captcha.Service
+// CaptchaVerifier 验证码验证接口（由宿主注入）
+type CaptchaVerifier interface {
+	Verify(ctx context.Context, captchaID, captchaCode string) error
 }
 
-// NewAuthService 创建AuthService实例
+// AuthService 管理员认证服务
+type AuthService struct {
+	userRepo     *RbacUserRepository
+	apiRepo      *RbacApiRepository
+	roleRepo     *RbacRoleRepository
+	menuRepo     *RbacMenuRepository
+	roleMenuRepo *RbacRoleMenuRepository
+	userRoleRepo *RbacUserRoleRepository
+	menuApiRepo  *RbacMenuApiRepository
+	cfg          config.AdminAuthConfig
+	rdb          *redis.Client
+	captcha      CaptchaVerifier
+}
+
 func NewAuthService(
-	userRepo *repository.RbacUserRepository,
-	apiRepo *repository.RbacApiRepository,
-	roleRepo *repository.RbacRoleRepository,
-	menuRepo *repository.RbacMenuRepository,
-	roleMenuRepo *repository.RbacRoleMenuRepository,
-	userRoleRepo *repository.RbacUserRoleRepository,
-	menuApiRepo *repository.RbacMenuApiRepository,
+	userRepo *RbacUserRepository,
+	apiRepo *RbacApiRepository,
+	roleRepo *RbacRoleRepository,
+	menuRepo *RbacMenuRepository,
+	roleMenuRepo *RbacRoleMenuRepository,
+	userRoleRepo *RbacUserRoleRepository,
+	menuApiRepo *RbacMenuApiRepository,
 	cfg config.AdminAuthConfig,
 	rdb *redis.Client,
-	captchaServ *captcha.Service,
+	captcha CaptchaVerifier,
 ) *AuthService {
 	return &AuthService{
 		userRepo:     userRepo,
@@ -59,18 +59,17 @@ func NewAuthService(
 		menuApiRepo:  menuApiRepo,
 		cfg:          cfg,
 		rdb:          rdb,
-		captchaServ:  captchaServ,
+		captcha:      captcha,
 	}
 }
 
 // Login 系统登录
-func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dto.AdminLoginResponse, string, error) {
-	// 验证码校验
-	if err := s.captchaServ.Verify(ctx, req.CaptchaID, req.CaptchaCode); err != nil {
+func (s *AuthService) Login(ctx context.Context, req *AuthLoginRequest) (*AdminLoginResponse, string, error) {
+	if err := s.captcha.Verify(ctx, req.CaptchaID, req.CaptchaCode); err != nil {
 		return nil, "", err
 	}
 
-	filter := &repository.RbacUserUsernameFilterField{Username: req.Username}
+	filter := &RbacUserUsernameFilterField{Username: req.Username}
 	item, err := s.userRepo.FindOne(ctx, filter)
 	if err != nil {
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
@@ -101,7 +100,6 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 		fmt.Sprintf("%s:%s", constants.RedisAdminRefreshTokenKey, refreshToken),
 		itemBytes,
 		time.Duration(s.cfg.RefreshTokenTtl)*time.Second)
-
 	if result.Err() != nil {
 		return nil, "", apperror.Wrap(errcode.Internal, result.Err(), apperror.WithMsg("登录失败"))
 	}
@@ -113,7 +111,7 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 
 	s.WithSU(item)
 
-	return &dto.AdminLoginResponse{
+	return &AdminLoginResponse{
 		Token: tokenString,
 		Ttl:   s.cfg.RefreshTokenTtl,
 		User:  item,
@@ -121,15 +119,14 @@ func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dt
 }
 
 // RefreshToken 刷新Token
-func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*dto.AdminLoginResponse, error) {
+func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*AdminLoginResponse, error) {
 	itemBytes, err := s.rdb.Get(ctx,
 		fmt.Sprintf("%s:%s", constants.RedisAdminRefreshTokenKey, refreshToken)).Bytes()
-
 	if err != nil {
 		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("刷新令牌失败"))
 	}
 
-	item := &model.RbacUser{}
+	item := &RbacUser{}
 	if err := json.Unmarshal(itemBytes, item); err != nil {
 		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("刷新令牌失败"))
 	}
@@ -139,21 +136,19 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*d
 		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("刷新令牌失败"))
 	}
 
-	return &dto.AdminLoginResponse{
+	return &AdminLoginResponse{
 		Token: token,
 		Ttl:   s.cfg.AccessTokenTtl,
 		User:  nil,
 	}, nil
 }
 
-// getRefreshToken 获取刷新令牌
 func (s *AuthService) getRefreshToken() (string, error) {
 	token := helper.StringMd5(fmt.Sprintf("%d", time.Now().UnixNano()) + helper.RandomString(16))
 	return token, nil
 }
 
-// getAccessToken 获取访问令牌
-func (s *AuthService) getAccessToken(item *model.RbacUser) (string, error) {
+func (s *AuthService) getAccessToken(item *RbacUser) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iat":      time.Now().Unix(),
 		"exp":      time.Now().Add(time.Duration(s.cfg.AccessTokenTtl) * time.Second).Unix(),
@@ -165,28 +160,24 @@ func (s *AuthService) getAccessToken(item *model.RbacUser) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	return tokenString, nil
 }
 
 // GetUserInfo 获取用户信息
-func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*model.RbacUser, error) {
-	// 1. 先从Redis缓存获取
+func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*RbacUser, error) {
 	cacheKey := fmt.Sprintf("%s:%d", constants.RedisAdminLoginKey, userId)
 	result := s.rdb.Get(ctx, cacheKey)
 
-	// 2. 缓存命中
 	if result.Err() == nil {
 		itemBytes, err := result.Bytes()
 		if err == nil {
-			item := &model.RbacUser{}
+			item := &RbacUser{}
 			if err := json.Unmarshal(itemBytes, item); err == nil {
 				return item, nil
 			}
 		}
 	}
 
-	// 3. 缓存未命中，查询数据库
 	user, err := s.userRepo.FindOne(ctx, userId)
 	if err != nil {
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
@@ -196,45 +187,40 @@ func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*model.Rb
 	}
 
 	s.WithSU(user)
-	// 4. 写入缓存
 	userBytes, err := json.Marshal(user)
 	if err != nil {
-		return user, nil // 即使序列化失败也返回用户数据
+		return user, nil
 	}
-
-	// 设置1小时有效期
 	s.rdb.Set(ctx, cacheKey, userBytes, time.Hour)
 
 	return user, nil
 }
 
 // WithSU 设置是否为超级管理员
-func (s *AuthService) WithSU(user *model.RbacUser) {
+func (s *AuthService) WithSU(user *RbacUser) {
 	if int(user.ID) == s.cfg.SuperUserId {
 		user.SU = true
 	}
 }
 
 // GetPermissions 获取用户菜单权限
-func (s *AuthService) GetPermissions(ctx context.Context, req *dto.AuthGetPermissionsRequest) ([]*model.RbacMenu, error) {
-	user := ctxkeys.User(ctx).(*model.RbacUser)
+func (s *AuthService) GetPermissions(ctx context.Context, req *AuthGetPermissionsRequest) ([]*RbacMenu, error) {
+	user := ctxkeys.User(ctx).(*RbacUser)
 	if user == nil {
 		return nil, nil
 	}
 
-	// 1. 如果是超级管理员，返回全部菜单
 	if user.SU {
 		menus, err := s.menuRepo.FindAll(ctx, nil, nil, nil, baserepo.WithScopes(nil))
 		if err != nil {
 			return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取菜单权限失败"))
 		}
 		if req.IsTree {
-			return model.RbacMenuList(menus).Tree(), nil
+			return RbacMenuList(menus).Tree(), nil
 		}
 		return menus, nil
 	}
 
-	// 2. 获取用户角色
 	roles, err := s.GetUserRoles(ctx, user.ID)
 	if err != nil {
 		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取菜单权限失败"))
@@ -243,8 +229,7 @@ func (s *AuthService) GetPermissions(ctx context.Context, req *dto.AuthGetPermis
 		return nil, nil
 	}
 
-	// 3. 获取角色对应的菜单
-	var menus []*model.RbacMenu
+	var menus []*RbacMenu
 	for _, role := range roles {
 		roleMenus, err := s.GetRoleMenus(ctx, role.ID)
 		if err != nil {
@@ -253,36 +238,31 @@ func (s *AuthService) GetPermissions(ctx context.Context, req *dto.AuthGetPermis
 		menus = append(menus, roleMenus...)
 	}
 
-	// 4. 去重
-	uniqueMenus := make(map[uint32]*model.RbacMenu)
+	uniqueMenus := make(map[uint32]*RbacMenu)
 	for _, menu := range menus {
 		uniqueMenus[menu.ID] = menu
 	}
 
-	// 5. 转换为切片返回
-	var result []*model.RbacMenu
+	var result []*RbacMenu
 	for _, menu := range uniqueMenus {
 		result = append(result, menu)
 	}
 
 	if req.IsTree {
-		return model.RbacMenuList(result).Tree(), nil
+		return RbacMenuList(result).Tree(), nil
 	}
-
 	return result, nil
 }
 
 // GetUserRoles 根据用户ID获取角色列表
-func (s *AuthService) GetUserRoles(ctx context.Context, userID uint32) ([]*model.RbacRole, error) {
-	filter := &repository.RbacUserRoleFilterField{UserId: userID}
+func (s *AuthService) GetUserRoles(ctx context.Context, userID uint32) ([]*RbacRole, error) {
+	filter := &RbacUserRoleFilterField{UserId: userID}
 	userRoles, err := s.userRoleRepo.FindAll(ctx, filter, nil, nil)
-
 	if err != nil {
 		return nil, err
 	}
-
 	if len(userRoles) == 0 {
-		return []*model.RbacRole{}, nil
+		return []*RbacRole{}, nil
 	}
 
 	var roleIDs []uint32
@@ -290,50 +270,42 @@ func (s *AuthService) GetUserRoles(ctx context.Context, userID uint32) ([]*model
 		roleIDs = append(roleIDs, ur.RoleId)
 	}
 
-	// 获取角色信息
-	roles, err := s.roleRepo.FindAll(ctx, &repository.RbacRoleFilterField{IDs: roleIDs}, nil, nil)
-
+	roles, err := s.roleRepo.FindAll(ctx, &RbacRoleFilterField{IDs: roleIDs}, nil, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	return roles, nil
 }
 
 // GetRoleMenus 根据角色ID获取角色菜单
-func (s *AuthService) GetRoleMenus(ctx context.Context, roleId uint32) ([]*model.RbacMenu, error) {
-	roleMenus, err := s.roleMenuRepo.FindAll(ctx, &repository.RbacRoleMenuFilterField{RoleId: roleId}, nil, nil)
-
+func (s *AuthService) GetRoleMenus(ctx context.Context, roleId uint32) ([]*RbacMenu, error) {
+	roleMenus, err := s.roleMenuRepo.FindAll(ctx, &RbacRoleMenuFilterField{RoleId: roleId}, nil, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	if len(roleMenus) == 0 {
-		return []*model.RbacMenu{}, nil
+		return []*RbacMenu{}, nil
 	}
 
-	// 获取菜单ID列表
 	var menuIDs []uint32
 	for _, rm := range roleMenus {
 		menuIDs = append(menuIDs, rm.MenuId)
 	}
 
-	// 获取菜单详情
-	menus, err := s.menuRepo.FindAll(ctx, &repository.RbacMenuFilterField{IDs: menuIDs}, nil, nil, baserepo.WithScopes(nil))
+	menus, err := s.menuRepo.FindAll(ctx, &RbacMenuFilterField{IDs: menuIDs}, nil, nil, baserepo.WithScopes(nil))
 	if err != nil {
 		return nil, err
 	}
-
 	return menus, nil
 }
 
 // ChangePassword 修改密码
-func (s *AuthService) ChangePassword(ctx context.Context, req *dto.ChangePasswordRequest) error {
-	user, _ := ctxkeys.User(ctx).(*model.RbacUser)
+func (s *AuthService) ChangePassword(ctx context.Context, req *ChangePasswordRequest) error {
+	user, _ := ctxkeys.User(ctx).(*RbacUser)
 	if user == nil || user.ID == 0 {
 		return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 	}
-	// 1. 获取用户信息
+
 	user, err := s.userRepo.FindOne(ctx, user.ID)
 	if err != nil {
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
@@ -342,7 +314,6 @@ func (s *AuthService) ChangePassword(ctx context.Context, req *dto.ChangePasswor
 		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("修改密码失败"))
 	}
 
-	// 2. 验证旧密码
 	ok, err := helper.CheckPassword(req.OldPassword, user.Password)
 	if err != nil {
 		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("验证密码失败"))
@@ -351,31 +322,24 @@ func (s *AuthService) ChangePassword(ctx context.Context, req *dto.ChangePasswor
 		return apperror.New(errcode.InvalidInput, apperror.WithMsg("旧密码不正确"))
 	}
 
-	// 3. 加密新密码
 	hashedPassword, err := helper.HashPassword(req.NewPassword)
 	if err != nil {
 		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("修改密码失败"))
 	}
 
-	// 4. 更新密码
-	updateData := map[string]any{
-		"password": hashedPassword,
-	}
-
+	updateData := map[string]any{"password": hashedPassword}
 	if err := s.userRepo.Updates(ctx, user, updateData); err != nil {
 		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("修改密码失败"))
 	}
-
 	return nil
 }
 
 // CheckAPIPermission 检查API权限
-func (s *AuthService) CheckAPIPermission(ctx context.Context, user *model.RbacUser, apiPath string) (bool, error) {
+func (s *AuthService) CheckAPIPermission(ctx context.Context, user *RbacUser, apiPath string) (bool, error) {
 	if user.SU {
 		return true, nil
 	}
 
-	// 1. 获取用户角色
 	roles, err := s.GetUserRoles(ctx, user.ID)
 	if err != nil {
 		return false, err
@@ -384,7 +348,6 @@ func (s *AuthService) CheckAPIPermission(ctx context.Context, user *model.RbacUs
 		return false, nil
 	}
 
-	// 2. 获取API权限
 	api, err := s.apiRepo.GetAPIByPath(ctx, apiPath)
 	if err != nil {
 		return false, err
@@ -393,7 +356,6 @@ func (s *AuthService) CheckAPIPermission(ctx context.Context, user *model.RbacUs
 		return false, nil
 	}
 
-	// 3. 检查角色是否有该API权限
 	for _, role := range roles {
 		hasPerm, err := s.CheckRoleAPIPermission(ctx, role.ID, api.ID)
 		if err != nil {
@@ -403,33 +365,28 @@ func (s *AuthService) CheckAPIPermission(ctx context.Context, user *model.RbacUs
 			return true, nil
 		}
 	}
-
 	return false, nil
 }
 
 // CheckRoleAPIPermission 检查角色是否有API权限
 func (s *AuthService) CheckRoleAPIPermission(ctx context.Context, roleID uint32, apiID uint32) (bool, error) {
-	roleMenus, err := s.roleMenuRepo.FindAll(ctx, &repository.RbacRoleMenuFilterField{RoleId: roleID}, nil, nil)
-
+	roleMenus, err := s.roleMenuRepo.FindAll(ctx, &RbacRoleMenuFilterField{RoleId: roleID}, nil, nil)
 	if err != nil {
 		return false, err
 	}
-
 	if len(roleMenus) == 0 {
 		return false, nil
 	}
 
-	// 获取菜单API关联
 	var menuIDs []uint32
 	for _, rm := range roleMenus {
 		menuIDs = append(menuIDs, rm.MenuId)
 	}
 
-	filter := &repository.RbacMenuApiFilterField{MenuIDs: menuIDs, ApiId: apiID}
+	filter := &RbacMenuApiFilterField{MenuIDs: menuIDs, ApiId: apiID}
 	menuApis, err := s.menuApiRepo.FindAll(ctx, filter, nil, nil, baserepo.WithScopes(nil))
 	if err != nil {
 		return false, err
 	}
-
 	return len(menuApis) > 0, nil
 }

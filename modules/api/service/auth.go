@@ -9,6 +9,7 @@ import (
 	"zero-backend/internal/config"
 	"zero-backend/internal/constants"
 	"zero-backend/internal/dto"
+	"zero-backend/modules/rbac"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
 
@@ -42,7 +43,7 @@ func NewAuthService(
 }
 
 // Login 用户登录
-func (s *AuthService) Login(ctx context.Context, req *dto.AuthLoginRequest) (*dto.UserLoginResponse, string, error) {
+func (s *AuthService) Login(ctx context.Context, req *rbac.AuthLoginRequest) (*dto.UserLoginResponse, string, error) {
 	filter := repository.UserFilterField{Username: req.Username}
 	item, err := s.userRepo.FindOne(ctx, filter)
 	if err != nil {
@@ -179,7 +180,7 @@ func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*model.Us
 }
 
 // ChangePassword 修改用户密码
-func (s *AuthService) ChangePassword(ctx context.Context, req *dto.ChangePasswordRequest) error {
+func (s *AuthService) ChangePassword(ctx context.Context, req *rbac.ChangePasswordRequest) error {
 	// 1. 获取当前用户
 	user := ctxkeys.User(ctx).(*model.User)
 	if user == nil || user.ID == 0 {

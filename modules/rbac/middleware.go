@@ -1,10 +1,9 @@
-package middleware
+package rbac
 
 import (
 	"strings"
+
 	"zero-backend/internal/config"
-	"zero-backend/internal/model"
-	"zero-backend/modules/admin/service"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-web/ctxkeys"
@@ -17,15 +16,12 @@ import (
 // AuthMiddleware 权限验证中间件
 type AuthMiddleware struct {
 	config   config.AdminAuthConfig
-	authServ *service.AuthService
+	authServ *AuthService
 }
 
 // NewAuthMiddleware 创建权限验证中间件
-func NewAuthMiddleware(cfg config.AdminAuthConfig, authServ *service.AuthService) *AuthMiddleware {
-	return &AuthMiddleware{
-		config:   cfg,
-		authServ: authServ,
-	}
+func NewAuthMiddleware(cfg config.AdminAuthConfig, authServ *AuthService) *AuthMiddleware {
+	return &AuthMiddleware{config: cfg, authServ: authServ}
 }
 
 // LoadUser 从 JWT claims 加载用户信息并注入上下文。
@@ -53,7 +49,7 @@ func (m *AuthMiddleware) CheckAPIPermission() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		user, ok := ctxkeys.User(ctx).(*model.RbacUser)
+		user, ok := ctxkeys.User(ctx).(*RbacUser)
 		if !ok || user == nil {
 			response.Error(c, apperror.New(errcode.Unauthorized))
 			c.Abort()

@@ -3,11 +3,9 @@ package providers
 import (
 	"zero-backend/internal/config"
 	"zero-backend/internal/constants"
-	"zero-backend/internal/service"
 	"zero-backend/modules/captcha"
 	"zero-backend/modules/setting"
-	service2 "zero-backend/modules/admin/service"
-	service3 "zero-backend/modules/api/service"
+	service2 "zero-backend/modules/api/service"
 
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
@@ -17,15 +15,6 @@ import (
 func NewSettingService(db *gorm.DB) *setting.Service {
 	return setting.NewService(setting.NewRepository(db), setting.NewDefaultRepository(db))
 }
-
-// ServiceProviderSet 提供服务层依赖集合
-var ServiceProviderSet = wire.NewSet(
-	service.NewRbacMenuService,
-	service.NewRbacApiService,
-	service.NewRbacRoleService,
-	service.NewRbacUserService,
-	service.NewRbacStoreService,
-)
 
 // NewAdminAuthConfig 提取管理端认证配置
 func NewAdminAuthConfig(cfg *config.Config) config.AdminAuthConfig {
@@ -53,8 +42,7 @@ var AdminServiceProviderSet = wire.NewSet(
 	NewCaptchaConfig,
 	NewCaptchaService,
 	NewSettingService,
-	service2.NewAuthService,
 )
 
 // ApiServiceProviderSet 提供API端服务层依赖集合
-var ApiServiceProviderSet = wire.NewSet(NewApiAuthConfig, NewSettingService, service3.NewAuthService)
+var ApiServiceProviderSet = wire.NewSet(NewApiAuthConfig, NewSettingService, service2.NewAuthService)

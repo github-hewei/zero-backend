@@ -1,8 +1,10 @@
-package model
+package rbac
 
 import (
 	"gorm.io/plugin/soft_delete"
 )
+
+const tablePrefix = "gaz_"
 
 // RbacMenu 菜单表模型
 type RbacMenu struct {
@@ -22,9 +24,8 @@ type RbacMenu struct {
 	Actions  []*RbacMenu `json:"actions" gorm:"-"`
 }
 
-// TableName 指定数据表名称
 func (m *RbacMenu) TableName() string {
-	return TableNamePrefix + "rbac_menu"
+	return tablePrefix + "rbac_menu"
 }
 
 // RbacMenuList 菜单列表
@@ -34,8 +35,8 @@ type RbacMenuList []*RbacMenu
 func (list RbacMenuList) Tree() []*RbacMenu {
 	idMap := make(map[uint32]*RbacMenu, len(list))
 	for _, menu := range list {
-		menu.Children = []*RbacMenu{} // 子菜单：页面
-		menu.Actions = []*RbacMenu{}  // 操作：动作
+		menu.Children = []*RbacMenu{}
+		menu.Actions = []*RbacMenu{}
 		idMap[menu.ID] = menu
 	}
 
@@ -68,9 +69,8 @@ type RbacApi struct {
 	Children  []*RbacApi `json:"children" gorm:"-"`
 }
 
-// TableName 指定数据表名称
 func (m *RbacApi) TableName() string {
-	return TableNamePrefix + "rbac_api"
+	return tablePrefix + "rbac_api"
 }
 
 // RbacApiList 接口列表
@@ -80,7 +80,7 @@ type RbacApiList []*RbacApi
 func (list RbacApiList) Tree() []*RbacApi {
 	idMap := make(map[uint32]*RbacApi, len(list))
 	for _, menu := range list {
-		menu.Children = []*RbacApi{} // 子接口：页面
+		menu.Children = []*RbacApi{}
 		idMap[menu.ID] = menu
 	}
 
@@ -104,9 +104,8 @@ type RbacMenuApi struct {
 	CreatedAt int64  `json:"created_at" gorm:"not null;comment:创建时间;autoCreateTime"`
 }
 
-// TableName 指定数据表名称
 func (m *RbacMenuApi) TableName() string {
-	return TableNamePrefix + "rbac_menu_api"
+	return tablePrefix + "rbac_menu_api"
 }
 
 // RbacRole 角色表模型
@@ -123,9 +122,8 @@ type RbacRole struct {
 	RbacRoleMenu []*RbacRoleMenu `json:"rbac_role_menu" gorm:"foreignKey:RoleId"`
 }
 
-// TableName 指定数据表名称
 func (m *RbacRole) TableName() string {
-	return TableNamePrefix + "rbac_role"
+	return tablePrefix + "rbac_role"
 }
 
 // RbacRoleList 角色列表
@@ -164,9 +162,8 @@ type RbacRoleMenu struct {
 	RbacMenu *RbacMenu `json:"rbac_menu" gorm:"foreignKey:MenuId"`
 }
 
-// TableName 指定数据表名称
 func (m *RbacRoleMenu) TableName() string {
-	return TableNamePrefix + "rbac_role_menu"
+	return tablePrefix + "rbac_role_menu"
 }
 
 // RbacStore 企业表模型
@@ -186,9 +183,8 @@ type RbacStore struct {
 	DeletedAt soft_delete.DeletedAt `json:"-" gorm:"not null;default:0;comment:删除时间"`
 }
 
-// TableName 指定数据表名称
 func (m *RbacStore) TableName() string {
-	return TableNamePrefix + "rbac_store"
+	return tablePrefix + "rbac_store"
 }
 
 // RbacUser 管理员表模型
@@ -206,13 +202,11 @@ type RbacUser struct {
 	DeletedAt    soft_delete.DeletedAt `json:"-" gorm:"not null;default:0;comment:删除时间"`
 	RbacUserRole []*RbacUserRole       `json:"rbac_user_role" gorm:"foreignKey:UserId"`
 
-	// 是否是超级超级管理员, 最高权限账号
 	SU bool `json:"su" gorm:"-"`
 }
 
-// TableName 指定数据表名称
 func (m *RbacUser) TableName() string {
-	return TableNamePrefix + "rbac_user"
+	return tablePrefix + "rbac_user"
 }
 
 // RbacUserRole 用户角色关联表
@@ -226,9 +220,8 @@ type RbacUserRole struct {
 	RbacRole *RbacRole `json:"rbac_role" gorm:"foreignKey:RoleId"`
 }
 
-// TableName 指定数据表名称
 func (m *RbacUserRole) TableName() string {
-	return TableNamePrefix + "rbac_user_role"
+	return tablePrefix + "rbac_user_role"
 }
 
 // RoleMenus 角色关联菜单表模型
@@ -240,7 +233,6 @@ type RoleMenus struct {
 	UpdatedAt int64  `json:"updated_at" gorm:"default:0;autoUpdateTime"`
 }
 
-// TableName 指定数据表名称
 func (m *RoleMenus) TableName() string {
-	return TableNamePrefix + "role_menus"
+	return tablePrefix + "role_menus"
 }
