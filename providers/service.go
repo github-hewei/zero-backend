@@ -2,10 +2,8 @@ package providers
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/internal/constants"
 	"zero-backend/modules/captcha"
 	"zero-backend/modules/setting"
-	service2 "zero-backend/modules/api/service"
 
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
@@ -33,7 +31,7 @@ func NewApiAuthConfig(cfg *config.Config) config.ApiAuthConfig {
 
 // NewCaptchaService 创建验证码服务
 func NewCaptchaService(rdb *redis.Client, cfg config.CaptchaConfig) *captcha.Service {
-	return captcha.NewService(rdb, captcha.Config{Enabled: cfg.Enabled, TTL: cfg.TTL}, constants.RedisCaptchaKey)
+	return captcha.NewService(rdb, captcha.Config{Enabled: cfg.Enabled, TTL: cfg.TTL}, "ZAG:CAPTCHA")
 }
 
 // AdminServiceProviderSet 提供管理端服务层依赖集合
@@ -45,4 +43,4 @@ var AdminServiceProviderSet = wire.NewSet(
 )
 
 // ApiServiceProviderSet 提供API端服务层依赖集合
-var ApiServiceProviderSet = wire.NewSet(NewApiAuthConfig, NewSettingService, service2.NewAuthService)
+var ApiServiceProviderSet = wire.NewSet(NewApiAuthConfig, NewSettingService)

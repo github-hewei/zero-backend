@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"time"
 	"zero-backend/internal/config"
-	"zero-backend/internal/constants"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/baserepo"
@@ -16,6 +15,11 @@ import (
 	"github.com/241x/zero-web/errcode"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
+)
+
+const (
+	redisAdminLoginKey        = "ZAG:ADMIN:LOGIN"
+	redisAdminRefreshTokenKey = "ZAG:ADMIN:REFRESH:TOKEN"
 )
 
 // CaptchaVerifier 验证码验证接口（由宿主注入）
@@ -97,7 +101,7 @@ func (s *AuthService) Login(ctx context.Context, req *AuthLoginRequest) (*AdminL
 	}
 
 	result := s.rdb.Set(ctx,
-		fmt.Sprintf("%s:%s", constants.RedisAdminRefreshTokenKey, refreshToken),
+		fmt.Sprintf("%s:%s", redisAdminRefreshTokenKey, refreshToken),
 		itemBytes,
 		time.Duration(s.cfg.RefreshTokenTtl)*time.Second)
 	if result.Err() != nil {
@@ -121,7 +125,7 @@ func (s *AuthService) Login(ctx context.Context, req *AuthLoginRequest) (*AdminL
 // RefreshToken 刷新Token
 func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*AdminLoginResponse, error) {
 	itemBytes, err := s.rdb.Get(ctx,
-		fmt.Sprintf("%s:%s", constants.RedisAdminRefreshTokenKey, refreshToken)).Bytes()
+		fmt.Sprintf("%s:%s", redisAdminRefreshTokenKey, refreshToken)).Bytes()
 	if err != nil {
 		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("刷新令牌失败"))
 	}
@@ -165,7 +169,7 @@ func (s *AuthService) getAccessToken(item *RbacUser) (string, error) {
 
 // GetUserInfo 获取用户信息
 func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*RbacUser, error) {
-	cacheKey := fmt.Sprintf("%s:%d", constants.RedisAdminLoginKey, userId)
+	cacheKey := fmt.Sprintf("%s:%d", redisAdminLoginKey, userId)
 	result := s.rdb.Get(ctx, cacheKey)
 
 	if result.Err() == nil {

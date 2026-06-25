@@ -2,28 +2,27 @@ package router
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/modules/api/controller"
-	apiMiddleware "zero-backend/modules/api/middleware"
 	"zero-backend/modules/region"
 	"zero-backend/modules/setting"
 	"zero-backend/modules/upload"
+	"zero-backend/modules/user"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/logger"
 	basecfg "github.com/241x/zero-web/config"
 	"github.com/241x/zero-web/middleware"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 func NewGin(
 	log logger.Logger,
-	ctrl *controller.Controllers,
-	apiMiddlewares *apiMiddleware.Middlewares,
-	corsConfig basecfg.CorsConfig,
-	authConfig config.ApiAuthConfig,
 	db *gorm.DB,
 	binder *bind.Binder,
+	rdb *redis.Client,
+	authConfig config.ApiAuthConfig,
+	corsConfig basecfg.CorsConfig,
 	settingSvc *setting.Service,
 ) *gin.Engine {
 	r := gin.Default()
@@ -33,14 +32,17 @@ func NewGin(
 
 	apiGroup := r.Group("/api")
 
-	apiGroup.POST("/login", ctrl.AuthController.Login)
-	apiGroup.POST("/refresh-token", ctrl.AuthController.RefreshToken)
+	authMid, h := user.RegisterApi(apiGroup, user.ApiDeps{
+		DB:      db,
+		Binder:  binder,
+		AuthCfg: authConfig,
+		RDB:     rdb,
+	})
 
 	apiGroup.Use(middleware.JWTGuard(authConfig.HmacSecret))
-	apiGroup.Use(apiMiddlewares.Auth.LoadUser())
+	apiGroup.Use(authMid.LoadUser())
 
-	apiGroup.POST("/logout", ctrl.AuthController.Logout)
-	apiGroup.POST("/change-password", ctrl.AuthController.ChangePassword)
+	user.RegisterApiProtected(apiGroup, h)
 
 	upload.RegisterApi(apiGroup, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
 	setting.RegisterApi(apiGroup, setting.Deps{DB: db, Binder: binder})

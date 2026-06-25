@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"zero-backend/internal/constants"
-
 	"github.com/241x/zero-kit/queue"
 	"github.com/spf13/cobra"
+)
+
+const (
+	queueDefaultKey = "default"
+	queueTestKey    = "test"
 )
 
 // QueueCommand 队列命令
@@ -67,7 +70,7 @@ func newQueuePublishCommand(manager *queue.QueueManager) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&queueName, "queue", "q", constants.QueueDefaultKey, "队列名称")
+	cmd.Flags().StringVarP(&queueName, "queue", "q", queueDefaultKey, "队列名称")
 	cmd.Flags().StringVarP(&taskType, "type", "t", "example", "任务类型")
 	cmd.Flags().IntVarP(&count, "count", "n", 1, "发布任务数量")
 	cmd.Flags().StringVarP(&message, "message", "m", "hello from cli", "任务消息内容")

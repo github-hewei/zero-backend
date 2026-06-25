@@ -6,13 +6,16 @@ import (
 	"os/signal"
 	"syscall"
 
-	"zero-backend/internal/constants"
-
 	"github.com/241x/zero-kit/queue"
 
 	"github.com/241x/zero-kit/logger"
 
 	"zero-backend/modules/worker/handler"
+)
+
+const (
+	queueDefaultKey = "default"
+	queueTestKey    = "test"
 )
 
 // WorkerServer 队列工作服务，管理队列消费和工作线程池
@@ -24,8 +27,8 @@ type WorkerServer struct {
 // NewWorkerServer 创建队列工作服务
 func NewWorkerServer(manager *queue.QueueManager, registry *handler.Registry, log logger.Logger) *WorkerServer {
 	// 注册默认队列工作线程池
-	config := queue.DefaultConfig().WithName(constants.QueueDefaultKey)
-	pool, err := manager.RegisterWorkerPool(constants.QueueDefaultKey, registry, config)
+	config := queue.DefaultConfig().WithName(queueDefaultKey)
+	pool, err := manager.RegisterWorkerPool(queueDefaultKey, registry, config)
 	if err != nil {
 		log.Err(err, "Failed to register default worker pool")
 	} else {

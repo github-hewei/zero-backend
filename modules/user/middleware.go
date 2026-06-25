@@ -1,8 +1,7 @@
-package middleware
+package user
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/modules/api/service"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-web/ctxkeys"
@@ -12,18 +11,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AuthMiddleware 权限验证中间件
+// AuthMiddleware 用户认证中间件
 type AuthMiddleware struct {
 	config   config.ApiAuthConfig
-	authServ *service.AuthService
+	authServ *AuthService
 }
 
-// NewAuthMiddleware 创建权限验证中间件
-func NewAuthMiddleware(cfg config.ApiAuthConfig, authServ *service.AuthService) *AuthMiddleware {
-	return &AuthMiddleware{
-		config:   cfg,
-		authServ: authServ,
-	}
+// NewAuthMiddleware 创建认证中间件
+func NewAuthMiddleware(cfg config.ApiAuthConfig, authServ *AuthService) *AuthMiddleware {
+	return &AuthMiddleware{config: cfg, authServ: authServ}
 }
 
 // LoadUser 从 JWT claims 加载用户信息并注入上下文。

@@ -14,11 +14,7 @@ import (
 	"github.com/241x/zero-kit/redis"
 	"github.com/241x/zero-web/server"
 	"zero-backend/internal/config"
-	"zero-backend/internal/repository"
-	"zero-backend/modules/api/controller"
-	"zero-backend/modules/api/middleware"
 	"zero-backend/modules/api/router"
-	"zero-backend/modules/api/service"
 	"zero-backend/providers"
 )
 
@@ -35,6 +31,12 @@ func wireApp() (*server.Server, error) {
 	}
 	database := conn.DB
 	zeroLogger := providers.ProvideLogger(loggerConfig, database)
+	mysqlConfig := providers.NewMySQLConfig(configConfig)
+	logger := gormutil.NewLogger(zeroLogger)
+	db, err := mysql.NewDB(mysqlConfig, logger)
+	if err != nil {
+		return nil, err
+	}
 	validate := bind.NewValidate()
 	translator, err := bind.NewTrans(validate)
 	if err != nil {
@@ -42,28 +44,12 @@ func wireApp() (*server.Server, error) {
 	}
 	code := providers.ProvideBindErrCode()
 	binder := bind.New(validate, translator, code)
-	mysqlConfig := providers.NewMySQLConfig(configConfig)
-	logger := gormutil.NewLogger(zeroLogger)
-	db, err := mysql.NewDB(mysqlConfig, logger)
-	if err != nil {
-		return nil, err
-	}
-	userRepository := repository.NewUserRepository(db)
-	apiAuthConfig := providers.NewApiAuthConfig(configConfig)
 	redisConfig := providers.NewRedisConfig(configConfig)
 	client := redis.New(redisConfig)
-	authService := service.NewAuthService(userRepository, apiAuthConfig, client)
-	authController := controller.NewAuthController(binder, authService, apiAuthConfig)
-	controllers := &controller.Controllers{
-		AuthController: authController,
-	}
-	authMiddleware := middleware.NewAuthMiddleware(apiAuthConfig, authService)
-	middlewares := &middleware.Middlewares{
-		Auth: authMiddleware,
-	}
+	apiAuthConfig := providers.NewApiAuthConfig(configConfig)
 	corsConfig := providers.NewApiCorsConfig(configConfig)
-	settingService := providers.NewSettingService(db)
-	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, apiAuthConfig, db, binder, settingService)
+	service := providers.NewSettingService(db)
+	engine := router.NewGin(zeroLogger, db, binder, client, apiAuthConfig, corsConfig, service)
 	v := providers.ProvideServerOptions()
 	serverServer := server.New(serverConfig, engine, zeroLogger, v...)
 	return serverServer, nil

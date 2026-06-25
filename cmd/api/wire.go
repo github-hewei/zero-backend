@@ -14,9 +14,6 @@ func wireApp() (*webserver.Server, error) {
 	panic(wire.Build(
 		config.New,
 		providers.RedisProviderSet,
-		providers.ApiControllersProviderSet,
-		providers.ApiMiddlewaresProviderSet,
-		providers.RepositoryProviderSet,
 		providers.ApiServiceProviderSet,
 		providers.ApiServerProviderSet,
 		providers.BindProviderSet,
