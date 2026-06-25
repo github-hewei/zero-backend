@@ -6,6 +6,7 @@ import (
 	adminMiddleware "zero-backend/modules/admin/middleware"
 	"zero-backend/modules/article"
 	"zero-backend/modules/captcha"
+	"zero-backend/modules/health"
 	"zero-backend/modules/region"
 	"zero-backend/modules/setting"
 	"zero-backend/modules/upload"
@@ -90,7 +91,7 @@ func NewGin(
 
 	region.Register(apiGroup, region.Deps{DB: db, Binder: binder})
 
-	r.GET("/health", ctrl.HealthController.Health)
+	health.Register(r)
 
 	r.LoadHTMLGlob("./views/*.html")
 	r.Static("/assets", "./views/assets")

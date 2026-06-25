@@ -15,7 +15,6 @@ var AdminControllersProviderSet = wire.NewSet(
 	controller.NewRbacRoleController,
 	controller.NewRbacUserController,
 	controller.NewRbacStoreController,
-	controller.NewHealthController,
 	wire.Struct(new(controller.Controllers), "*"),
 )
 

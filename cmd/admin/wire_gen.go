@@ -74,7 +74,6 @@ func wireApp() (*server.Server, error) {
 	rbacStoreRepository := repository.NewRbacStoreRepository(db)
 	rbacStoreService := service2.NewRbacStoreService(rbacStoreRepository)
 	rbacStoreController := controller.NewRbacStoreController(binder, rbacStoreService)
-	healthController := controller.NewHealthController()
 	controllers := &controller.Controllers{
 		AuthController:      authController,
 		RbacMenuController:  rbacMenuController,
@@ -82,7 +81,6 @@ func wireApp() (*server.Server, error) {
 		RbacRoleController:  rbacRoleController,
 		RbacUserController:  rbacUserController,
 		RbacStoreController: rbacStoreController,
-		HealthController:    healthController,
 	}
 	authMiddleware := middleware.NewAuthMiddleware(adminAuthConfig, authService)
 	middlewares := &middleware.Middlewares{
