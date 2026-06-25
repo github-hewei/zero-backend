@@ -74,29 +74,22 @@ func wireApp() (*server.Server, error) {
 	rbacStoreRepository := repository.NewRbacStoreRepository(db)
 	rbacStoreService := service2.NewRbacStoreService(rbacStoreRepository)
 	rbacStoreController := controller.NewRbacStoreController(binder, rbacStoreService)
-	settingRepository := repository.NewSettingRepository(db)
-	settingDefaultRepository := repository.NewSettingDefaultRepository(db)
-	settingService := service2.NewSettingService(settingRepository, settingDefaultRepository)
-	settingController := controller.NewSettingController(binder, settingService)
-	settingDefaultService := service2.NewSettingDefaultService(settingDefaultRepository)
-	settingDefaultController := controller.NewSettingDefaultController(binder, settingDefaultService)
 	healthController := controller.NewHealthController()
 	controllers := &controller.Controllers{
-		AuthController:           authController,
-		RbacMenuController:       rbacMenuController,
-		RbacApiController:        rbacApiController,
-		RbacRoleController:       rbacRoleController,
-		RbacUserController:       rbacUserController,
-		RbacStoreController:      rbacStoreController,
-		SettingController:        settingController,
-		SettingDefaultController: settingDefaultController,
-		HealthController:         healthController,
+		AuthController:      authController,
+		RbacMenuController:  rbacMenuController,
+		RbacApiController:   rbacApiController,
+		RbacRoleController:  rbacRoleController,
+		RbacUserController:  rbacUserController,
+		RbacStoreController: rbacStoreController,
+		HealthController:    healthController,
 	}
 	authMiddleware := middleware.NewAuthMiddleware(adminAuthConfig, authService)
 	middlewares := &middleware.Middlewares{
 		Auth: authMiddleware,
 	}
 	corsConfig := providers.NewAdminCorsConfig(configConfig)
+	settingService := providers.NewSettingService(db)
 	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, adminAuthConfig, db, binder, settingService, captchaService)
 	v := providers.ProvideServerOptions()
 	serverServer := server.New(serverConfig, engine, zeroLogger, v...)

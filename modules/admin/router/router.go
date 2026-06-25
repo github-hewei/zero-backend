@@ -7,11 +7,11 @@ import (
 	"zero-backend/modules/article"
 	"zero-backend/modules/captcha"
 	"zero-backend/modules/region"
+	"zero-backend/modules/setting"
 	"zero-backend/modules/upload"
 	"zero-backend/modules/user"
 
 	"zero-backend/internal/config"
-	"zero-backend/internal/service"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/logger"
@@ -29,7 +29,7 @@ func NewGin(
 	authConfig config.AdminAuthConfig,
 	db *gorm.DB,
 	binder *bind.Binder,
-	settingSvc *service.SettingService,
+	settingSvc *setting.Service,
 	captchaSvc *captcha.Service,
 ) *gin.Engine {
 	r := gin.Default()
@@ -81,16 +81,7 @@ func NewGin(
 	apiGroup.POST("/rbac/user/set-roles", ctrl.RbacUserController.SetRoles)
 	apiGroup.POST("/rbac/user/reset-password", ctrl.RbacUserController.ResetPassword)
 
-	apiGroup.POST("/setting/list", ctrl.SettingController.List)
-	apiGroup.POST("/setting/create", ctrl.SettingController.Create)
-	apiGroup.POST("/setting/update", ctrl.SettingController.Update)
-	apiGroup.POST("/setting/delete", ctrl.SettingController.Delete)
-	apiGroup.POST("/setting/form-configs", ctrl.SettingController.FormConfigs)
-	apiGroup.POST("/setting/qiniu-token", ctrl.SettingController.QiniuToken)
-	apiGroup.POST("/setting/default/list", ctrl.SettingDefaultController.List)
-	apiGroup.POST("/setting/default/create", ctrl.SettingDefaultController.Create)
-	apiGroup.POST("/setting/default/update", ctrl.SettingDefaultController.Update)
-	apiGroup.POST("/setting/default/delete", ctrl.SettingDefaultController.Delete)
+	setting.RegisterAdmin(apiGroup, setting.Deps{DB: db, Binder: binder})
 
 	article.Register(apiGroup, article.Deps{DB: db, Binder: binder})
 	upload.RegisterAdmin(apiGroup, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})

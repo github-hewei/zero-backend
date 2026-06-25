@@ -15,7 +15,6 @@ import (
 	"github.com/241x/zero-web/server"
 	"zero-backend/internal/config"
 	"zero-backend/internal/repository"
-	service2 "zero-backend/internal/service"
 	"zero-backend/modules/api/controller"
 	"zero-backend/modules/api/middleware"
 	"zero-backend/modules/api/router"
@@ -55,19 +54,15 @@ func wireApp() (*server.Server, error) {
 	client := redis.New(redisConfig)
 	authService := service.NewAuthService(userRepository, apiAuthConfig, client)
 	authController := controller.NewAuthController(binder, authService, apiAuthConfig)
-	settingRepository := repository.NewSettingRepository(db)
-	settingDefaultRepository := repository.NewSettingDefaultRepository(db)
-	settingService := service2.NewSettingService(settingRepository, settingDefaultRepository)
-	settingController := controller.NewSettingController(settingService)
 	controllers := &controller.Controllers{
-		AuthController:    authController,
-		SettingController: settingController,
+		AuthController: authController,
 	}
 	authMiddleware := middleware.NewAuthMiddleware(apiAuthConfig, authService)
 	middlewares := &middleware.Middlewares{
 		Auth: authMiddleware,
 	}
 	corsConfig := providers.NewApiCorsConfig(configConfig)
+	settingService := providers.NewSettingService(db)
 	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, apiAuthConfig, db, binder, settingService)
 	v := providers.ProvideServerOptions()
 	serverServer := server.New(serverConfig, engine, zeroLogger, v...)

@@ -2,10 +2,10 @@ package router
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/internal/service"
 	"zero-backend/modules/api/controller"
 	apiMiddleware "zero-backend/modules/api/middleware"
 	"zero-backend/modules/region"
+	"zero-backend/modules/setting"
 	"zero-backend/modules/upload"
 
 	"github.com/241x/zero-kit/bind"
@@ -24,7 +24,7 @@ func NewGin(
 	authConfig config.ApiAuthConfig,
 	db *gorm.DB,
 	binder *bind.Binder,
-	settingSvc *service.SettingService,
+	settingSvc *setting.Service,
 ) *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.CORS(corsConfig))
@@ -43,8 +43,7 @@ func NewGin(
 	apiGroup.POST("/change-password", ctrl.AuthController.ChangePassword)
 
 	upload.RegisterApi(apiGroup, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
-
-	apiGroup.POST("/setting/qiniu-token", ctrl.SettingController.QiniuToken)
+	setting.RegisterApi(apiGroup, setting.Deps{DB: db, Binder: binder})
 	region.Register(apiGroup, region.Deps{DB: db, Binder: binder})
 
 	return r

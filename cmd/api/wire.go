@@ -17,7 +17,6 @@ func wireApp() (*webserver.Server, error) {
 		providers.ApiControllersProviderSet,
 		providers.ApiMiddlewaresProviderSet,
 		providers.RepositoryProviderSet,
-		providers.ServiceProviderSet,
 		providers.ApiServiceProviderSet,
 		providers.ApiServerProviderSet,
 		providers.BindProviderSet,
