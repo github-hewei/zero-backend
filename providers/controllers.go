@@ -10,7 +10,6 @@ import (
 // AdminControllersProviderSet 提供管理端控制器依赖集合
 var AdminControllersProviderSet = wire.NewSet(
 	controller.NewAuthController,
-	controller.NewCaptchaController,
 	controller.NewRbacMenuController,
 	controller.NewRbacApiController,
 	controller.NewRbacRoleController,

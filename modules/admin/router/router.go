@@ -5,6 +5,7 @@ import (
 	"zero-backend/modules/admin/controller"
 	adminMiddleware "zero-backend/modules/admin/middleware"
 	"zero-backend/modules/article"
+	"zero-backend/modules/captcha"
 	"zero-backend/modules/region"
 	"zero-backend/modules/upload"
 
@@ -28,35 +29,28 @@ func NewGin(
 	db *gorm.DB,
 	binder *bind.Binder,
 	settingSvc *service.SettingService,
+	captchaSvc *captcha.Service,
 ) *gin.Engine {
 	r := gin.Default()
-	// CORS 跨域配置
 	r.Use(middleware.CORS(corsConfig))
-	// Trace 跟踪配置
 	r.Use(middleware.Trace(log))
-	// Request 日志配置
 	r.Use(middleware.RequestLog())
 
 	apiGroup := r.Group("/api")
 
-	// 系统登录
 	apiGroup.POST("/login", ctrl.AuthController.Login)
 	apiGroup.POST("/refresh-token", ctrl.AuthController.RefreshToken)
 
-	// 验证码
-	apiGroup.POST("/captcha/generate", ctrl.CaptchaController.Generate)
+	captcha.RegisterWith(apiGroup, binder, captchaSvc)
 
-	// 注册中间件验证权限
 	apiGroup.Use(middleware.JWTGuard(authConfig.HmacSecret))
 	apiGroup.Use(adminMiddlewares.Auth.LoadUser())
 	apiGroup.Use(adminMiddlewares.Auth.CheckAPIPermission())
 
-	// 鉴权相关接口
 	apiGroup.POST("/logout", ctrl.AuthController.Logout)
 	apiGroup.POST("/change-password", ctrl.AuthController.ChangePassword)
 	apiGroup.POST("/permissions", ctrl.AuthController.GetPermissions)
 
-	// RBAC权限管理
 	apiGroup.POST("/rbac/menu/list", ctrl.RbacMenuController.List)
 	apiGroup.POST("/rbac/menu/create", ctrl.RbacMenuController.Create)
 	apiGroup.POST("/rbac/menu/update", ctrl.RbacMenuController.Update)
@@ -86,7 +80,6 @@ func NewGin(
 	apiGroup.POST("/rbac/user/set-roles", ctrl.RbacUserController.SetRoles)
 	apiGroup.POST("/rbac/user/reset-password", ctrl.RbacUserController.ResetPassword)
 
-	// 设置管理
 	apiGroup.POST("/setting/list", ctrl.SettingController.List)
 	apiGroup.POST("/setting/create", ctrl.SettingController.Create)
 	apiGroup.POST("/setting/update", ctrl.SettingController.Update)
@@ -98,10 +91,9 @@ func NewGin(
 	apiGroup.POST("/setting/default/update", ctrl.SettingDefaultController.Update)
 	apiGroup.POST("/setting/default/delete", ctrl.SettingDefaultController.Delete)
 
-	// 文章管理
 	article.Register(apiGroup, article.Deps{DB: db, Binder: binder})
+	upload.RegisterAdmin(apiGroup, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
 
-	// 用户管理
 	apiGroup.POST("/user/user/list", ctrl.UserController.List)
 	apiGroup.POST("/user/user/create", ctrl.UserController.Create)
 	apiGroup.POST("/user/user/update", ctrl.UserController.Update)
@@ -110,23 +102,14 @@ func NewGin(
 	apiGroup.POST("/user/points/logs", ctrl.UserController.GetPointsLogs)
 	apiGroup.POST("/user/points/change", ctrl.UserController.ChangePoints)
 
-	// 文件上传管理
-	upload.RegisterAdmin(apiGroup, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
-
-	// 区划管理
 	region.Register(apiGroup, region.Deps{DB: db, Binder: binder})
 
-	// 检测服务健康接口
 	r.GET("/health", ctrl.HealthController.Health)
 
-	// 设置视图文件目录
 	r.LoadHTMLGlob("./views/*.html")
-
-	// 静态资源文件目录
 	r.Static("/assets", "./views/assets")
 	r.Static("/uploads", "./uploads")
 
-	// 默认图标
 	r.GET("/favicon.ico", func(c *gin.Context) {
 		c.File("./views/favicon.ico")
 	})
@@ -134,12 +117,10 @@ func NewGin(
 		c.File("./views/logo.svg")
 	})
 
-	// 默认首页
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
-	// 404
 	r.NoRoute(func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", nil)
 	})

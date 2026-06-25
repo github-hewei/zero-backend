@@ -11,7 +11,7 @@ import (
 	"zero-backend/internal/dto"
 	"zero-backend/internal/model"
 	"zero-backend/internal/repository"
-	"zero-backend/internal/service"
+	"zero-backend/modules/captcha"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/baserepo"
@@ -33,7 +33,7 @@ type AuthService struct {
 	menuApiRepo  *repository.RbacMenuApiRepository
 	cfg          config.AdminAuthConfig
 	rdb          *redis.Client
-	captchaServ  *service.CaptchaService
+	captchaServ  *captcha.Service
 }
 
 // NewAuthService 创建AuthService实例
@@ -47,7 +47,7 @@ func NewAuthService(
 	menuApiRepo *repository.RbacMenuApiRepository,
 	cfg config.AdminAuthConfig,
 	rdb *redis.Client,
-	captchaServ *service.CaptchaService,
+	captchaServ *captcha.Service,
 ) *AuthService {
 	return &AuthService{
 		userRepo:     userRepo,

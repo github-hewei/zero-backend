@@ -15,11 +15,11 @@ import (
 	"github.com/241x/zero-web/server"
 	"zero-backend/internal/config"
 	"zero-backend/internal/repository"
-	"zero-backend/internal/service"
+	service2 "zero-backend/internal/service"
 	"zero-backend/modules/admin/controller"
 	"zero-backend/modules/admin/middleware"
 	"zero-backend/modules/admin/router"
-	service2 "zero-backend/modules/admin/service"
+	"zero-backend/modules/admin/service"
 	"zero-backend/providers"
 )
 
@@ -60,35 +60,33 @@ func wireApp() (*server.Server, error) {
 	redisConfig := providers.NewRedisConfig(configConfig)
 	client := redis.New(redisConfig)
 	captchaConfig := providers.NewCaptchaConfig(configConfig)
-	captchaService := service.NewCaptchaService(client, captchaConfig)
-	authService := service2.NewAuthService(rbacUserRepository, rbacApiRepository, rbacRoleRepository, rbacMenuRepository, rbacRoleMenuRepository, rbacUserRoleRepository, rbacMenuApiRepository, adminAuthConfig, client, captchaService)
+	captchaService := providers.NewCaptchaService(client, captchaConfig)
+	authService := service.NewAuthService(rbacUserRepository, rbacApiRepository, rbacRoleRepository, rbacMenuRepository, rbacRoleMenuRepository, rbacUserRoleRepository, rbacMenuApiRepository, adminAuthConfig, client, captchaService)
 	authController := controller.NewAuthController(binder, authService, adminAuthConfig)
-	captchaController := controller.NewCaptchaController(binder, captchaService)
-	rbacMenuService := service.NewRbacMenuService(rbacMenuRepository, rbacMenuApiRepository, db)
+	rbacMenuService := service2.NewRbacMenuService(rbacMenuRepository, rbacMenuApiRepository, db)
 	rbacMenuController := controller.NewRbacMenuController(binder, rbacMenuService)
-	rbacApiService := service.NewRbacApiService(rbacApiRepository)
+	rbacApiService := service2.NewRbacApiService(rbacApiRepository)
 	rbacApiController := controller.NewRbacApiController(binder, rbacApiService)
-	rbacRoleService := service.NewRbacRoleService(rbacRoleRepository, rbacRoleMenuRepository, db)
+	rbacRoleService := service2.NewRbacRoleService(rbacRoleRepository, rbacRoleMenuRepository, db)
 	rbacRoleController := controller.NewRbacRoleController(rbacRoleService, binder)
-	rbacUserService := service.NewRbacUserService(db, rbacUserRepository, rbacUserRoleRepository)
+	rbacUserService := service2.NewRbacUserService(db, rbacUserRepository, rbacUserRoleRepository)
 	rbacUserController := controller.NewRbacUserController(binder, rbacUserService)
 	rbacStoreRepository := repository.NewRbacStoreRepository(db)
-	rbacStoreService := service.NewRbacStoreService(rbacStoreRepository)
+	rbacStoreService := service2.NewRbacStoreService(rbacStoreRepository)
 	rbacStoreController := controller.NewRbacStoreController(binder, rbacStoreService)
 	userRepository := repository.NewUserRepository(db)
 	userPointsLogRepository := repository.NewUserPointsLogRepository(db)
-	userService := service.NewUserService(db, userRepository, userPointsLogRepository)
+	userService := service2.NewUserService(db, userRepository, userPointsLogRepository)
 	userController := controller.NewUserController(binder, userService)
 	settingRepository := repository.NewSettingRepository(db)
 	settingDefaultRepository := repository.NewSettingDefaultRepository(db)
-	settingService := service.NewSettingService(settingRepository, settingDefaultRepository)
+	settingService := service2.NewSettingService(settingRepository, settingDefaultRepository)
 	settingController := controller.NewSettingController(binder, settingService)
-	settingDefaultService := service.NewSettingDefaultService(settingDefaultRepository)
+	settingDefaultService := service2.NewSettingDefaultService(settingDefaultRepository)
 	settingDefaultController := controller.NewSettingDefaultController(binder, settingDefaultService)
 	healthController := controller.NewHealthController()
 	controllers := &controller.Controllers{
 		AuthController:           authController,
-		CaptchaController:        captchaController,
 		RbacMenuController:       rbacMenuController,
 		RbacApiController:        rbacApiController,
 		RbacRoleController:       rbacRoleController,
@@ -104,7 +102,7 @@ func wireApp() (*server.Server, error) {
 		Auth: authMiddleware,
 	}
 	corsConfig := providers.NewAdminCorsConfig(configConfig)
-	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, adminAuthConfig, db, binder, settingService)
+	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, adminAuthConfig, db, binder, settingService, captchaService)
 	v := providers.ProvideServerOptions()
 	serverServer := server.New(serverConfig, engine, zeroLogger, v...)
 	return serverServer, nil

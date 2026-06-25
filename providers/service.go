@@ -2,11 +2,14 @@ package providers
 
 import (
 	"zero-backend/internal/config"
+	"zero-backend/internal/constants"
 	"zero-backend/internal/service"
+	"zero-backend/modules/captcha"
 	service2 "zero-backend/modules/admin/service"
 	service3 "zero-backend/modules/api/service"
 
 	"github.com/google/wire"
+	"github.com/redis/go-redis/v9"
 )
 
 // ServiceProviderSet 提供服务层依赖集合
@@ -19,7 +22,6 @@ var ServiceProviderSet = wire.NewSet(
 	service.NewUserService,
 	service.NewSettingService,
 	service.NewSettingDefaultService,
-	service.NewCaptchaService,
 )
 
 // NewAdminAuthConfig 提取管理端认证配置
@@ -37,10 +39,16 @@ func NewApiAuthConfig(cfg *config.Config) config.ApiAuthConfig {
 	return cfg.Api.Auth
 }
 
+// NewCaptchaService 创建验证码服务
+func NewCaptchaService(rdb *redis.Client, cfg config.CaptchaConfig) *captcha.Service {
+	return captcha.NewService(rdb, captcha.Config{Enabled: cfg.Enabled, TTL: cfg.TTL}, constants.RedisCaptchaKey)
+}
+
 // AdminServiceProviderSet 提供管理端服务层依赖集合
 var AdminServiceProviderSet = wire.NewSet(
 	NewAdminAuthConfig,
 	NewCaptchaConfig,
+	NewCaptchaService,
 	service2.NewAuthService,
 )
 
