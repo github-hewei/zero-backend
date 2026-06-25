@@ -1,4 +1,4 @@
-package uploader
+package upload
 
 import (
 	"context"
@@ -11,6 +11,25 @@ import (
 	"github.com/241x/zero-web/errcode"
 )
 
+// Uploader 定义文件上传接口
+type Uploader interface {
+	Upload(ctx context.Context, file *multipart.FileHeader, savePath string) (domain string, err error)
+	Delete(ctx context.Context, filePath string) error
+}
+
+// NewUploader 创建上传器实例
+func NewUploader(storageType string, ctx context.Context) (Uploader, error) {
+	switch storageType {
+	case "local":
+		return NewLocalUploader(), nil
+	case "qiniu":
+		qiniuConfig := QiniuConfigFromCtx(ctx)
+		return NewQiniuUploader(qiniuConfig), nil
+	default:
+		return nil, apperror.New(errcode.Internal, apperror.WithMsg("不支持的存储类型"))
+	}
+}
+
 // LocalUploader 本地文件上传实现
 type LocalUploader struct{}
 
@@ -18,7 +37,6 @@ func NewLocalUploader() *LocalUploader {
 	return &LocalUploader{}
 }
 
-// Upload 上传文件
 func (u *LocalUploader) Upload(ctx context.Context, file *multipart.FileHeader, savePath string) (string, error) {
 	src, err := file.Open()
 	if err != nil {
@@ -47,7 +65,23 @@ func (u *LocalUploader) Upload(ctx context.Context, file *multipart.FileHeader, 
 	return "", nil
 }
 
-// Delete 删除文件
 func (u *LocalUploader) Delete(ctx context.Context, filePath string) error {
 	return os.Remove(filePath)
+}
+
+// qiniuConfigKey 上下文传递七牛云配置
+type qiniuConfigKey struct{}
+
+// WithQiniuConfig 注入七牛云配置
+func WithQiniuConfig(ctx context.Context, cfg *QiniuConfig) context.Context {
+	return context.WithValue(ctx, qiniuConfigKey{}, cfg)
+}
+
+// QiniuConfigFromCtx 从上下文读取七牛云配置
+func QiniuConfigFromCtx(ctx context.Context) *QiniuConfig {
+	v, ok := ctx.Value(qiniuConfigKey{}).(*QiniuConfig)
+	if !ok {
+		return nil
+	}
+	return v
 }

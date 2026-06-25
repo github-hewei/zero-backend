@@ -16,8 +16,6 @@ var ServiceProviderSet = wire.NewSet(
 	service.NewRbacRoleService,
 	service.NewRbacUserService,
 	service.NewRbacStoreService,
-	service.NewUploadGroupService,
-	service.NewUploadFileService,
 	service.NewUserService,
 	service.NewSettingService,
 	service.NewSettingDefaultService,

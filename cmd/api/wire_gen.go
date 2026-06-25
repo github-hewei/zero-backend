@@ -55,28 +55,24 @@ func wireApp() (*server.Server, error) {
 	client := redis.New(redisConfig)
 	authService := service.NewAuthService(userRepository, apiAuthConfig, client)
 	authController := controller.NewAuthController(binder, authService, apiAuthConfig)
-	uploadFileRepository := repository.NewUploadFileRepository(db)
+	regionRepository := repository.NewRegionRepository(db)
 	settingRepository := repository.NewSettingRepository(db)
 	settingDefaultRepository := repository.NewSettingDefaultRepository(db)
 	settingService := service2.NewSettingService(settingRepository, settingDefaultRepository)
-	uploadFileService := service2.NewUploadFileService(uploadFileRepository, settingService)
-	uploadFileController := controller.NewUploadFileController(binder, uploadFileService)
-	regionRepository := repository.NewRegionRepository(db)
 	regionService := service2.NewRegionService(regionRepository, settingService)
 	regionController := controller.NewRegionController(regionService)
 	settingController := controller.NewSettingController(settingService)
 	controllers := &controller.Controllers{
-		AuthController:       authController,
-		UploadFileController: uploadFileController,
-		RegionController:     regionController,
-		SettingController:    settingController,
+		AuthController:    authController,
+		RegionController:  regionController,
+		SettingController: settingController,
 	}
 	authMiddleware := middleware.NewAuthMiddleware(apiAuthConfig, authService)
 	middlewares := &middleware.Middlewares{
 		Auth: authMiddleware,
 	}
 	corsConfig := providers.NewApiCorsConfig(configConfig)
-	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, apiAuthConfig)
+	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, apiAuthConfig, db, binder, settingService)
 	v := providers.ProvideServerOptions()
 	serverServer := server.New(serverConfig, engine, zeroLogger, v...)
 	return serverServer, nil

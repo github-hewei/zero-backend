@@ -9,8 +9,6 @@ type Controllers struct {
 	RbacRoleController        *RbacRoleController
 	RbacUserController        *RbacUserController
 	RbacStoreController       *RbacStoreController
-	UploadGroupController     *UploadGroupController
-	UploadFileController      *UploadFileController
 	UserController            *UserController
 	SettingController         *SettingController
 	SettingDefaultController  *SettingDefaultController

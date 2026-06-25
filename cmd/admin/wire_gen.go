@@ -75,19 +75,13 @@ func wireApp() (*server.Server, error) {
 	rbacStoreRepository := repository.NewRbacStoreRepository(db)
 	rbacStoreService := service.NewRbacStoreService(rbacStoreRepository)
 	rbacStoreController := controller.NewRbacStoreController(binder, rbacStoreService)
-	uploadGroupRepository := repository.NewUploadGroupRepository(db)
-	uploadGroupService := service.NewUploadGroupService(uploadGroupRepository)
-	uploadGroupController := controller.NewUploadGroupController(binder, uploadGroupService)
-	uploadFileRepository := repository.NewUploadFileRepository(db)
-	settingRepository := repository.NewSettingRepository(db)
-	settingDefaultRepository := repository.NewSettingDefaultRepository(db)
-	settingService := service.NewSettingService(settingRepository, settingDefaultRepository)
-	uploadFileService := service.NewUploadFileService(uploadFileRepository, settingService)
-	uploadFileController := controller.NewUploadFileController(binder, uploadFileService)
 	userRepository := repository.NewUserRepository(db)
 	userPointsLogRepository := repository.NewUserPointsLogRepository(db)
 	userService := service.NewUserService(db, userRepository, userPointsLogRepository)
 	userController := controller.NewUserController(binder, userService)
+	settingRepository := repository.NewSettingRepository(db)
+	settingDefaultRepository := repository.NewSettingDefaultRepository(db)
+	settingService := service.NewSettingService(settingRepository, settingDefaultRepository)
 	settingController := controller.NewSettingController(binder, settingService)
 	settingDefaultService := service.NewSettingDefaultService(settingDefaultRepository)
 	settingDefaultController := controller.NewSettingDefaultController(binder, settingDefaultService)
@@ -103,8 +97,6 @@ func wireApp() (*server.Server, error) {
 		RbacRoleController:       rbacRoleController,
 		RbacUserController:       rbacUserController,
 		RbacStoreController:      rbacStoreController,
-		UploadGroupController:    uploadGroupController,
-		UploadFileController:     uploadFileController,
 		UserController:           userController,
 		SettingController:        settingController,
 		SettingDefaultController: settingDefaultController,
@@ -116,7 +108,7 @@ func wireApp() (*server.Server, error) {
 		Auth: authMiddleware,
 	}
 	corsConfig := providers.NewAdminCorsConfig(configConfig)
-	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, adminAuthConfig, db, binder)
+	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, adminAuthConfig, db, binder, settingService)
 	v := providers.ProvideServerOptions()
 	serverServer := server.New(serverConfig, engine, zeroLogger, v...)
 	return serverServer, nil

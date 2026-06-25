@@ -30,6 +30,13 @@ type QiniuConfig struct {
 	Zone      string `json:"zone"`
 }
 
+// QiniuTokenResponse 七牛上传token
+type QiniuTokenResponse struct {
+	Token     string `json:"token"`
+	Domain    string `json:"domain"`
+	UploadUrl string `json:"upload_url"`
+}
+
 // UploadConfig 文件上传配置
 type UploadConfig struct {
 	StorageType  string   `json:"storage_type"`  // 存储方式(local/qiniu)

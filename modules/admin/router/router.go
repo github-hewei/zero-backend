@@ -5,8 +5,10 @@ import (
 	"zero-backend/modules/admin/controller"
 	adminMiddleware "zero-backend/modules/admin/middleware"
 	"zero-backend/modules/article"
+	"zero-backend/modules/upload"
 
 	"zero-backend/internal/config"
+	"zero-backend/internal/service"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/logger"
@@ -24,6 +26,7 @@ func NewGin(
 	authConfig config.AdminAuthConfig,
 	db *gorm.DB,
 	binder *bind.Binder,
+	settingSvc *service.SettingService,
 ) *gin.Engine {
 	r := gin.Default()
 	// CORS 跨域配置
@@ -107,13 +110,7 @@ func NewGin(
 	apiGroup.POST("/user/points/change", ctrl.UserController.ChangePoints)
 
 	// 文件上传管理
-	apiGroup.POST("/upload/group/list", ctrl.UploadGroupController.List)
-	apiGroup.POST("/upload/group/create", ctrl.UploadGroupController.Create)
-	apiGroup.POST("/upload/group/update", ctrl.UploadGroupController.Update)
-	apiGroup.POST("/upload/group/delete", ctrl.UploadGroupController.Delete)
-	apiGroup.POST("/upload/file/list", ctrl.UploadFileController.List)
-	apiGroup.POST("/upload/file/upload", ctrl.UploadFileController.Upload)
-	apiGroup.POST("/upload/file/delete", ctrl.UploadFileController.Delete)
+	upload.RegisterAdmin(apiGroup, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
 
 	// 区划管理
 	apiGroup.POST("/region/tree", ctrl.RegionController.Tree)

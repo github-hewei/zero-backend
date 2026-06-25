@@ -1,10 +1,9 @@
-package uploader
+package upload
 
 import (
 	"context"
 	"mime/multipart"
 	"strings"
-	"zero-backend/internal/dto"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-web/errcode"
@@ -14,15 +13,13 @@ import (
 
 // QiniuUploader 七牛云文件上传实现
 type QiniuUploader struct {
-	config *dto.QiniuConfig
+	config *QiniuConfig
 }
 
-// NewQiniuUploader 创建七牛云上传实现
-func NewQiniuUploader(config *dto.QiniuConfig) *QiniuUploader {
+func NewQiniuUploader(config *QiniuConfig) *QiniuUploader {
 	return &QiniuUploader{config: config}
 }
 
-// getZone 获取区域
 func (u *QiniuUploader) getZone(zone string) *storage.Zone {
 	switch zone {
 	case "z0":
@@ -40,25 +37,15 @@ func (u *QiniuUploader) getZone(zone string) *storage.Zone {
 	}
 }
 
-// Upload 上传文件到七牛云
 func (u *QiniuUploader) Upload(ctx context.Context, file *multipart.FileHeader, savePath string) (string, error) {
-	// 初始化上传凭证
-	putPolicy := storage.PutPolicy{
-		Scope: u.config.Bucket,
-	}
+	putPolicy := storage.PutPolicy{Scope: u.config.Bucket}
 	mac := qbox.NewMac(u.config.AccessKey, u.config.SecretKey)
 	upToken := putPolicy.UploadToken(mac)
 
-	// 配置上传参数
-	cfg := storage.Config{
-		Zone:          u.getZone(u.config.Zone),
-		UseHTTPS:      true,
-		UseCdnDomains: true,
-	}
+	cfg := storage.Config{Zone: u.getZone(u.config.Zone), UseHTTPS: true, UseCdnDomains: true}
 	formUploader := storage.NewFormUploader(&cfg)
 	ret := storage.PutRet{}
 
-	// 执行上传
 	fileReader, err := file.Open()
 	if err != nil {
 		return "", apperror.Wrap(errcode.Internal, err, apperror.WithMsg("打开文件失败"))
@@ -74,12 +61,9 @@ func (u *QiniuUploader) Upload(ctx context.Context, file *multipart.FileHeader, 
 	return u.config.Domain, nil
 }
 
-// Delete 删除七牛云文件
 func (u *QiniuUploader) Delete(ctx context.Context, filePath string) error {
 	mac := qbox.NewMac(u.config.AccessKey, u.config.SecretKey)
-	cfg := storage.Config{
-		Zone: u.getZone(u.config.Zone),
-	}
+	cfg := storage.Config{Zone: u.getZone(u.config.Zone)}
 	bucketManager := storage.NewBucketManager(mac, &cfg)
 	return bucketManager.Delete(u.config.Bucket, filePath)
 }

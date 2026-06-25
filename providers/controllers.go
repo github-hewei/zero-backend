@@ -16,8 +16,6 @@ var AdminControllersProviderSet = wire.NewSet(
 	controller.NewRbacRoleController,
 	controller.NewRbacUserController,
 	controller.NewRbacStoreController,
-	controller.NewUploadGroupController,
-	controller.NewUploadFileController,
 	controller.NewUserController,
 	controller.NewSettingController,
 	controller.NewSettingDefaultController,
@@ -29,7 +27,6 @@ var AdminControllersProviderSet = wire.NewSet(
 // ApiControllersProviderSet 提供API控制器依赖集合
 var ApiControllersProviderSet = wire.NewSet(
 	controller2.NewAuthController,
-	controller2.NewUploadFileController,
 	controller2.NewRegionController,
 	controller2.NewSettingController,
 	wire.Struct(new(controller2.Controllers), "*"),
