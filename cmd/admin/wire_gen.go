@@ -91,40 +91,32 @@ func wireApp() (*server.Server, error) {
 	settingController := controller.NewSettingController(binder, settingService)
 	settingDefaultService := service.NewSettingDefaultService(settingDefaultRepository)
 	settingDefaultController := controller.NewSettingDefaultController(binder, settingDefaultService)
-	articleCategoryRepository := repository.NewArticleCategoryRepository(db)
-	articleCategoryService := service.NewArticleCategoryService(articleCategoryRepository)
-	articleCategoryController := controller.NewArticleCategoryController(binder, articleCategoryService)
-	articleRepository := repository.NewArticleRepository(db)
-	articleService := service.NewArticleService(articleRepository)
-	articleController := controller.NewArticleController(binder, articleService)
 	regionRepository := repository.NewRegionRepository(db)
 	regionService := service.NewRegionService(regionRepository, settingService)
 	regionController := controller.NewRegionController(regionService)
 	healthController := controller.NewHealthController()
 	controllers := &controller.Controllers{
-		AuthController:            authController,
-		CaptchaController:         captchaController,
-		RbacMenuController:        rbacMenuController,
-		RbacApiController:         rbacApiController,
-		RbacRoleController:        rbacRoleController,
-		RbacUserController:        rbacUserController,
-		RbacStoreController:       rbacStoreController,
-		UploadGroupController:     uploadGroupController,
-		UploadFileController:      uploadFileController,
-		UserController:            userController,
-		SettingController:         settingController,
-		SettingDefaultController:  settingDefaultController,
-		ArticleCategoryController: articleCategoryController,
-		ArticleController:         articleController,
-		RegionController:          regionController,
-		HealthController:          healthController,
+		AuthController:           authController,
+		CaptchaController:        captchaController,
+		RbacMenuController:       rbacMenuController,
+		RbacApiController:        rbacApiController,
+		RbacRoleController:       rbacRoleController,
+		RbacUserController:       rbacUserController,
+		RbacStoreController:      rbacStoreController,
+		UploadGroupController:    uploadGroupController,
+		UploadFileController:     uploadFileController,
+		UserController:           userController,
+		SettingController:        settingController,
+		SettingDefaultController: settingDefaultController,
+		RegionController:         regionController,
+		HealthController:         healthController,
 	}
 	authMiddleware := middleware.NewAuthMiddleware(adminAuthConfig, authService)
 	middlewares := &middleware.Middlewares{
 		Auth: authMiddleware,
 	}
 	corsConfig := providers.NewAdminCorsConfig(configConfig)
-	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, adminAuthConfig)
+	engine := router.NewGin(zeroLogger, controllers, middlewares, corsConfig, adminAuthConfig, db, binder)
 	v := providers.ProvideServerOptions()
 	serverServer := server.New(serverConfig, engine, zeroLogger, v...)
 	return serverServer, nil

@@ -1,7 +1,13 @@
-package dto
+package article
 
-// ArticleCategoryListRequest 文章分类列表请求参数
-type ArticleCategoryListRequest struct {
+// ListResult 列表数据结构体
+type ListResult struct {
+	List  any   `json:"list"`
+	Total int64 `json:"total"`
+}
+
+// CategoryListRequest 文章分类列表请求参数
+type CategoryListRequest struct {
 	Name    string `json:"name"`
 	Status  int8   `json:"status" validate:"oneof=0 1"`
 	StoreId uint32 `json:"store_id"`
@@ -9,16 +15,16 @@ type ArticleCategoryListRequest struct {
 	Limit   int    `json:"limit" validate:"required,min=1,max=100"`
 }
 
-// ArticleCategoryCreateRequest 创建文章分类请求参数
-type ArticleCategoryCreateRequest struct {
+// CategoryCreateRequest 创建文章分类请求参数
+type CategoryCreateRequest struct {
 	Name    string `json:"name" validate:"required,max=50"`
 	Status  int8   `json:"status" validate:"required,oneof=0 1"`
 	Sort    uint32 `json:"sort"`
 	StoreId uint32 `json:"store_id"`
 }
 
-// ArticleCategoryUpdateRequest 更新文章分类请求参数
-type ArticleCategoryUpdateRequest struct {
+// CategoryUpdateRequest 更新文章分类请求参数
+type CategoryUpdateRequest struct {
 	Id      uint32 `json:"id" validate:"required"`
 	Name    string `json:"name" validate:"required,max=50"`
 	Status  int8   `json:"status" validate:"required,oneof=0 1"`
@@ -26,14 +32,14 @@ type ArticleCategoryUpdateRequest struct {
 	StoreId uint32 `json:"store_id"`
 }
 
-// ArticleCategoryDeleteRequest 删除文章分类请求参数
-type ArticleCategoryDeleteRequest struct {
+// CategoryDeleteRequest 删除文章分类请求参数
+type CategoryDeleteRequest struct {
 	Id      uint32 `json:"id" validate:"required"`
 	StoreId uint32 `json:"store_id"`
 }
 
-// ArticleListRequest 文章列表请求参数
-type ArticleListRequest struct {
+// ListRequest 文章列表请求参数
+type ListRequest struct {
 	Title      string `json:"title"`
 	CategoryId uint32 `json:"category_id"`
 	Status     int8   `json:"status" validate:"oneof=0 1"`
@@ -42,8 +48,8 @@ type ArticleListRequest struct {
 	Limit      int    `json:"limit" validate:"required,min=1,max=100"`
 }
 
-// ArticleCreateRequest 创建文章请求参数
-type ArticleCreateRequest struct {
+// CreateRequest 创建文章请求参数
+type CreateRequest struct {
 	Title        string `json:"title" validate:"required,max=300"`
 	ShowType     int8   `json:"show_type" validate:"required,oneof=10 20"`
 	CategoryId   uint32 `json:"category_id" validate:"required"`
@@ -55,8 +61,8 @@ type ArticleCreateRequest struct {
 	StoreId      uint32 `json:"store_id"`
 }
 
-// ArticleUpdateRequest 更新文章请求参数
-type ArticleUpdateRequest struct {
+// UpdateRequest 更新文章请求参数
+type UpdateRequest struct {
 	Id           uint32 `json:"id" validate:"required"`
 	Title        string `json:"title" validate:"required,max=300"`
 	ShowType     int8   `json:"show_type" validate:"required,oneof=10 20"`
@@ -69,8 +75,8 @@ type ArticleUpdateRequest struct {
 	StoreId      uint32 `json:"store_id"`
 }
 
-// ArticleDeleteRequest 删除文章请求参数
-type ArticleDeleteRequest struct {
+// DeleteRequest 删除文章请求参数
+type DeleteRequest struct {
 	Id      uint32 `json:"id" validate:"required"`
 	StoreId uint32 `json:"store_id"`
 }

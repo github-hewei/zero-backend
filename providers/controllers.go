@@ -21,8 +21,6 @@ var AdminControllersProviderSet = wire.NewSet(
 	controller.NewUserController,
 	controller.NewSettingController,
 	controller.NewSettingDefaultController,
-	controller.NewArticleCategoryController,
-	controller.NewArticleController,
 	controller.NewRegionController,
 	controller.NewHealthController,
 	wire.Struct(new(controller.Controllers), "*"),

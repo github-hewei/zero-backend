@@ -4,13 +4,16 @@ import (
 	"net/http"
 	"zero-backend/modules/admin/controller"
 	adminMiddleware "zero-backend/modules/admin/middleware"
+	"zero-backend/modules/article"
 
 	"zero-backend/internal/config"
 
+	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/logger"
 	basecfg "github.com/241x/zero-web/config"
 	"github.com/241x/zero-web/middleware"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func NewGin(
@@ -19,6 +22,8 @@ func NewGin(
 	adminMiddlewares *adminMiddleware.Middlewares,
 	corsConfig basecfg.CorsConfig,
 	authConfig config.AdminAuthConfig,
+	db *gorm.DB,
+	binder *bind.Binder,
 ) *gin.Engine {
 	r := gin.Default()
 	// CORS 跨域配置
@@ -90,14 +95,7 @@ func NewGin(
 	apiGroup.POST("/setting/default/delete", ctrl.SettingDefaultController.Delete)
 
 	// 文章管理
-	apiGroup.POST("/article/category/list", ctrl.ArticleCategoryController.List)
-	apiGroup.POST("/article/category/create", ctrl.ArticleCategoryController.Create)
-	apiGroup.POST("/article/category/update", ctrl.ArticleCategoryController.Update)
-	apiGroup.POST("/article/category/delete", ctrl.ArticleCategoryController.Delete)
-	apiGroup.POST("/article/article/list", ctrl.ArticleController.List)
-	apiGroup.POST("/article/article/create", ctrl.ArticleController.Create)
-	apiGroup.POST("/article/article/update", ctrl.ArticleController.Update)
-	apiGroup.POST("/article/article/delete", ctrl.ArticleController.Delete)
+	article.Register(apiGroup, article.Deps{DB: db, Binder: binder})
 
 	// 用户管理
 	apiGroup.POST("/user/user/list", ctrl.UserController.List)

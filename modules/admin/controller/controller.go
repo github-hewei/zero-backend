@@ -14,8 +14,6 @@ type Controllers struct {
 	UserController            *UserController
 	SettingController         *SettingController
 	SettingDefaultController  *SettingDefaultController
-	ArticleCategoryController *ArticleCategoryController
-	ArticleController         *ArticleController
 	RegionController          *RegionController
 	HealthController          *HealthController
 }

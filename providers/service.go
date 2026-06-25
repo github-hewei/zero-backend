@@ -21,8 +21,6 @@ var ServiceProviderSet = wire.NewSet(
 	service.NewUserService,
 	service.NewSettingService,
 	service.NewSettingDefaultService,
-	service.NewArticleCategoryService,
-	service.NewArticleService,
 	service.NewRegionService,
 	service.NewCaptchaService,
 )
