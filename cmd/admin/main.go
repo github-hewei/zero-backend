@@ -4,7 +4,6 @@ import (
 	"zero-backend/internal/admin"
 	"zero-backend/internal/app"
 	"zero-backend/internal/config"
-	"zero-backend/internal/modules/rbac"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/gormutil"
@@ -18,9 +17,9 @@ func main() {
 	config.Init()
 
 	conn := app.Must(mongodb.NewConn(app.LoadMongoConfig()))
-	l := app.LoadLogger(conn.DB)
+	log := app.LoadLogger(conn.DB)
 
-	gormLog := gormutil.NewLogger(l)
+	gormLog := gormutil.NewLogger(log)
 	db := app.Must(mysql.NewDB(app.LoadMySQLConfig(), gormLog))
 
 	v := bind.NewValidate()
@@ -28,11 +27,8 @@ func main() {
 	binder := bind.New(v, t, app.ProvideBindErrCode())
 
 	rdb := redis.New(app.LoadRedisConfig())
-	captchaSvc := app.Must(app.NewCaptchaService(rdb, app.LoadCaptchaConfig()))
-	authCfg := app.Must(rbac.LoadConfig())
+	engine := admin.NewGin(log, db, binder, rdb)
 
-	engine := admin.NewGin(l, db, binder, captchaSvc, rdb, authCfg)
-
-	srv := server.New(app.LoadAdminServerConfig(), engine, l, app.ProvideServerOptions()...)
+	srv := server.New(app.LoadAdminServerConfig(), engine, log, app.ProvideServerOptions()...)
 	srv.Run()
 }

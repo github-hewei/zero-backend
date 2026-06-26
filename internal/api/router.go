@@ -28,8 +28,9 @@ func NewGin(
 	r.Use(middleware.RequestLog())
 
 	apiGroup := r.Group("/api")
+	protected := apiGroup.Group("")
 
-	user.RegisterApi(apiGroup, apiGroup, user.ApiDeps{
+	user.RegisterApi(apiGroup, protected, user.ApiDeps{
 		DB:      db,
 		Binder:  binder,
 		AuthCfg: authCfg,
@@ -38,9 +39,9 @@ func NewGin(
 
 	settingSvc := app.NewSettingService(db)
 
-	upload.RegisterApi(apiGroup, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
-	setting.RegisterApi(apiGroup, setting.Deps{DB: db, Binder: binder})
-	region.Register(apiGroup, region.Deps{DB: db, Binder: binder})
+	upload.RegisterApi(protected, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
+	setting.RegisterApi(protected, setting.Deps{DB: db, Binder: binder})
+	region.Register(protected, region.Deps{DB: db, Binder: binder})
 
 	return r
 }

@@ -24,20 +24,21 @@ func NewGin(
 	log logger.Logger,
 	db *gorm.DB,
 	binder *bind.Binder,
-	captchaSvc *captcha.Service,
 	rdb *redis.Client,
-	authCfg rbac.Config,
 ) *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.CORS(app.LoadAdminCorsConfig()))
 	r.Use(middleware.Trace(log))
 	r.Use(middleware.RequestLog())
 
-	apiGroup := r.Group("/api")
+	public := r.Group("/api")
+	protected := public.Group("")
 
-	captcha.RegisterWith(apiGroup, binder, captchaSvc)
+	captchaSvc := app.Must(app.NewCaptchaService(rdb, app.LoadCaptchaConfig()))
+	captcha.RegisterWith(public, binder, captchaSvc)
 
-	rbac.Register(apiGroup, apiGroup, rbac.Deps{
+	authCfg := app.Must(rbac.LoadConfig())
+	rbac.Register(public, protected, rbac.Deps{
 		DB:      db,
 		Binder:  binder,
 		Config:  authCfg,
@@ -47,11 +48,11 @@ func NewGin(
 
 	settingSvc := app.NewSettingService(db)
 
-	setting.RegisterAdmin(apiGroup, setting.Deps{DB: db, Binder: binder})
-	article.Register(apiGroup, article.Deps{DB: db, Binder: binder})
-	upload.RegisterAdmin(apiGroup, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
-	user.Register(apiGroup, user.Deps{DB: db, Binder: binder})
-	region.Register(apiGroup, region.Deps{DB: db, Binder: binder})
+	setting.RegisterAdmin(protected, setting.Deps{DB: db, Binder: binder})
+	article.Register(protected, article.Deps{DB: db, Binder: binder})
+	upload.RegisterAdmin(protected, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
+	user.Register(protected, user.Deps{DB: db, Binder: binder})
+	region.Register(protected, region.Deps{DB: db, Binder: binder})
 
 	health.Register(r)
 
