@@ -3,7 +3,7 @@
 package main
 
 import (
-	"zero-backend/internal/config"
+	"zero-backend/config"
 	"zero-backend/providers"
 
 	webserver "github.com/241x/zero-web/server"

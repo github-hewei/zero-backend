@@ -3,8 +3,8 @@
 package main
 
 import (
-	"zero-backend/internal/config"
-	"zero-backend/modules/worker/server"
+	"zero-backend/config"
+	"zero-backend/cmd/worker/server"
 	"zero-backend/providers"
 
 	"github.com/google/wire"

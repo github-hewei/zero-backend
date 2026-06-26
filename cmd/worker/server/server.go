@@ -10,7 +10,7 @@ import (
 
 	"github.com/241x/zero-kit/logger"
 
-	"zero-backend/modules/worker/handler"
+	"zero-backend/cmd/worker/handler"
 )
 
 const (

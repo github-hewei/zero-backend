@@ -1,7 +1,7 @@
 package rbac
 
 import (
-	"zero-backend/internal/config"
+	"zero-backend/config"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/bind"

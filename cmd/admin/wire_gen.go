@@ -13,8 +13,8 @@ import (
 	"github.com/241x/zero-kit/mysql"
 	"github.com/241x/zero-kit/redis"
 	"github.com/241x/zero-web/server"
-	"zero-backend/internal/config"
-	"zero-backend/modules/admin/router"
+	"zero-backend/cmd/admin/router"
+	"zero-backend/config"
 	"zero-backend/providers"
 )
 

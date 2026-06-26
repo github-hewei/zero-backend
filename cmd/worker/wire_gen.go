@@ -10,9 +10,9 @@ import (
 	"github.com/241x/zero-kit/mongodb"
 	"github.com/241x/zero-kit/queue"
 	"github.com/241x/zero-kit/redis"
-	"zero-backend/internal/config"
-	"zero-backend/modules/worker/handler"
-	"zero-backend/modules/worker/server"
+	"zero-backend/cmd/worker/handler"
+	"zero-backend/cmd/worker/server"
+	"zero-backend/config"
 	"zero-backend/providers"
 )
 

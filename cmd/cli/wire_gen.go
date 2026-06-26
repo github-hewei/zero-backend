@@ -13,9 +13,9 @@ import (
 	"github.com/241x/zero-kit/mysql"
 	"github.com/241x/zero-kit/queue"
 	"github.com/241x/zero-kit/redis"
-	"zero-backend/internal/config"
-	"zero-backend/modules/cli/command"
-	"zero-backend/modules/cli/runner"
+	"zero-backend/cmd/cli/command"
+	"zero-backend/cmd/cli/runner"
+	"zero-backend/config"
 	"zero-backend/modules/rbac"
 	"zero-backend/providers"
 )

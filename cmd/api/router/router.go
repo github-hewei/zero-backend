@@ -1,7 +1,7 @@
 package router
 
 import (
-	"zero-backend/internal/config"
+	"zero-backend/config"
 	"zero-backend/modules/region"
 	"zero-backend/modules/setting"
 	"zero-backend/modules/upload"

@@ -1,7 +1,7 @@
 package user
 
 import (
-	"zero-backend/internal/config"
+	"zero-backend/config"
 	"zero-backend/modules/rbac"
 
 	"github.com/241x/zero-kit/apperror"

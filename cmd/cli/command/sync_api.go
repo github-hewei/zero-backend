@@ -3,7 +3,7 @@ package command
 import (
 	"fmt"
 
-	"zero-backend/modules/cli/runner"
+	"zero-backend/cmd/cli/runner"
 
 	"github.com/241x/zero-kit/logger"
 

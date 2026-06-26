@@ -1,7 +1,7 @@
 package user
 
 import (
-	"zero-backend/internal/config"
+	"zero-backend/config"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/gin-gonic/gin"

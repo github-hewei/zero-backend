@@ -1,7 +1,7 @@
 package command
 
 import (
-	"zero-backend/modules/cli/runner"
+	"zero-backend/cmd/cli/runner"
 
 	"github.com/241x/zero-kit/logger"
 	"github.com/spf13/cobra"
