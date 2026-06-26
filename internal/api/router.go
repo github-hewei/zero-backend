@@ -1,4 +1,4 @@
-package router
+package api
 
 import (
 	"zero-backend/internal/config"

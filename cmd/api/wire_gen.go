@@ -13,7 +13,7 @@ import (
 	"github.com/241x/zero-kit/mysql"
 	"github.com/241x/zero-kit/redis"
 	"github.com/241x/zero-web/server"
-	"zero-backend/cmd/api/router"
+	"zero-backend/internal/api"
 	"zero-backend/internal/config"
 	"zero-backend/providers"
 )
@@ -49,7 +49,7 @@ func wireApp() (*server.Server, error) {
 	apiAuthConfig := providers.NewApiAuthConfig(configConfig)
 	corsConfig := providers.NewApiCorsConfig(configConfig)
 	service := providers.NewSettingService(db)
-	engine := router.NewGin(zeroLogger, db, binder, client, apiAuthConfig, corsConfig, service)
+	engine := api.NewGin(zeroLogger, db, binder, client, apiAuthConfig, corsConfig, service)
 	v := providers.ProvideServerOptions()
 	serverServer := server.New(serverConfig, engine, zeroLogger, v...)
 	return serverServer, nil

@@ -1,8 +1,8 @@
 package providers
 
 import (
-	"zero-backend/cmd/admin/router"
-	apiRouter "zero-backend/cmd/api/router"
+	"zero-backend/internal/admin"
+	"zero-backend/internal/api"
 	"zero-backend/internal/config"
 	"zero-backend/internal/modules/captcha"
 	"zero-backend/internal/modules/rbac"
@@ -118,10 +118,10 @@ func NewAdminCorsConfig(cfg *config.Config) baseconfig.CorsConfig     { return c
 func NewApiCorsConfig(cfg *config.Config) baseconfig.CorsConfig       { return cfg.Api.Cors }
 
 var AdminServerProviderSet = wire.NewSet(
-	NewAdminServerConfig, NewAdminCorsConfig, ProvideServerOptions, webserver.New, router.NewGin,
+	NewAdminServerConfig, NewAdminCorsConfig, ProvideServerOptions, webserver.New, admin.NewGin,
 )
 var ApiServerProviderSet = wire.NewSet(
-	NewApiServerConfig, NewApiCorsConfig, ProvideServerOptions, webserver.New, apiRouter.NewGin,
+	NewApiServerConfig, NewApiCorsConfig, ProvideServerOptions, webserver.New, api.NewGin,
 )
 
 // ---------- service ----------

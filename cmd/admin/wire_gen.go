@@ -13,7 +13,7 @@ import (
 	"github.com/241x/zero-kit/mysql"
 	"github.com/241x/zero-kit/redis"
 	"github.com/241x/zero-web/server"
-	"zero-backend/cmd/admin/router"
+	"zero-backend/internal/admin"
 	"zero-backend/internal/config"
 	"zero-backend/providers"
 )
@@ -51,7 +51,7 @@ func wireApp() (*server.Server, error) {
 	client := redis.New(redisConfig)
 	captchaConfig := providers.NewCaptchaConfig(configConfig)
 	captchaService := providers.NewCaptchaService(client, captchaConfig)
-	engine := router.NewGin(zeroLogger, db, binder, adminAuthConfig, corsConfig, service, captchaService)
+	engine := admin.NewGin(zeroLogger, db, binder, adminAuthConfig, corsConfig, service, captchaService)
 	v := providers.ProvideServerOptions()
 	serverServer := server.New(serverConfig, engine, zeroLogger, v...)
 	return serverServer, nil
