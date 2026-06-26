@@ -2,10 +2,10 @@ package router
 
 import (
 	"zero-backend/internal/config"
-	"zero-backend/modules/region"
-	"zero-backend/modules/setting"
-	"zero-backend/modules/upload"
-	"zero-backend/modules/user"
+	"zero-backend/internal/modules/region"
+	"zero-backend/internal/modules/setting"
+	"zero-backend/internal/modules/upload"
+	"zero-backend/internal/modules/user"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/logger"

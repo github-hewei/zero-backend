@@ -16,7 +16,7 @@ import (
 	"zero-backend/cmd/cli/command"
 	"zero-backend/cmd/cli/runner"
 	"zero-backend/internal/config"
-	"zero-backend/modules/rbac"
+	"zero-backend/internal/modules/rbac"
 	"zero-backend/providers"
 )
 

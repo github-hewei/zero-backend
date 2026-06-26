@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 	"zero-backend/internal/config"
-	"zero-backend/modules/rbac"
+	"zero-backend/internal/modules/rbac"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/baserepo"

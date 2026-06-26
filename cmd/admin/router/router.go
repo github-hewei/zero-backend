@@ -2,14 +2,14 @@ package router
 
 import (
 	"net/http"
-	"zero-backend/modules/article"
-	"zero-backend/modules/captcha"
-	"zero-backend/modules/health"
-	"zero-backend/modules/rbac"
-	"zero-backend/modules/region"
-	"zero-backend/modules/setting"
-	"zero-backend/modules/upload"
-	"zero-backend/modules/user"
+	"zero-backend/internal/modules/article"
+	"zero-backend/internal/modules/captcha"
+	"zero-backend/internal/modules/health"
+	"zero-backend/internal/modules/rbac"
+	"zero-backend/internal/modules/region"
+	"zero-backend/internal/modules/setting"
+	"zero-backend/internal/modules/upload"
+	"zero-backend/internal/modules/user"
 
 	"zero-backend/internal/config"
 
