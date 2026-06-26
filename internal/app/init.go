@@ -1,6 +1,7 @@
 package app
 
 import (
+	"strings"
 	"zero-backend/internal/config"
 
 	"github.com/241x/zero-kit/apperror"
@@ -43,6 +44,14 @@ func Must[T any](v T, err error) T {
 func LoadLogger(db *mongo.Database) *logger.ZeroLogger {
 	var cfg LoggerConfig
 	config.UnmarshalKey("logger", &cfg)
+	if lv := config.GetString("logger.level"); lv != "" {
+		cfg.Level = lv
+	}
+	if w := config.GetStringSlice("logger.writers"); len(w) > 0 {
+		cfg.Writers = w
+	} else if s := config.GetString("logger.writers"); s != "" {
+		cfg.Writers = splitComma(s)
+	}
 
 	options := []logger.Option{}
 	for _, writer := range cfg.Writers {
@@ -76,19 +85,35 @@ func LoadLogger(db *mongo.Database) *logger.ZeroLogger {
 }
 
 func LoadMongoConfig() mongodb.Config {
-	var c mongodb.Config
-	config.UnmarshalKey("mongodb", &c)
-	return c
+	return mongodb.Config{
+		URI:      config.GetString("mongodb.uri"),
+		Database: config.GetString("mongodb.database"),
+		Enabled:  config.GetBool("mongodb.enabled"),
+	}
 }
 
 func LoadMySQLConfig() mysql.Config {
-	var c mysql.Config
-	config.UnmarshalKey("mysql", &c)
-	return c
+	return mysql.Config{
+		Dsn:    config.GetString("mysql.dsn"),
+		Prefix: config.GetString("mysql.prefix"),
+	}
 }
 
 func LoadRedisConfig() redis.Config {
-	var c redis.Config
-	config.UnmarshalKey("redis", &c)
-	return c
+	return redis.Config{
+		Host:     config.GetString("redis.host"),
+		Port:     config.GetInt("redis.port"),
+		Password: config.GetString("redis.password"),
+		DB:       config.GetInt("redis.db"),
+	}
+}
+
+func splitComma(s string) []string {
+	var res []string
+	for _, item := range strings.Split(s, ",") {
+		if t := strings.TrimSpace(item); t != "" {
+			res = append(res, t)
+		}
+	}
+	return res
 }

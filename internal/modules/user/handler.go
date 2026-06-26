@@ -127,6 +127,11 @@ func (h *Handler) Detail(c *gin.Context) {
 	response.Success(c, "请求成功", result)
 }
 
+// @Summary 用户登录
+// @Tags 用户认证
+// @Param body body rbac.AuthLoginRequest true "登录参数"
+// @Success 200 {object} response.Response{data=UserLoginResponse}
+// @Router /login [post]
 func (h *Handler) login(c *gin.Context) {
 	req := &rbac.AuthLoginRequest{}
 	if err := h.binder.ShouldBindJSON(c, req); err != nil {
@@ -142,10 +147,18 @@ func (h *Handler) login(c *gin.Context) {
 	response.Success(c, "请求成功", result)
 }
 
+// @Summary 用户登出
+// @Tags 用户认证
+// @Success 200 {object} response.Response
+// @Router /logout [post]
 func (h *Handler) logout(c *gin.Context) {
 	response.Success(c, "操作成功", nil)
 }
 
+// @Summary 用户刷新令牌
+// @Tags 用户认证
+// @Success 200 {object} response.Response{data=UserLoginResponse}
+// @Router /refresh-token [post]
 func (h *Handler) refreshToken(c *gin.Context) {
 	cookie, err := c.Request.Cookie("token")
 	if err != nil {
@@ -160,6 +173,11 @@ func (h *Handler) refreshToken(c *gin.Context) {
 	response.Success(c, "请求成功", result)
 }
 
+// @Summary 用户修改密码
+// @Tags 用户认证
+// @Param body body rbac.ChangePasswordRequest true "修改密码参数"
+// @Success 200 {object} response.Response
+// @Router /change-password [post]
 func (h *Handler) changePassword(c *gin.Context) {
 	req := &rbac.ChangePasswordRequest{}
 	if err := h.binder.ShouldBindJSON(c, req); err != nil {

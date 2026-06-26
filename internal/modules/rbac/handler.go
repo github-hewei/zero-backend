@@ -57,6 +57,11 @@ func storeID(ctx *gin.Context) uint32 {
 
 // --- auth ---
 
+// @Summary 系统登录
+// @Tags 认证
+// @Param body body AuthLoginRequest true "登录参数"
+// @Success 200 {object} response.Response{data=AdminLoginResponse}
+// @Router /login [post]
 func (h *handler) login(ctx *gin.Context) {
 	req := &AuthLoginRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -72,10 +77,18 @@ func (h *handler) login(ctx *gin.Context) {
 	response.Success(ctx, "请求成功", result)
 }
 
+// @Summary 系统登出
+// @Tags 认证
+// @Success 200 {object} response.Response
+// @Router /logout [post]
 func (h *handler) logout(ctx *gin.Context) {
 	response.Success(ctx, "操作成功", nil)
 }
 
+// @Summary 刷新令牌
+// @Tags 认证
+// @Success 200 {object} response.Response{data=AdminLoginResponse}
+// @Router /refresh-token [post]
 func (h *handler) refreshToken(ctx *gin.Context) {
 	cookie, err := ctx.Request.Cookie("token")
 	if err != nil {
@@ -90,6 +103,11 @@ func (h *handler) refreshToken(ctx *gin.Context) {
 	response.Success(ctx, "请求成功", result)
 }
 
+// @Summary 修改密码
+// @Tags 认证
+// @Param body body ChangePasswordRequest true "修改密码参数"
+// @Success 200 {object} response.Response
+// @Router /change-password [post]
 func (h *handler) changePassword(ctx *gin.Context) {
 	req := &ChangePasswordRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -103,6 +121,11 @@ func (h *handler) changePassword(ctx *gin.Context) {
 	response.Success(ctx, "密码修改成功", nil)
 }
 
+// @Summary 获取用户权限菜单
+// @Tags 认证
+// @Param body body AuthGetPermissionsRequest true "查询参数"
+// @Success 200 {object} response.Response{data=[]RbacMenu}
+// @Router /permissions [post]
 func (h *handler) permissions(ctx *gin.Context) {
 	req := &AuthGetPermissionsRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {

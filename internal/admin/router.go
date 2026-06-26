@@ -16,6 +16,8 @@ import (
 	"github.com/241x/zero-kit/logger"
 	"github.com/241x/zero-web/middleware"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
@@ -55,6 +57,8 @@ func NewGin(
 	region.Register(protected, region.Deps{DB: db, Binder: binder})
 
 	health.Register(r)
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	r.LoadHTMLGlob("./views/*.html")
 	r.Static("/assets", "./views/assets")

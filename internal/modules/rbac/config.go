@@ -29,8 +29,12 @@ func (c Config) Validate() error {
 
 // LoadConfig 从全局配置加载模块配置，校验失败返回 error。
 func LoadConfig() (Config, error) {
-	var c Config
-	config.UnmarshalKey("admin.auth", &c)
+	c := Config{
+		HmacSecret:      config.GetString("admin.auth.hmac_secret"),
+		AccessTokenTtl:  config.GetInt("admin.auth.access_token_ttl"),
+		RefreshTokenTtl: config.GetInt("admin.auth.refresh_token_ttl"),
+		SuperUserId:     config.GetInt("admin.auth.super_user_id"),
+	}
 	if err := c.Validate(); err != nil {
 		return Config{}, err
 	}

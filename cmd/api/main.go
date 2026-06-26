@@ -1,3 +1,8 @@
+// @title           Zero API
+// @version         1.0
+// @host            localhost:8081
+// @BasePath        /api
+
 package main
 
 import (

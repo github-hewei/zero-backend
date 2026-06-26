@@ -10,15 +10,17 @@ import (
 func ProvideServerOptions() []server.Option { return nil }
 
 func LoadAdminServerConfig() server.Config {
-	var c server.Config
-	config.UnmarshalKey("admin.server", &c)
-	return c
+	return server.Config{
+		Host: config.GetString("admin.server.host"),
+		Port: config.GetInt("admin.server.port"),
+	}
 }
 
 func LoadApiServerConfig() server.Config {
-	var c server.Config
-	config.UnmarshalKey("api.server", &c)
-	return c
+	return server.Config{
+		Host: config.GetString("api.server.host"),
+		Port: config.GetInt("api.server.port"),
+	}
 }
 
 func LoadAdminCorsConfig() middleware.CorsConfig {

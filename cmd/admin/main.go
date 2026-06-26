@@ -1,3 +1,8 @@
+// @title           Zero Admin API
+// @version         1.0
+// @host            localhost:8080
+// @BasePath        /api
+
 package main
 
 import (

@@ -11,6 +11,8 @@ import (
 	"github.com/241x/zero-kit/logger"
 	"github.com/241x/zero-web/middleware"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
@@ -42,6 +44,8 @@ func NewGin(
 	upload.RegisterApi(protected, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
 	setting.RegisterApi(protected, setting.Deps{DB: db, Binder: binder})
 	region.Register(protected, region.Deps{DB: db, Binder: binder})
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return r
 }
