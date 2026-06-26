@@ -24,11 +24,6 @@ type Service struct {
 	capt   click.Captcha
 }
 
-// RDB 返回内部 Redis 客户端
-func (s *Service) RDB() *redis.Client {
-	return s.rdb
-}
-
 // NewService 创建验证码服务实例。
 func NewService(rdb *redis.Client, cfg Config, prefix string) (*Service, error) {
 	font, err := fzshengsksjw.GetFont()

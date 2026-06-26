@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/241x/zero-kit/bind"
+	"github.com/241x/zero-web/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -37,8 +38,8 @@ func Register(rg *gin.RouterGroup, deps Deps) {
 	rg.POST("/user/points/change", h.ChangePoints)
 }
 
-// RegisterApi 注册用户模块路由（API端），返回 AuthMiddleware 和 Handler
-func RegisterApi(rg *gin.RouterGroup, deps ApiDeps) (*AuthMiddleware, *Handler) {
+// RegisterApi 注册用户模块 API 端路由。public 注册公开路由，protected 注册需认证的路由并挂载 JWT 中间件。
+func RegisterApi(public, protected *gin.RouterGroup, deps ApiDeps) {
 	repo := NewRepository(deps.DB)
 	authServ := NewAuthService(repo, deps.AuthCfg, deps.RDB)
 	authMid := NewAuthMiddleware(deps.AuthCfg, authServ)
@@ -46,14 +47,12 @@ func RegisterApi(rg *gin.RouterGroup, deps ApiDeps) (*AuthMiddleware, *Handler) 
 	svc := NewService(deps.DB, repo, pointsLogRepo)
 	h := newAuthHandler(deps.Binder, svc, authServ, deps.AuthCfg)
 
-	rg.POST("/login", h.login)
-	rg.POST("/refresh-token", h.refreshToken)
+	public.POST("/login", h.login)
+	public.POST("/refresh-token", h.refreshToken)
 
-	return authMid, h
-}
+	protected.Use(middleware.JWTGuard(deps.AuthCfg.HmacSecret))
+	protected.Use(authMid.LoadUser())
 
-// RegisterApiProtected 注册需要 JWT 保护的路由
-func RegisterApiProtected(rg *gin.RouterGroup, h *Handler) {
-	rg.POST("/logout", h.logout)
-	rg.POST("/change-password", h.changePassword)
+	protected.POST("/logout", h.logout)
+	protected.POST("/change-password", h.changePassword)
 }

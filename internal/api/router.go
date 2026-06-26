@@ -20,7 +20,8 @@ func NewGin(
 	db *gorm.DB,
 	binder *bind.Binder,
 	rdb *redis.Client,
-) (*gin.Engine, error) {
+	authCfg user.Config,
+) *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.CORS(app.LoadApiCorsConfig()))
 	r.Use(middleware.Trace(log))
@@ -28,21 +29,12 @@ func NewGin(
 
 	apiGroup := r.Group("/api")
 
-	authCfg, err := user.LoadConfig()
-	if err != nil {
-		return nil, err
-	}
-	authMid, h := user.RegisterApi(apiGroup, user.ApiDeps{
+	user.RegisterApi(apiGroup, apiGroup, user.ApiDeps{
 		DB:      db,
 		Binder:  binder,
 		AuthCfg: authCfg,
 		RDB:     rdb,
 	})
-
-	apiGroup.Use(middleware.JWTGuard(authCfg.HmacSecret))
-	apiGroup.Use(authMid.LoadUser())
-
-	user.RegisterApiProtected(apiGroup, h)
 
 	settingSvc := app.NewSettingService(db)
 
@@ -50,5 +42,5 @@ func NewGin(
 	setting.RegisterApi(apiGroup, setting.Deps{DB: db, Binder: binder})
 	region.Register(apiGroup, region.Deps{DB: db, Binder: binder})
 
-	return r, nil
+	return r
 }

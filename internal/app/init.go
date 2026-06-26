@@ -14,20 +14,20 @@ import (
 
 // LoggerConfig 日志配置
 type LoggerConfig struct {
-	Level   string        `mapstructure:"level"`
-	Writers []string      `mapstructure:"writers"`
-	File    FileLogConfig `mapstructure:"file"`
+	Level   string
+	Writers []string
+	File    FileLogConfig
 }
 
 // FileLogConfig 文件日志配置
 type FileLogConfig struct {
-	Path       string `mapstructure:"path"`
-	Filename   string `mapstructure:"filename"`
-	MaxSize    int    `mapstructure:"max_size"`
-	MaxAge     int    `mapstructure:"max_age"`
-	MaxBackups int    `mapstructure:"max_backups"`
-	Compress   bool   `mapstructure:"compress"`
-	LocalTime  bool   `mapstructure:"local_time"`
+	Path       string
+	Filename   string
+	MaxSize    int
+	MaxAge     int
+	MaxBackups int
+	Compress   bool
+	LocalTime  bool
 }
 
 func ProvideBindErrCode() apperror.Code { return errcode.InvalidInput }

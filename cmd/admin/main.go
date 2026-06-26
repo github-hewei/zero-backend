@@ -4,6 +4,7 @@ import (
 	"zero-backend/internal/admin"
 	"zero-backend/internal/app"
 	"zero-backend/internal/config"
+	"zero-backend/internal/modules/rbac"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/gormutil"
@@ -28,8 +29,9 @@ func main() {
 
 	rdb := redis.New(app.LoadRedisConfig())
 	captchaSvc := app.Must(app.NewCaptchaService(rdb, app.LoadCaptchaConfig()))
+	authCfg := app.Must(rbac.LoadConfig())
 
-	engine := app.Must(admin.NewGin(l, db, binder, captchaSvc, rdb))
+	engine := admin.NewGin(l, db, binder, captchaSvc, rdb, authCfg)
 
 	srv := server.New(app.LoadAdminServerConfig(), engine, l, app.ProvideServerOptions()...)
 	srv.Run()
