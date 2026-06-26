@@ -8,15 +8,32 @@ import (
 	"github.com/241x/zero-kit/mongodb"
 	"github.com/241x/zero-kit/mysql"
 	"github.com/241x/zero-kit/redis"
-	baseconfig "github.com/241x/zero-web/config"
 	"github.com/241x/zero-web/errcode"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// LoggerConfig 日志配置
+type LoggerConfig struct {
+	Level   string        `mapstructure:"level"`
+	Writers []string      `mapstructure:"writers"`
+	File    FileLogConfig `mapstructure:"file"`
+}
+
+// FileLogConfig 文件日志配置
+type FileLogConfig struct {
+	Path       string `mapstructure:"path"`
+	Filename   string `mapstructure:"filename"`
+	MaxSize    int    `mapstructure:"max_size"`
+	MaxAge     int    `mapstructure:"max_age"`
+	MaxBackups int    `mapstructure:"max_backups"`
+	Compress   bool   `mapstructure:"compress"`
+	LocalTime  bool   `mapstructure:"local_time"`
+}
+
 func ProvideBindErrCode() apperror.Code { return errcode.InvalidInput }
 
 func LoadLogger(db *mongo.Database) *logger.ZeroLogger {
-	var cfg baseconfig.LoggerConfig
+	var cfg LoggerConfig
 	config.UnmarshalKey("logger", &cfg)
 
 	options := []logger.Option{}
