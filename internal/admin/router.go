@@ -2,6 +2,7 @@ package admin
 
 import (
 	"net/http"
+	_ "zero-backend/docs/admin"
 	"zero-backend/internal/app"
 	"zero-backend/internal/modules/article"
 	"zero-backend/internal/modules/captcha"

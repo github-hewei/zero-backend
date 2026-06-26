@@ -1,0 +1,349 @@
+basePath: /api
+definitions:
+  internal_modules_rbac.AdminLoginResponse:
+    properties:
+      token:
+        type: string
+      ttl:
+        type: integer
+      user:
+        $ref: '#/definitions/internal_modules_rbac.RbacUser'
+    type: object
+  internal_modules_rbac.AuthGetPermissionsRequest:
+    properties:
+      is_tree:
+        type: boolean
+    type: object
+  internal_modules_rbac.AuthLoginRequest:
+    properties:
+      captcha_code:
+        type: string
+      captcha_id:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - captcha_code
+    - captcha_id
+    - password
+    - username
+    type: object
+  internal_modules_rbac.ChangePasswordRequest:
+    properties:
+      new_password:
+        maxLength: 20
+        minLength: 6
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  internal_modules_rbac.RbacMenu:
+    properties:
+      action_mark:
+        type: string
+      actions:
+        items:
+          $ref: '#/definitions/internal_modules_rbac.RbacMenu'
+        type: array
+      children:
+        items:
+          $ref: '#/definitions/internal_modules_rbac.RbacMenu'
+        type: array
+      created_at:
+        type: integer
+      id:
+        type: integer
+      is_page:
+        type: integer
+      module_key:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: integer
+      path:
+        type: string
+      sort:
+        type: integer
+      type:
+        type: integer
+      updated_at:
+        type: integer
+    type: object
+  internal_modules_rbac.RbacRole:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/internal_modules_rbac.RbacRole'
+        type: array
+      created_at:
+        type: integer
+      id:
+        type: integer
+      parent_id:
+        type: integer
+      rbac_role_menu:
+        items:
+          $ref: '#/definitions/internal_modules_rbac.RbacRoleMenu'
+        type: array
+      role_name:
+        type: string
+      sort:
+        type: integer
+      store_id:
+        type: integer
+      updated_at:
+        type: integer
+    type: object
+  internal_modules_rbac.RbacRoleMenu:
+    properties:
+      created_at:
+        type: integer
+      id:
+        type: integer
+      menu_id:
+        type: integer
+      rbac_menu:
+        $ref: '#/definitions/internal_modules_rbac.RbacMenu'
+      role_id:
+        type: integer
+      store_id:
+        type: integer
+    type: object
+  internal_modules_rbac.RbacUser:
+    properties:
+      created_at:
+        type: integer
+      id:
+        type: integer
+      is_super:
+        type: integer
+      rbac_user_role:
+        items:
+          $ref: '#/definitions/internal_modules_rbac.RbacUserRole'
+        type: array
+      real_name:
+        type: string
+      sort:
+        type: integer
+      store_id:
+        type: integer
+      su:
+        type: boolean
+      updated_at:
+        type: integer
+      username:
+        type: string
+    type: object
+  internal_modules_rbac.RbacUserRole:
+    properties:
+      created_at:
+        type: integer
+      id:
+        type: integer
+      rbac_role:
+        $ref: '#/definitions/internal_modules_rbac.RbacRole'
+      role_id:
+        type: integer
+      store_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  internal_modules_user.UploadFile:
+    properties:
+      domain:
+        type: string
+      file_name:
+        type: string
+      file_path:
+        type: string
+      id:
+        type: integer
+    type: object
+  internal_modules_user.User:
+    properties:
+      avatar:
+        $ref: '#/definitions/internal_modules_user.UploadFile'
+      avatar_id:
+        type: integer
+      city:
+        type: string
+      country:
+        type: string
+      created_at:
+        type: integer
+      gender:
+        type: integer
+      id:
+        type: integer
+      last_login_time:
+        type: integer
+      mobile:
+        type: string
+      nick_name:
+        type: string
+      platform:
+        type: string
+      points:
+        type: integer
+      province:
+        type: string
+      status:
+        type: integer
+      store_id:
+        type: integer
+      updated_at:
+        type: integer
+      username:
+        type: string
+    type: object
+  internal_modules_user.UserLoginResponse:
+    properties:
+      token:
+        type: string
+      ttl:
+        type: integer
+      user:
+        $ref: '#/definitions/internal_modules_user.User'
+    type: object
+  response.Response:
+    properties:
+      cost:
+        type: string
+      data: {}
+      errcode:
+        type: integer
+      message:
+        type: string
+      traceId:
+        type: string
+    type: object
+  zero-backend_internal_modules_rbac.AuthLoginRequest:
+    properties:
+      captcha_code:
+        type: string
+      captcha_id:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - captcha_code
+    - captcha_id
+    - password
+    - username
+    type: object
+  zero-backend_internal_modules_rbac.ChangePasswordRequest:
+    properties:
+      new_password:
+        maxLength: 20
+        minLength: 6
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: Zero Admin API
+  version: "1.0"
+paths:
+  /change-password:
+    post:
+      parameters:
+      - description: 修改密码参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/zero-backend_internal_modules_rbac.ChangePasswordRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 用户修改密码
+      tags:
+      - 用户认证
+  /login:
+    post:
+      parameters:
+      - description: 登录参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/zero-backend_internal_modules_rbac.AuthLoginRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/internal_modules_user.UserLoginResponse'
+              type: object
+      summary: 用户登录
+      tags:
+      - 用户认证
+  /logout:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 用户登出
+      tags:
+      - 用户认证
+  /permissions:
+    post:
+      parameters:
+      - description: 查询参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_modules_rbac.AuthGetPermissionsRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/internal_modules_rbac.RbacMenu'
+                  type: array
+              type: object
+      summary: 获取用户权限菜单
+      tags:
+      - 认证
+  /refresh-token:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/internal_modules_user.UserLoginResponse'
+              type: object
+      summary: 用户刷新令牌
+      tags:
+      - 用户认证
+swagger: "2.0"

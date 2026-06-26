@@ -1,6 +1,7 @@
 package api
 
 import (
+	_ "zero-backend/docs/api"
 	"zero-backend/internal/app"
 	"zero-backend/internal/modules/region"
 	"zero-backend/internal/modules/setting"
