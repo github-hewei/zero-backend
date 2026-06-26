@@ -9,9 +9,9 @@ import (
 
 // Handler 设置模块处理器
 type Handler struct {
-	binder       *bind.Binder
-	svc          *Service
-	defaultSvc   *DefaultService
+	binder     *bind.Binder
+	svc        *Service
+	defaultSvc *DefaultService
 }
 
 func newHandler(binder *bind.Binder, svc *Service, defaultSvc *DefaultService) *Handler {

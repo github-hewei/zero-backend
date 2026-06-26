@@ -9,9 +9,9 @@ import (
 
 // Handler 文章模块处理器
 type Handler struct {
-	binder         *bind.Binder
-	categorySvc    *CategoryService
-	articleSvc     *Service
+	binder      *bind.Binder
+	categorySvc *CategoryService
+	articleSvc  *Service
 }
 
 func NewHandler(binder *bind.Binder, categorySvc *CategoryService, articleSvc *Service) *Handler {

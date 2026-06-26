@@ -13,9 +13,9 @@ import (
 
 // Handler 上传模块处理器
 type Handler struct {
-	binder    *bind.Binder
-	groupSvc  *GroupService
-	fileSvc   *FileService
+	binder   *bind.Binder
+	groupSvc *GroupService
+	fileSvc  *FileService
 }
 
 func newHandler(binder *bind.Binder, groupSvc *GroupService, fileSvc *FileService) *Handler {

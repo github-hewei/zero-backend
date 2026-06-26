@@ -21,8 +21,8 @@ type ChangePasswordRequest struct {
 
 // AdminLoginResponse 登录返回
 type AdminLoginResponse struct {
-	Token string `json:"token"`
-	Ttl   int    `json:"ttl"`
+	Token string    `json:"token"`
+	Ttl   int       `json:"ttl"`
 	User  *RbacUser `json:"user,omitempty"`
 }
 
