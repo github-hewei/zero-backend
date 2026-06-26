@@ -3,8 +3,6 @@ package providers
 import (
 	"zero-backend/cmd/admin/router"
 	apiRouter "zero-backend/cmd/api/router"
-	"zero-backend/cmd/cli/command"
-	"zero-backend/cmd/cli/runner"
 	"zero-backend/cmd/worker/handler"
 	workerServer "zero-backend/cmd/worker/server"
 	"zero-backend/internal/config"
@@ -150,10 +148,7 @@ var ApiServiceProviderSet = wire.NewSet(NewApiAuthConfig, NewSettingService)
 
 // ---------- command ----------
 
-var CliCommandProviderSet = wire.NewSet(
-	command.NewRootCommand, command.NewMigrateCommand, command.NewQueueCommand,
-	command.NewSyncApiCommand, runner.NewSyncApiRunner, queue.NewQueueManager,
-)
+// CliCommandProviderSet 已移除 — CLI 改为手动注入
 
 // ---------- worker ----------
 
