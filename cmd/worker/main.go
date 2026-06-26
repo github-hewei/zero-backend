@@ -1,9 +1,9 @@
 package main
 
 import (
+	"zero-backend/internal/app"
 	"zero-backend/internal/config"
 	"zero-backend/internal/worker"
-	"zero-backend/providers"
 
 	"github.com/241x/zero-kit/mongodb"
 	"github.com/241x/zero-kit/queue"
@@ -13,15 +13,15 @@ import (
 func main() {
 	cfg := config.New()
 
-	rdb := redis.New(providers.NewRedisConfig(cfg))
+	rdb := redis.New(app.NewRedisConfig(cfg))
 	mgr := queue.NewQueueManager(rdb)
 
-	mongoCfg := providers.NewMongoDBConfig(cfg)
+	mongoCfg := app.NewMongoDBConfig(cfg)
 	conn, err := mongodb.NewConn(mongoCfg)
 	if err != nil {
 		panic(err)
 	}
-	l := providers.ProvideLogger(cfg.Logger, conn.DB)
+	l := app.ProvideLogger(cfg.Logger, conn.DB)
 
 	registry := worker.NewRegistry(l)
 	registry.Register("example", &worker.ExampleHandler{L: l})

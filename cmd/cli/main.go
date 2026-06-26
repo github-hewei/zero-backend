@@ -1,11 +1,11 @@
 package main
 
 import (
+	"zero-backend/internal/app"
 	"zero-backend/internal/cli"
 	"zero-backend/internal/cli/runner"
 	"zero-backend/internal/config"
 	"zero-backend/internal/modules/rbac"
-	"zero-backend/providers"
 
 	"github.com/241x/zero-kit/gormutil"
 	"github.com/241x/zero-kit/mongodb"
@@ -17,24 +17,24 @@ import (
 func main() {
 	cfg := config.New()
 
-	mongoCfg := providers.NewMongoDBConfig(cfg)
+	mongoCfg := app.NewMongoDBConfig(cfg)
 	conn, err := mongodb.NewConn(mongoCfg)
 	if err != nil {
 		panic(err)
 	}
-	l := providers.ProvideLogger(cfg.Logger, conn.DB)
+	l := app.ProvideLogger(cfg.Logger, conn.DB)
 
-	rdb := redis.New(providers.NewRedisConfig(cfg))
+	rdb := redis.New(app.NewRedisConfig(cfg))
 
 	gormLog := gormutil.NewLogger(l)
-	db, err := mysql.NewDB(providers.NewMySQLConfig(cfg), gormLog)
+	db, err := mysql.NewDB(app.NewMySQLConfig(cfg), gormLog)
 	if err != nil {
 		panic(err)
 	}
 
-	app := cli.New(l, rdb)
-	app.AddCommand(cli.MigrateCmd(db, l))
-	app.AddCommand(cli.QueueCmd(queue.NewQueueManager(rdb)))
-	app.AddCommand(cli.SyncApiCmd(runner.NewSyncApiRunner(l, rbac.NewRbacApiRepository(db))))
-	app.Run()
+	cliApp := cli.New(l, rdb)
+	cliApp.AddCommand(cli.MigrateCmd(db, l))
+	cliApp.AddCommand(cli.QueueCmd(queue.NewQueueManager(rdb)))
+	cliApp.AddCommand(cli.SyncApiCmd(runner.NewSyncApiRunner(l, rbac.NewRbacApiRepository(db))))
+	cliApp.Run()
 }
