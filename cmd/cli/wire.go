@@ -3,8 +3,8 @@
 package main
 
 import (
-	"zero-backend/config"
 	"zero-backend/cmd/cli/command"
+	"zero-backend/internal/config"
 	"zero-backend/providers"
 
 	"github.com/241x/zero-kit/locker"

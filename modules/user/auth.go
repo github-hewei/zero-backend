@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"zero-backend/config"
+	"zero-backend/internal/config"
 	"zero-backend/modules/rbac"
 
 	"github.com/241x/zero-kit/apperror"

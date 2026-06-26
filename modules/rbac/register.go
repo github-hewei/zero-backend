@@ -1,7 +1,7 @@
 package rbac
 
 import (
-	"zero-backend/config"
+	"zero-backend/internal/config"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/gin-gonic/gin"

@@ -12,7 +12,7 @@ import (
 	"github.com/241x/zero-kit/redis"
 	"zero-backend/cmd/worker/handler"
 	"zero-backend/cmd/worker/server"
-	"zero-backend/config"
+	"zero-backend/internal/config"
 	"zero-backend/providers"
 )
 

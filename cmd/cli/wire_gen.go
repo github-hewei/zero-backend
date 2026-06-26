@@ -15,7 +15,7 @@ import (
 	"github.com/241x/zero-kit/redis"
 	"zero-backend/cmd/cli/command"
 	"zero-backend/cmd/cli/runner"
-	"zero-backend/config"
+	"zero-backend/internal/config"
 	"zero-backend/modules/rbac"
 	"zero-backend/providers"
 )

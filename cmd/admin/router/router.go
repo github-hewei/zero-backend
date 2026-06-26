@@ -11,7 +11,7 @@ import (
 	"zero-backend/modules/upload"
 	"zero-backend/modules/user"
 
-	"zero-backend/config"
+	"zero-backend/internal/config"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/logger"

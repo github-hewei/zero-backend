@@ -14,7 +14,7 @@ import (
 	"github.com/241x/zero-kit/redis"
 	"github.com/241x/zero-web/server"
 	"zero-backend/cmd/api/router"
-	"zero-backend/config"
+	"zero-backend/internal/config"
 	"zero-backend/providers"
 )
 

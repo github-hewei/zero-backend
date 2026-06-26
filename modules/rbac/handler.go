@@ -1,7 +1,7 @@
 package rbac
 
 import (
-	"zero-backend/config"
+	"zero-backend/internal/config"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/bind"
@@ -13,15 +13,15 @@ import (
 
 // handler rbac 模块处理器
 type handler struct {
-	binder       *bind.Binder
-	authServ     *AuthService
-	authCfg      config.AdminAuthConfig
-	menuServ     *RbacMenuService
-	apiServ      *RbacApiService
-	roleServ     *RbacRoleService
-	userServ     *RbacUserService
-	storeServ    *RbacStoreService
-	authMid      *AuthMiddleware
+	binder    *bind.Binder
+	authServ  *AuthService
+	authCfg   config.AdminAuthConfig
+	menuServ  *RbacMenuService
+	apiServ   *RbacApiService
+	roleServ  *RbacRoleService
+	userServ  *RbacUserService
+	storeServ *RbacStoreService
+	authMid   *AuthMiddleware
 }
 
 func newHandler(

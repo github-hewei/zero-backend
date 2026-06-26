@@ -7,7 +7,7 @@ import (
 	"zero-backend/cmd/cli/runner"
 	"zero-backend/cmd/worker/handler"
 	workerServer "zero-backend/cmd/worker/server"
-	"zero-backend/config"
+	"zero-backend/internal/config"
 	"zero-backend/modules/captcha"
 	"zero-backend/modules/rbac"
 	"zero-backend/modules/setting"
