@@ -1,15 +1,16 @@
-package main
+package cli
 
 import (
 	"fmt"
 
-	"zero-backend/cmd/cli/runner"
+	"zero-backend/internal/cli/runner"
 
 	"github.com/241x/zero-kit/logger"
 	"github.com/spf13/cobra"
 )
 
-func syncApiCmd(r *runner.SyncApiRunner) *cobra.Command {
+// SyncApiCmd 同步 OpenAPI 接口到数据库。
+func SyncApiCmd(r *runner.SyncApiRunner) *cobra.Command {
 	var (
 		filePath   string
 		deleteFlag bool

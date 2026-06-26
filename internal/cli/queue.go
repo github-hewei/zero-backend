@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"encoding/json"
@@ -13,7 +13,8 @@ const (
 	queueTestKey    = "test"
 )
 
-func queueCmd(manager *queue.QueueManager) *cobra.Command {
+// QueueCmd 队列管理命令。
+func QueueCmd(manager *queue.QueueManager) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "queue",
 		Short: "队列管理",
