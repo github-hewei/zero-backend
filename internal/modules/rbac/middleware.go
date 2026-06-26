@@ -3,8 +3,6 @@ package rbac
 import (
 	"strings"
 
-	"zero-backend/internal/config"
-
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-web/ctxkeys"
 	"github.com/241x/zero-web/errcode"
@@ -15,12 +13,12 @@ import (
 
 // AuthMiddleware 权限验证中间件
 type AuthMiddleware struct {
-	config   config.AdminAuthConfig
+	config   Config
 	authServ *AuthService
 }
 
 // NewAuthMiddleware 创建权限验证中间件
-func NewAuthMiddleware(cfg config.AdminAuthConfig, authServ *AuthService) *AuthMiddleware {
+func NewAuthMiddleware(cfg Config, authServ *AuthService) *AuthMiddleware {
 	return &AuthMiddleware{config: cfg, authServ: authServ}
 }
 

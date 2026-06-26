@@ -1,8 +1,6 @@
 package user
 
 import (
-	"zero-backend/internal/config"
-
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-web/ctxkeys"
 	"github.com/241x/zero-web/errcode"
@@ -13,12 +11,12 @@ import (
 
 // AuthMiddleware 用户认证中间件
 type AuthMiddleware struct {
-	config   config.ApiAuthConfig
+	config   Config
 	authServ *AuthService
 }
 
 // NewAuthMiddleware 创建认证中间件
-func NewAuthMiddleware(cfg config.ApiAuthConfig, authServ *AuthService) *AuthMiddleware {
+func NewAuthMiddleware(cfg Config, authServ *AuthService) *AuthMiddleware {
 	return &AuthMiddleware{config: cfg, authServ: authServ}
 }
 

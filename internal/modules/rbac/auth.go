@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"zero-backend/internal/config"
-
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/baserepo"
 	"github.com/241x/zero-kit/helper"
@@ -36,7 +34,7 @@ type AuthService struct {
 	roleMenuRepo *RbacRoleMenuRepository
 	userRoleRepo *RbacUserRoleRepository
 	menuApiRepo  *RbacMenuApiRepository
-	cfg          config.AdminAuthConfig
+	cfg          Config
 	rdb          *redis.Client
 	captcha      CaptchaVerifier
 }
@@ -49,7 +47,7 @@ func NewAuthService(
 	roleMenuRepo *RbacRoleMenuRepository,
 	userRoleRepo *RbacUserRoleRepository,
 	menuApiRepo *RbacMenuApiRepository,
-	cfg config.AdminAuthConfig,
+	cfg Config,
 	rdb *redis.Client,
 	captcha CaptchaVerifier,
 ) *AuthService {

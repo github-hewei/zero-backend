@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"zero-backend/internal/config"
 	"zero-backend/internal/modules/rbac"
 
 	"github.com/241x/zero-kit/apperror"
@@ -33,14 +32,14 @@ type UserLoginResponse struct {
 // AuthService 用户认证服务
 type AuthService struct {
 	userRepo *Repository
-	cfg      config.ApiAuthConfig
+	cfg      Config
 	rdb      *redis.Client
 }
 
 // NewAuthService 创建AuthService实例
 func NewAuthService(
 	userRepo *Repository,
-	cfg config.ApiAuthConfig,
+	cfg Config,
 	rdb *redis.Client,
 ) *AuthService {
 	return &AuthService{

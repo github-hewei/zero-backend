@@ -14,16 +14,18 @@ import (
 )
 
 func main() {
-	cfg := config.New()
+	config.Init()
 
-	conn, err := mongodb.NewConn(app.NewMongoDBConfig(cfg))
+	mongoCfg := app.LoadMongoConfig()
+	conn, err := mongodb.NewConn(mongoCfg)
 	if err != nil {
 		panic(err)
 	}
-	l := app.ProvideLogger(cfg.Logger, conn.DB)
+	l := app.LoadLogger(conn.DB)
 
 	gormLog := gormutil.NewLogger(l)
-	db, err := mysql.NewDB(app.NewMySQLConfig(cfg), gormLog)
+	mysqlCfg := app.LoadMySQLConfig()
+	db, err := mysql.NewDB(mysqlCfg, gormLog)
 	if err != nil {
 		panic(err)
 	}
@@ -35,17 +37,13 @@ func main() {
 	}
 	binder := bind.New(v, t, app.ProvideBindErrCode())
 
-	rdb := redis.New(app.NewRedisConfig(cfg))
-	captchaSvc := app.NewCaptchaService(rdb, app.NewCaptchaConfig(cfg))
+	rdb := redis.New(app.LoadRedisConfig())
+	captchaCfg := app.LoadCaptchaConfig()
+	captchaSvc := app.NewCaptchaService(rdb, captchaCfg)
 
 	srv := server.New(
-		app.NewAdminServerConfig(cfg),
-		admin.NewGin(l, db, binder,
-			app.NewAdminAuthConfig(cfg),
-			app.NewAdminCorsConfig(cfg),
-			app.NewSettingService(db),
-			captchaSvc,
-		),
+		app.LoadAdminServerConfig(),
+		admin.NewGin(l, db, binder, captchaSvc, rdb),
 		l,
 		app.ProvideServerOptions()...,
 	)

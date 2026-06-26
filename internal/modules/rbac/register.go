@@ -1,8 +1,6 @@
 package rbac
 
 import (
-	"zero-backend/internal/config"
-
 	"github.com/241x/zero-kit/bind"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -13,7 +11,7 @@ import (
 type Deps struct {
 	DB      *gorm.DB
 	Binder  *bind.Binder
-	AuthCfg config.AdminAuthConfig
+	Config  Config
 	RDB     *redis.Client
 	Captcha CaptchaVerifier
 }
@@ -31,10 +29,10 @@ func buildAll(deps Deps) (*handler, *AuthMiddleware) {
 	authServ := NewAuthService(
 		userRepo, apiRepo, roleRepo, menuRepo,
 		roleMenuRepo, userRoleRepo, menuApiRepo,
-		deps.AuthCfg, deps.RDB, deps.Captcha,
+		deps.Config, deps.RDB, deps.Captcha,
 	)
 
-	authMid := NewAuthMiddleware(deps.AuthCfg, authServ)
+	authMid := NewAuthMiddleware(deps.Config, authServ)
 
 	menuServ := NewRbacMenuService(menuRepo, menuApiRepo, deps.DB)
 	apiServ := NewRbacApiService(apiRepo)
@@ -42,7 +40,8 @@ func buildAll(deps Deps) (*handler, *AuthMiddleware) {
 	userServ := NewRbacUserService(deps.DB, userRepo, userRoleRepo)
 	storeServ := NewRbacStoreService(storeRepo)
 
-	h := newHandler(deps.Binder, authServ, deps.AuthCfg, menuServ, apiServ, roleServ, userServ, storeServ, authMid)
+	authCfg := deps.Config
+	h := newHandler(deps.Binder, authServ, authCfg, menuServ, apiServ, roleServ, userServ, storeServ, authMid)
 
 	return h, authMid
 }

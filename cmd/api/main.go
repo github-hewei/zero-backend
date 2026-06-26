@@ -14,16 +14,17 @@ import (
 )
 
 func main() {
-	cfg := config.New()
+	config.Init()
 
-	conn, err := mongodb.NewConn(app.NewMongoDBConfig(cfg))
+	mongoCfg := app.LoadMongoConfig()
+	conn, err := mongodb.NewConn(mongoCfg)
 	if err != nil {
 		panic(err)
 	}
-	l := app.ProvideLogger(cfg.Logger, conn.DB)
+	l := app.LoadLogger(conn.DB)
 
 	gormLog := gormutil.NewLogger(l)
-	db, err := mysql.NewDB(app.NewMySQLConfig(cfg), gormLog)
+	db, err := mysql.NewDB(app.LoadMySQLConfig(), gormLog)
 	if err != nil {
 		panic(err)
 	}
@@ -35,15 +36,11 @@ func main() {
 	}
 	binder := bind.New(v, t, app.ProvideBindErrCode())
 
-	rdb := redis.New(app.NewRedisConfig(cfg))
+	rdb := redis.New(app.LoadRedisConfig())
 
 	srv := server.New(
-		app.NewApiServerConfig(cfg),
-		api.NewGin(l, db, binder, rdb,
-			app.NewApiAuthConfig(cfg),
-			app.NewApiCorsConfig(cfg),
-			app.NewSettingService(db),
-		),
+		app.LoadApiServerConfig(),
+		api.NewGin(l, db, binder, rdb),
 		l,
 		app.ProvideServerOptions()...,
 	)

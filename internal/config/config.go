@@ -1,149 +1,38 @@
 package config
 
 import (
-	"errors"
 	"log"
 	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
-
-	"github.com/241x/zero-web/config"
 )
 
-// Config 全局配置
-type Config struct {
-	Admin   AdminConfig          `mapstructure:"admin"`
-	Api     ApiConfig            `mapstructure:"api"`
-	Logger  config.LoggerConfig  `mapstructure:"logger"`
-	MySQL   config.MySQLConfig   `mapstructure:"mysql"`
-	Redis   config.RedisConfig   `mapstructure:"redis"`
-	MongoDB config.MongoDBConfig `mapstructure:"mongodb"`
-}
+var v = viper.New()
 
-// CaptchaConfig 验证码配置
-type CaptchaConfig struct {
-	Enabled bool `mapstructure:"enabled"`
-	TTL     int  `mapstructure:"ttl"`
-}
+// Init 初始化配置（只读一次文件到内存）。
+func Init() {
+	v.SetConfigName("config")
+	v.SetConfigType("yaml")
+	v.AddConfigPath(".")
+	v.AddConfigPath("./config")
 
-// AdminConfig 管理后台配置
-type AdminConfig struct {
-	Server  config.ServerConfig `mapstructure:"server"`
-	Auth    AdminAuthConfig     `mapstructure:"auth"`
-	Cors    config.CorsConfig   `mapstructure:"cors"`
-	Captcha CaptchaConfig       `mapstructure:"captcha"`
-}
+	v.SetEnvPrefix("APP")
+	v.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-// AdminAuthConfig 管理端认证配置
-type AdminAuthConfig struct {
-	config.AuthConfig `mapstructure:",squash"`
-	SuperUserId       int `mapstructure:"super_user_id"`
-}
-
-// ApiConfig API模块配置
-type ApiConfig struct {
-	Server config.ServerConfig `mapstructure:"server"`
-	Auth   ApiAuthConfig       `mapstructure:"auth"`
-	Cors   config.CorsConfig   `mapstructure:"cors"`
-}
-
-// ApiAuthConfig API端认证配置
-type ApiAuthConfig struct {
-	config.AuthConfig `mapstructure:",squash"`
-}
-
-// New 加载配置（支持 YAML + 环境变量覆盖）
-func New() *Config {
-	return loadConfig()
-}
-
-// loadConfig 加载配置
-func loadConfig() *Config {
-	// 添加配置文件搜索路径（按优先级排序）
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("./config")
-
-	// 环境变量覆盖配置
-	viper.SetEnvPrefix("APP")
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-	// 读取配置文件
-	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := errors.AsType[viper.ConfigFileNotFoundError](err); ok {
-			log.Println("[WARN] config.yaml not found")
-		} else {
-			log.Printf("[WARN] read config.yaml failed: %v\n", err)
-		}
+	if err := v.ReadInConfig(); err != nil {
+		log.Printf("[WARN] read config.yaml failed: %v\n", err)
 	}
 
-	// 使用 godotenv 加载 .env 文件并设置环境变量
 	if err := godotenv.Load(); err != nil {
-		log.Printf("[WARN] .env file not found, skipping\n")
+		log.Printf("[WARN] .env file not found\n")
 	}
-
-	// 反序列化配置到结构体
-	var cfg Config
-	if err := viper.Unmarshal(&cfg); err != nil {
-		log.Printf("[ERROR] unmarshal config failed: %v\n", err)
-		panic(err)
-	}
-
-	// 验证配置
-	if err := cfg.validate(); err != nil {
-		log.Printf("[ERROR] invalid config: %v\n", err)
-		panic(err)
-	}
-
-	return &cfg
 }
 
-// validate 验证配置有效性
-func (c *Config) validate() error {
-	// 验证 Admin 配置
-	if err := c.validateAdmin(); err != nil {
-		return err
+// UnmarshalKey 从配置中读取指定 key 到 target。
+func UnmarshalKey(key string, target any) {
+	if err := v.UnmarshalKey(key, target); err != nil {
+		log.Printf("[WARN] unmarshal key %s failed: %v\n", key, err)
 	}
-
-	// 验证 API 配置
-	if err := c.validateApi(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Config) validateAdmin() error {
-	if c.Admin.Server.Port <= 0 || c.Admin.Server.Port > 65535 {
-		return errors.New("invalid admin server port: must be between 1 and 65535")
-	}
-	if c.Admin.Auth.AccessTokenTtl <= 0 {
-		return errors.New("invalid admin access token TTL: must be positive")
-	}
-	if c.Admin.Auth.RefreshTokenTtl <= 0 {
-		return errors.New("invalid admin refresh token TTL: must be positive")
-	}
-	if c.Admin.Auth.HmacSecret == "" {
-		return errors.New("invalid admin HMAC secret: cannot be empty")
-	}
-	return nil
-}
-
-func (c *Config) validateApi() error {
-	if c.Api.Server.Port <= 0 || c.Api.Server.Port > 65535 {
-		return errors.New("invalid api server port: must be between 1 and 65535")
-	}
-	if c.Api.Auth.AccessTokenTtl <= 0 {
-		return errors.New("invalid api access token TTL: must be positive")
-	}
-	if c.Api.Auth.RefreshTokenTtl <= 0 {
-		return errors.New("invalid api refresh token TTL: must be positive")
-	}
-	if c.Api.Auth.HmacSecret == "" {
-		return errors.New("invalid api HMAC secret: cannot be empty")
-	}
-	return nil
 }

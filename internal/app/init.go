@@ -15,7 +15,10 @@ import (
 
 func ProvideBindErrCode() apperror.Code { return errcode.InvalidInput }
 
-func ProvideLogger(cfg baseconfig.LoggerConfig, db *mongo.Database) *logger.ZeroLogger {
+func LoadLogger(db *mongo.Database) *logger.ZeroLogger {
+	var cfg baseconfig.LoggerConfig
+	config.UnmarshalKey("logger", &cfg)
+
 	options := []logger.Option{}
 	for _, writer := range cfg.Writers {
 		switch writer {
@@ -47,14 +50,20 @@ func ProvideLogger(cfg baseconfig.LoggerConfig, db *mongo.Database) *logger.Zero
 	return logger.New(options...)
 }
 
-func NewMongoDBConfig(cfg *config.Config) mongodb.Config {
-	return mongodb.Config{URI: cfg.MongoDB.URI, Database: cfg.MongoDB.Database, Enabled: cfg.MongoDB.Enabled}
+func LoadMongoConfig() mongodb.Config {
+	var c mongodb.Config
+	config.UnmarshalKey("mongodb", &c)
+	return c
 }
 
-func NewMySQLConfig(cfg *config.Config) mysql.Config {
-	return mysql.Config{Dsn: cfg.MySQL.Dsn, Prefix: cfg.MySQL.Prefix}
+func LoadMySQLConfig() mysql.Config {
+	var c mysql.Config
+	config.UnmarshalKey("mysql", &c)
+	return c
 }
 
-func NewRedisConfig(cfg *config.Config) redis.Config {
-	return redis.Config{Host: cfg.Redis.Host, Port: cfg.Redis.Port, Password: cfg.Redis.Password, DB: cfg.Redis.DB}
+func LoadRedisConfig() redis.Config {
+	var c redis.Config
+	config.UnmarshalKey("redis", &c)
+	return c
 }

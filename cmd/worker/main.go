@@ -11,17 +11,16 @@ import (
 )
 
 func main() {
-	cfg := config.New()
+	config.Init()
 
-	rdb := redis.New(app.NewRedisConfig(cfg))
+	rdb := redis.New(app.LoadRedisConfig())
 	mgr := queue.NewQueueManager(rdb)
 
-	mongoCfg := app.NewMongoDBConfig(cfg)
-	conn, err := mongodb.NewConn(mongoCfg)
+	conn, err := mongodb.NewConn(app.LoadMongoConfig())
 	if err != nil {
 		panic(err)
 	}
-	l := app.ProvideLogger(cfg.Logger, conn.DB)
+	l := app.LoadLogger(conn.DB)
 
 	registry := worker.NewRegistry(l)
 	registry.Register("example", &worker.ExampleHandler{L: l})

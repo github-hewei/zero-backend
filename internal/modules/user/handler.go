@@ -1,7 +1,6 @@
 package user
 
 import (
-	"zero-backend/internal/config"
 	"zero-backend/internal/modules/rbac"
 
 	"github.com/241x/zero-kit/apperror"
@@ -17,14 +16,14 @@ type Handler struct {
 	binder   *bind.Binder
 	svc      *Service
 	authServ *AuthService
-	authCfg  config.ApiAuthConfig
+	authCfg  Config
 }
 
 func newHandler(binder *bind.Binder, svc *Service) *Handler {
 	return &Handler{binder: binder, svc: svc}
 }
 
-func newAuthHandler(binder *bind.Binder, svc *Service, authServ *AuthService, authCfg config.ApiAuthConfig) *Handler {
+func newAuthHandler(binder *bind.Binder, svc *Service, authServ *AuthService, authCfg Config) *Handler {
 	return &Handler{binder: binder, svc: svc, authServ: authServ, authCfg: authCfg}
 }
 

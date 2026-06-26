@@ -15,22 +15,21 @@ import (
 )
 
 func main() {
-	cfg := config.New()
+	config.Init()
 
-	mongoCfg := app.NewMongoDBConfig(cfg)
-	conn, err := mongodb.NewConn(mongoCfg)
+	conn, err := mongodb.NewConn(app.LoadMongoConfig())
 	if err != nil {
 		panic(err)
 	}
-	l := app.ProvideLogger(cfg.Logger, conn.DB)
-
-	rdb := redis.New(app.NewRedisConfig(cfg))
+	l := app.LoadLogger(conn.DB)
 
 	gormLog := gormutil.NewLogger(l)
-	db, err := mysql.NewDB(app.NewMySQLConfig(cfg), gormLog)
+	db, err := mysql.NewDB(app.LoadMySQLConfig(), gormLog)
 	if err != nil {
 		panic(err)
 	}
+
+	rdb := redis.New(app.LoadRedisConfig())
 
 	cliApp := cli.New(l, rdb)
 	cliApp.AddCommand(cli.MigrateCmd(db, l))

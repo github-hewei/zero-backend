@@ -1,8 +1,6 @@
 package user
 
 import (
-	"zero-backend/internal/config"
-
 	"github.com/241x/zero-kit/bind"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -20,7 +18,7 @@ type ApiDeps struct {
 	DB      *gorm.DB
 	Binder  *bind.Binder
 	RDB     *redis.Client
-	AuthCfg config.ApiAuthConfig
+	AuthCfg Config
 }
 
 // Register 注册用户模块路由（管理端）

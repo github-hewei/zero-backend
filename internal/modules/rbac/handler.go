@@ -1,8 +1,6 @@
 package rbac
 
 import (
-	"zero-backend/internal/config"
-
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-web/ctxkeys"
@@ -15,7 +13,7 @@ import (
 type handler struct {
 	binder    *bind.Binder
 	authServ  *AuthService
-	authCfg   config.AdminAuthConfig
+	authCfg   Config
 	menuServ  *RbacMenuService
 	apiServ   *RbacApiService
 	roleServ  *RbacRoleService
@@ -27,7 +25,7 @@ type handler struct {
 func newHandler(
 	binder *bind.Binder,
 	authServ *AuthService,
-	authCfg config.AdminAuthConfig,
+	authCfg Config,
 	menuServ *RbacMenuService,
 	apiServ *RbacApiService,
 	roleServ *RbacRoleService,
