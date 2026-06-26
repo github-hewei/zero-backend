@@ -16,10 +16,7 @@ func main() {
 	rdb := redis.New(app.LoadRedisConfig())
 	mgr := queue.NewQueueManager(rdb)
 
-	conn, err := mongodb.NewConn(app.LoadMongoConfig())
-	if err != nil {
-		panic(err)
-	}
+	conn := app.Must(mongodb.NewConn(app.LoadMongoConfig()))
 	l := app.LoadLogger(conn.DB)
 
 	registry := worker.NewRegistry(l)

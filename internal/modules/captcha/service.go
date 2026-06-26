@@ -29,16 +29,16 @@ func (s *Service) RDB() *redis.Client {
 	return s.rdb
 }
 
-// NewService 创建验证码服务实例
-func NewService(rdb *redis.Client, cfg Config, prefix string) *Service {
+// NewService 创建验证码服务实例。
+func NewService(rdb *redis.Client, cfg Config, prefix string) (*Service, error) {
 	font, err := fzshengsksjw.GetFont()
 	if err != nil {
-		panic(fmt.Sprintf("captcha: 加载字体失败: %v", err))
+		return nil, fmt.Errorf("captcha: 加载字体失败: %w", err)
 	}
 
 	bgImages, err := imagesv2.GetImages()
 	if err != nil {
-		panic(fmt.Sprintf("captcha: 加载背景图片失败: %v", err))
+		return nil, fmt.Errorf("captcha: 加载背景图片失败: %w", err)
 	}
 
 	builder := click.NewBuilder()
@@ -52,7 +52,7 @@ func NewService(rdb *redis.Client, cfg Config, prefix string) *Service {
 		cfg:    cfg,
 		prefix: prefix,
 		capt:   builder.Make(),
-	}
+	}, nil
 }
 
 // Generate 生成验证码

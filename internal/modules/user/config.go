@@ -1,6 +1,9 @@
 package user
 
-import "zero-backend/internal/config"
+import (
+	"errors"
+	"zero-backend/internal/config"
+)
 
 // Config API 端模块配置。
 type Config struct {
@@ -9,9 +12,26 @@ type Config struct {
 	RefreshTokenTtl int
 }
 
-// LoadConfig 从全局配置加载模块配置。
-func LoadConfig() Config {
+// Validate 校验配置有效性。
+func (c Config) Validate() error {
+	if c.HmacSecret == "" {
+		return errors.New("user: api.auth.hmac_secret is required")
+	}
+	if c.AccessTokenTtl <= 0 {
+		return errors.New("user: api.auth.access_token_ttl must be positive")
+	}
+	if c.RefreshTokenTtl <= 0 {
+		return errors.New("user: api.auth.refresh_token_ttl must be positive")
+	}
+	return nil
+}
+
+// LoadConfig 从全局配置加载模块配置，校验失败返回 error。
+func LoadConfig() (Config, error) {
 	var c Config
 	config.UnmarshalKey("api.auth", &c)
-	return c
+	if err := c.Validate(); err != nil {
+		return Config{}, err
+	}
+	return c, nil
 }

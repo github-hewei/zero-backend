@@ -22,6 +22,6 @@ func LoadCaptchaConfig() captcha.Config {
 	return captcha.Config{Enabled: c.Enabled, TTL: c.TTL}
 }
 
-func NewCaptchaService(rdb *goredis.Client, cfg captcha.Config) *captcha.Service {
+func NewCaptchaService(rdb *goredis.Client, cfg captcha.Config) (*captcha.Service, error) {
 	return captcha.NewService(rdb, cfg, "ZAG:CAPTCHA")
 }

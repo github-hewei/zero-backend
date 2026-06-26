@@ -26,7 +26,7 @@ func NewGin(
 	binder *bind.Binder,
 	captchaSvc *captcha.Service,
 	rdb *redis.Client,
-) *gin.Engine {
+) (*gin.Engine, error) {
 	r := gin.Default()
 	r.Use(middleware.CORS(app.LoadAdminCorsConfig()))
 	r.Use(middleware.Trace(log))
@@ -34,17 +34,21 @@ func NewGin(
 
 	apiGroup := r.Group("/api")
 
+	authCfg, err := rbac.LoadConfig()
+	if err != nil {
+		return nil, err
+	}
 	authMid, h := rbac.RegisterAdmin(apiGroup, rbac.Deps{
 		DB:      db,
 		Binder:  binder,
-		Config:  rbac.LoadConfig(),
+		Config:  authCfg,
 		RDB:     captchaSvc.RDB(),
 		Captcha: captchaSvc,
 	})
 
 	captcha.RegisterWith(apiGroup, binder, captchaSvc)
 
-	apiGroup.Use(middleware.JWTGuard(rbac.LoadConfig().HmacSecret))
+	apiGroup.Use(middleware.JWTGuard(authCfg.HmacSecret))
 	apiGroup.Use(authMid.LoadUser())
 	apiGroup.Use(authMid.CheckAPIPermission())
 
@@ -69,5 +73,5 @@ func NewGin(
 	r.GET("/", func(c *gin.Context) { c.HTML(http.StatusOK, "index.html", nil) })
 	r.NoRoute(func(c *gin.Context) { c.HTML(http.StatusOK, "index.html", nil) })
 
-	return r
+	return r, nil
 }

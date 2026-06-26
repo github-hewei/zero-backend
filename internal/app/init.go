@@ -32,6 +32,14 @@ type FileLogConfig struct {
 
 func ProvideBindErrCode() apperror.Code { return errcode.InvalidInput }
 
+// Must 泛型辅助：err != nil 时 panic，用于启动阶段集中处理错误。
+func Must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func LoadLogger(db *mongo.Database) *logger.ZeroLogger {
 	var cfg LoggerConfig
 	config.UnmarshalKey("logger", &cfg)

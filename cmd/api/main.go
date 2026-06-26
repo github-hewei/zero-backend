@@ -16,33 +16,20 @@ import (
 func main() {
 	config.Init()
 
-	mongoCfg := app.LoadMongoConfig()
-	conn, err := mongodb.NewConn(mongoCfg)
-	if err != nil {
-		panic(err)
-	}
+	conn := app.Must(mongodb.NewConn(app.LoadMongoConfig()))
 	l := app.LoadLogger(conn.DB)
 
 	gormLog := gormutil.NewLogger(l)
-	db, err := mysql.NewDB(app.LoadMySQLConfig(), gormLog)
-	if err != nil {
-		panic(err)
-	}
+	db := app.Must(mysql.NewDB(app.LoadMySQLConfig(), gormLog))
 
 	v := bind.NewValidate()
-	t, err := bind.NewTrans(v)
-	if err != nil {
-		panic(err)
-	}
+	t := app.Must(bind.NewTrans(v))
 	binder := bind.New(v, t, app.ProvideBindErrCode())
 
 	rdb := redis.New(app.LoadRedisConfig())
 
-	srv := server.New(
-		app.LoadApiServerConfig(),
-		api.NewGin(l, db, binder, rdb),
-		l,
-		app.ProvideServerOptions()...,
-	)
+	engine := app.Must(api.NewGin(l, db, binder, rdb))
+
+	srv := server.New(app.LoadApiServerConfig(), engine, l, app.ProvideServerOptions()...)
 	srv.Run()
 }
