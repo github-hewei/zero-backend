@@ -16,9 +16,9 @@ import (
 	"github.com/241x/zero-kit/logger"
 	"github.com/241x/zero-web/middleware"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 

@@ -47,9 +47,7 @@ func LoadLogger(db *mongo.Database) *logger.ZeroLogger {
 	if lv := config.GetString("logger.level"); lv != "" {
 		cfg.Level = lv
 	}
-	if w := config.GetStringSlice("logger.writers"); len(w) > 0 {
-		cfg.Writers = w
-	} else if s := config.GetString("logger.writers"); s != "" {
+	if s := config.GetString("logger.writers"); s != "" {
 		cfg.Writers = splitComma(s)
 	}
 

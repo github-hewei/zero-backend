@@ -21,16 +21,6 @@ func Init() {
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	v.BindEnv("mysql.dsn")
-	v.BindEnv("redis.host")
-	v.BindEnv("redis.port")
-	v.BindEnv("redis.password")
-	v.BindEnv("redis.db")
-	v.BindEnv("mongodb.uri")
-	v.BindEnv("mongodb.database")
-	v.BindEnv("logger.level")
-	v.BindEnv("logger.writers")
-
 	if err := godotenv.Load(); err != nil {
 		log.Printf("[WARN] .env file not found\n")
 	}
@@ -55,6 +45,3 @@ func GetInt(key string) int { return v.GetInt(key) }
 
 // GetBool 读取布尔配置（支持 env 覆盖）。
 func GetBool(key string) bool { return v.GetBool(key) }
-
-// GetStringSlice 读取字符串数组配置（支持 env 覆盖）。
-func GetStringSlice(key string) []string { return v.GetStringSlice(key) }

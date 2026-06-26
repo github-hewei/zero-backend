@@ -14,12 +14,9 @@ func NewSettingService(db *gorm.DB) *setting.Service {
 }
 
 func LoadCaptchaConfig() captcha.Config {
-	var c struct {
-		Enabled bool
-		TTL     int
-	}
+	var c captcha.Config
 	config.UnmarshalKey("admin.captcha", &c)
-	return captcha.Config{Enabled: c.Enabled, TTL: c.TTL}
+	return c
 }
 
 func NewCaptchaService(rdb *goredis.Client, cfg captcha.Config) (*captcha.Service, error) {

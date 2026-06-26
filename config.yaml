@@ -69,12 +69,10 @@ api:
 # 日志配置
 logger:
   # 日志级别: debug, info, warn, error
-  level: "debug"
+  level: "info"
   # 输出方式: console, file
   writers:
-    - "console"
     - "file"
-    - "mongodb"
 
   # 文件日志配置
   file:
