@@ -3,8 +3,6 @@ package providers
 import (
 	"zero-backend/cmd/admin/router"
 	apiRouter "zero-backend/cmd/api/router"
-	"zero-backend/cmd/worker/handler"
-	workerServer "zero-backend/cmd/worker/server"
 	"zero-backend/internal/config"
 	"zero-backend/internal/modules/captcha"
 	"zero-backend/internal/modules/rbac"
@@ -17,7 +15,6 @@ import (
 	zeroLogger "github.com/241x/zero-kit/logger"
 	"github.com/241x/zero-kit/mongodb"
 	"github.com/241x/zero-kit/mysql"
-	"github.com/241x/zero-kit/queue"
 	zeroRedis "github.com/241x/zero-kit/redis"
 	baseconfig "github.com/241x/zero-web/config"
 	"github.com/241x/zero-web/errcode"
@@ -150,14 +147,4 @@ var ApiServiceProviderSet = wire.NewSet(NewApiAuthConfig, NewSettingService)
 
 // CliCommandProviderSet 已移除 — CLI 改为手动注入
 
-// ---------- worker ----------
-
-func ProvideRegistry(log zeroLogger.Logger, exampleHandler *handler.ExampleHandler) *handler.Registry {
-	registry := handler.NewRegistry(log)
-	registry.Register("example", exampleHandler)
-	return registry
-}
-
-var WorkerProviderSet = wire.NewSet(
-	ProvideRegistry, handler.NewExampleHandler, queue.NewQueueManager, workerServer.NewWorkerServer,
-)
+// WorkerProviderSet 已移除 — Worker 改为手动注入

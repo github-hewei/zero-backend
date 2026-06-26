@@ -1,4 +1,4 @@
-package server
+package worker
 
 import (
 	"context"
@@ -9,8 +9,6 @@ import (
 	"github.com/241x/zero-kit/queue"
 
 	"github.com/241x/zero-kit/logger"
-
-	"zero-backend/cmd/worker/handler"
 )
 
 const (
@@ -18,15 +16,14 @@ const (
 	queueTestKey    = "test"
 )
 
-// WorkerServer 队列工作服务，管理队列消费和工作线程池
-type WorkerServer struct {
+// Server 队列工作服务，管理队列消费和工作线程池。
+type Server struct {
 	manager *queue.QueueManager
 	logger  logger.Logger
 }
 
-// NewWorkerServer 创建队列工作服务
-func NewWorkerServer(manager *queue.QueueManager, registry *handler.Registry, log logger.Logger) *WorkerServer {
-	// 注册默认队列工作线程池
+// NewServer 创建队列工作服务。
+func NewServer(manager *queue.QueueManager, registry *Registry, log logger.Logger) *Server {
 	config := queue.DefaultConfig().WithName(queueDefaultKey)
 	pool, err := manager.RegisterWorkerPool(queueDefaultKey, registry, config)
 	if err != nil {
@@ -34,22 +31,17 @@ func NewWorkerServer(manager *queue.QueueManager, registry *handler.Registry, lo
 	} else {
 		pool.WithLogger(log)
 	}
-
-	return &WorkerServer{
-		manager: manager,
-		logger:  log,
-	}
+	return &Server{manager: manager, logger: log}
 }
 
-// Run 启动队列工作服务，阻塞直到收到退出信号
-func (s *WorkerServer) Run() {
+// Run 启动队列工作服务，阻塞直到收到退出信号。
+func (s *Server) Run() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 启动所有工作线程池
 	if err := s.manager.StartAllWorkerPools(ctx); err != nil {
 		s.logger.Err(err, "Failed to start worker pools")
 		return
@@ -57,11 +49,9 @@ func (s *WorkerServer) Run() {
 
 	s.logger.Info("Worker started, waiting for tasks...")
 
-	// 等待退出信号
 	<-sig
 	s.logger.Info("Shutting down worker...")
 
-	// 优雅停止所有工作线程池
 	if err := s.manager.StopAllWorkerPools(); err != nil {
 		s.logger.Err(err, "Failed to stop worker pools")
 	}
