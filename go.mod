@@ -3,7 +3,7 @@ module zero-backend
 go 1.26.4
 
 require (
-	github.com/241x/zero-kit v1.5.0
+	github.com/241x/zero-kit v1.6.0
 	github.com/241x/zero-web v0.0.9
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gin-gonic/gin v1.12.0

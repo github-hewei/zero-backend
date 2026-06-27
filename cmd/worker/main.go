@@ -17,7 +17,7 @@ func main() {
 	mgr := queue.NewQueueManager(rdb)
 
 	conn := app.Must(mongodb.NewConn(app.LoadMongoConfig()))
-	l := app.LoadLogger(conn.DB)
+	l := app.LoadLogger(conn.DB, "worker.log")
 
 	registry := worker.NewRegistry(l)
 	registry.Register("example", &worker.ExampleHandler{L: l})

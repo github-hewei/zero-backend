@@ -37,8 +37,8 @@ type FileLogConfig struct {
 	LocalTime  bool
 }
 
-// LoadLogger 加载日志组件
-func LoadLogger(db *mongo.Database) *logger.ZeroLogger {
+// LoadLogger 加载日志组件。filename 为空时使用配置文件中的默认文件名。
+func LoadLogger(db *mongo.Database, filename string) *logger.ZeroLogger {
 	var cfg LoggerConfig
 	config.UnmarshalKey("logger", &cfg)
 	if lv := config.GetString("logger.level"); lv != "" {
@@ -46,6 +46,9 @@ func LoadLogger(db *mongo.Database) *logger.ZeroLogger {
 	}
 	if s := config.GetString("logger.writers"); s != "" {
 		cfg.Writers = splitComma(s)
+	}
+	if filename != "" {
+		cfg.File.Filename = filename
 	}
 
 	options := []logger.Option{}

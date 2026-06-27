@@ -1,6 +1,6 @@
 // @title           Zero Admin API
 // @version         1.0
-// @host            localhost:8080
+// @host            127.0.0.1:8081
 // @BasePath        /api
 
 package main
@@ -22,7 +22,7 @@ func main() {
 	config.Init()
 
 	conn := app.Must(mongodb.NewConn(app.LoadMongoConfig()))
-	log := app.LoadLogger(conn.DB)
+	log := app.LoadLogger(conn.DB, "admin.log")
 
 	gormLog := gormutil.NewLogger(log)
 	db := app.Must(mysql.NewDB(app.LoadMySQLConfig(), gormLog))

@@ -1245,7 +1245,7 @@ definitions:
     - new_password
     - old_password
     type: object
-host: localhost:8081
+host: 127.0.0.1:8082
 info:
   contact: {}
   title: Zero API

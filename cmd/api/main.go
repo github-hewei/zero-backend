@@ -1,6 +1,6 @@
 // @title           Zero API
 // @version         1.0
-// @host            localhost:8081
+// @host            127.0.0.1:8082
 // @BasePath        /api
 
 package main
@@ -23,7 +23,7 @@ func main() {
 	config.Init()
 
 	conn := app.Must(mongodb.NewConn(app.LoadMongoConfig()))
-	l := app.LoadLogger(conn.DB)
+	l := app.LoadLogger(conn.DB, "api.log")
 
 	gormLog := gormutil.NewLogger(l)
 	db := app.Must(mysql.NewDB(app.LoadMySQLConfig(), gormLog))
