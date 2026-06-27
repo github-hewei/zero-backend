@@ -1,0 +1,186 @@
+/rbac/role/list:
+  post:
+    tags:
+      - RBAC-角色管理
+    summary: 获取角色列表
+    operationId: getRoleList
+    security:
+      - BearerAuth: []
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              role_name:
+                type: string
+                description: 角色名称
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/RbacRole'
+
+/rbac/role/create:
+  post:
+    tags:
+      - RBAC-角色管理
+    summary: 创建角色
+    operationId: createRole
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - role_name
+            properties:
+              role_name:
+                type: string
+                description: 角色名称
+              parent_id:
+                type: integer
+                description: 父级角色ID
+              sort:
+                type: integer
+                description: 排序
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/role/update:
+  post:
+    tags:
+      - RBAC-角色管理
+    summary: 更新角色
+    operationId: updateRole
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - role_name
+            properties:
+              id:
+                type: integer
+                description: 角色ID
+              role_name:
+                type: string
+                description: 角色名称
+              parent_id:
+                type: integer
+                description: 父级角色ID
+              sort:
+                type: integer
+                description: 排序
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/role/delete:
+  post:
+    tags:
+      - RBAC-角色管理
+    summary: 删除角色
+    operationId: deleteRole
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 角色ID
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/role/set-menus:
+  post:
+    tags:
+      - RBAC-角色管理
+    summary: 设置角色菜单
+    description: 为角色分配菜单权限
+    operationId: setRoleMenus
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - role_id
+              - menu_ids
+            properties:
+              role_id:
+                type: integer
+                description: 角色ID
+              menu_ids:
+                type: array
+                items:
+                  type: integer
+                description: 菜单ID列表
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'

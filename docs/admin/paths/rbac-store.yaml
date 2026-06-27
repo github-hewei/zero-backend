@@ -1,0 +1,237 @@
+/rbac/store/list:
+  post:
+    tags:
+      - RBAC-企业管理
+    summary: 获取企业列表
+    operationId: getStoreList
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - page
+              - limit
+            properties:
+              page:
+                type: integer
+                description: 页码
+              limit:
+                type: integer
+                description: 每页数量
+              name:
+                type: string
+                description: 企业名称
+              is_recycle:
+                type: integer
+                description: 是否回收 (0否 1是 -1全部)
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/RbacStore'
+                    total:
+                      type: integer
+
+/rbac/store/create:
+  post:
+    tags:
+      - RBAC-企业管理
+    summary: 创建企业
+    operationId: createStore
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - short_name
+              - contact
+              - contact_phone
+            properties:
+              name:
+                type: string
+                description: 企业名称
+              short_name:
+                type: string
+                description: 企业简称
+              contact:
+                type: string
+                description: 企业联系人
+              contact_phone:
+                type: string
+                description: 联系电话
+              description:
+                type: string
+                description: 简介
+              logo_image_id:
+                type: integer
+                description: LOGO文件ID
+              sort:
+                type: integer
+                description: 排序
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/store/update:
+  post:
+    tags:
+      - RBAC-企业管理
+    summary: 更新企业
+    operationId: updateStore
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - name
+              - short_name
+              - contact
+              - contact_phone
+            properties:
+              id:
+                type: integer
+                description: 企业ID
+              name:
+                type: string
+                description: 企业名称
+              short_name:
+                type: string
+                description: 企业简称
+              contact:
+                type: string
+                description: 企业联系人
+              contact_phone:
+                type: string
+                description: 联系电话
+              description:
+                type: string
+                description: 简介
+              logo_image_id:
+                type: integer
+                description: LOGO文件ID
+              sort:
+                type: integer
+                description: 排序
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/store/delete:
+  post:
+    tags:
+      - RBAC-企业管理
+    summary: 删除企业
+    operationId: deleteStore
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/store/recycle:
+  post:
+    tags:
+      - RBAC-企业管理
+    summary: 回收企业
+    operationId: recycleStore
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/store/restore:
+  post:
+    tags:
+      - RBAC-企业管理
+    summary: 恢复企业
+    operationId: restoreStore
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'

@@ -1,8 +1,3 @@
-// @title           Zero API
-// @version         1.0
-// @host            127.0.0.1:8082
-// @BasePath        /api
-
 package main
 
 import (

@@ -1,0 +1,376 @@
+/setting/list:
+  post:
+    tags:
+      - 设置管理
+    summary: 获取设置列表
+    operationId: getSettingList
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - page
+              - limit
+            properties:
+              page:
+                type: integer
+              limit:
+                type: integer
+              setting_key:
+                type: string
+                description: 设置项标识
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/Setting'
+                    total:
+                      type: integer
+
+/setting/create:
+  post:
+    tags:
+      - 设置管理
+    summary: 创建设置
+    operationId: createSetting
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - setting_key
+              - setting_values
+            properties:
+              setting_key:
+                type: string
+                description: 设置项标识
+              setting_values:
+                type: string
+                description: 设置内容(JSON格式)
+              description:
+                type: string
+                description: 设置项描述
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/setting/update:
+  post:
+    tags:
+      - 设置管理
+    summary: 更新设置
+    operationId: updateSetting
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - setting_key
+              - setting_values
+            properties:
+              id:
+                type: integer
+                description: 设置ID
+              setting_key:
+                type: string
+                description: 设置项标识
+              setting_values:
+                type: string
+                description: 设置内容
+              description:
+                type: string
+                description: 设置项描述
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/setting/delete:
+  post:
+    tags:
+      - 设置管理
+    summary: 删除设置
+    operationId: deleteSetting
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 设置ID
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/setting/form-configs:
+  post:
+    tags:
+      - 设置管理
+    summary: 获取表单配置
+    operationId: getFormConfigs
+    security:
+      - BearerAuth: []
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              only_platform:
+                type: boolean
+                description: 仅获取平台级配置
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: array
+                  items:
+                    type: object
+
+/setting/qiniu-token:
+  post:
+    tags:
+      - 设置管理
+    summary: 获取七牛上传Token
+    operationId: getQiniuToken
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    token:
+                      type: string
+                      description: 上传Token
+                    domain:
+                      type: string
+                      description: 存储域名
+                    upload_url:
+                      type: string
+                      description: 上传地址
+
+/setting/default/list:
+  post:
+    tags:
+      - 默认设置管理
+    summary: 获取默认设置列表
+    operationId: getSettingDefaultList
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - page
+              - limit
+            properties:
+              page:
+                type: integer
+              limit:
+                type: integer
+              setting_key:
+                type: string
+                description: 设置项标识
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/SettingDefault'
+                    total:
+                      type: integer
+
+/setting/default/create:
+  post:
+    tags:
+      - 默认设置管理
+    summary: 创建默认设置
+    operationId: createSettingDefault
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - setting_key
+              - setting_values
+            properties:
+              setting_key:
+                type: string
+                description: 设置项标识
+              setting_values:
+                type: string
+                description: 设置内容
+              description:
+                type: string
+                description: 设置项描述
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/setting/default/update:
+  post:
+    tags:
+      - 默认设置管理
+    summary: 更新默认设置
+    operationId: updateSettingDefault
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - setting_key
+              - setting_values
+            properties:
+              id:
+                type: integer
+                description: 设置ID
+              setting_key:
+                type: string
+                description: 设置项标识
+              setting_values:
+                type: string
+                description: 设置内容
+              description:
+                type: string
+                description: 设置项描述
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/setting/default/delete:
+  post:
+    tags:
+      - 默认设置管理
+    summary: 删除默认设置
+    operationId: deleteSettingDefault
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 设置ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'

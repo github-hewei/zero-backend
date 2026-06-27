@@ -2,7 +2,7 @@ package admin
 
 import (
 	"net/http"
-	_ "zero-backend/docs/admin"
+	
 	"zero-backend/internal/app"
 	"zero-backend/internal/modules/article"
 	"zero-backend/internal/modules/captcha"
@@ -18,8 +18,6 @@ import (
 	"github.com/241x/zero-web/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 )
 
@@ -59,8 +57,6 @@ func NewGin(
 	region.Register(protected, region.Deps{DB: db, Binder: binder})
 
 	health.Register(r)
-
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	r.LoadHTMLGlob("./views/*.html")
 	r.Static("/assets", "./views/assets")

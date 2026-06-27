@@ -1,0 +1,141 @@
+/rbac/api/list:
+  post:
+    tags:
+      - RBAC-接口管理
+    summary: 获取接口列表
+    operationId: getApiList
+    security:
+      - BearerAuth: []
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/RbacApi'
+
+/rbac/api/create:
+  post:
+    tags:
+      - RBAC-接口管理
+    summary: 创建接口
+    operationId: createApi
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - url
+            properties:
+              name:
+                type: string
+                description: 接口名称
+              url:
+                type: string
+                description: 接口URL
+              parent_id:
+                type: integer
+                description: 父级ID
+              sort:
+                type: integer
+                description: 排序
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/api/update:
+  post:
+    tags:
+      - RBAC-接口管理
+    summary: 更新接口
+    operationId: updateApi
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - name
+              - url
+            properties:
+              id:
+                type: integer
+                description: 接口ID
+              name:
+                type: string
+                description: 接口名称
+              url:
+                type: string
+                description: 接口URL
+              parent_id:
+                type: integer
+                description: 父级ID
+              sort:
+                type: integer
+                description: 排序
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/api/delete:
+  post:
+    tags:
+      - RBAC-接口管理
+    summary: 删除接口
+    operationId: deleteApi
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 接口ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'

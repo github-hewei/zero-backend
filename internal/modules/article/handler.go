@@ -20,11 +20,6 @@ func NewHandler(binder *bind.Binder, categorySvc *CategoryService, articleSvc *S
 }
 
 // ListCategory 获取文章分类列表
-// @Summary 获取文章分类列表
-// @Tags 文章分类管理
-// @Param body body CategoryListRequest true "查询参数"
-// @Success 200 {object} response.Response{data=ListResult}
-// @Router /article/category/list [post]
 func (h *Handler) ListCategory(ctx *gin.Context) {
 	req := &CategoryListRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -41,11 +36,6 @@ func (h *Handler) ListCategory(ctx *gin.Context) {
 }
 
 // CreateCategory 创建文章分类
-// @Summary 创建文章分类
-// @Tags 文章分类管理
-// @Param body body CategoryCreateRequest true "创建参数"
-// @Success 200 {object} response.Response
-// @Router /article/category/create [post]
 func (h *Handler) CreateCategory(ctx *gin.Context) {
 	req := &CategoryCreateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -61,11 +51,6 @@ func (h *Handler) CreateCategory(ctx *gin.Context) {
 }
 
 // UpdateCategory 更新文章分类
-// @Summary 更新文章分类
-// @Tags 文章分类管理
-// @Param body body CategoryUpdateRequest true "更新参数"
-// @Success 200 {object} response.Response
-// @Router /article/category/update [post]
 func (h *Handler) UpdateCategory(ctx *gin.Context) {
 	req := &CategoryUpdateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -81,11 +66,6 @@ func (h *Handler) UpdateCategory(ctx *gin.Context) {
 }
 
 // DeleteCategory 删除文章分类
-// @Summary 删除文章分类
-// @Tags 文章分类管理
-// @Param body body CategoryDeleteRequest true "删除参数"
-// @Success 200 {object} response.Response
-// @Router /article/category/delete [post]
 func (h *Handler) DeleteCategory(ctx *gin.Context) {
 	req := &CategoryDeleteRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -101,11 +81,6 @@ func (h *Handler) DeleteCategory(ctx *gin.Context) {
 }
 
 // List 获取文章列表
-// @Summary 获取文章列表
-// @Tags 文章管理
-// @Param body body ListRequest true "查询参数"
-// @Success 200 {object} response.Response{data=ListResult}
-// @Router /article/article/list [post]
 func (h *Handler) List(ctx *gin.Context) {
 	req := &ListRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -122,11 +97,6 @@ func (h *Handler) List(ctx *gin.Context) {
 }
 
 // Create 创建文章
-// @Summary 创建文章
-// @Tags 文章管理
-// @Param body body CreateRequest true "创建参数"
-// @Success 200 {object} response.Response
-// @Router /article/article/create [post]
 func (h *Handler) Create(ctx *gin.Context) {
 	req := &CreateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -142,11 +112,6 @@ func (h *Handler) Create(ctx *gin.Context) {
 }
 
 // Update 更新文章
-// @Summary 更新文章
-// @Tags 文章管理
-// @Param body body UpdateRequest true "更新参数"
-// @Success 200 {object} response.Response
-// @Router /article/article/update [post]
 func (h *Handler) Update(ctx *gin.Context) {
 	req := &UpdateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -162,11 +127,6 @@ func (h *Handler) Update(ctx *gin.Context) {
 }
 
 // Delete 删除文章
-// @Summary 删除文章
-// @Tags 文章管理
-// @Param body body DeleteRequest true "删除参数"
-// @Success 200 {object} response.Response
-// @Router /article/article/delete [post]
 func (h *Handler) Delete(ctx *gin.Context) {
 	req := &DeleteRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {

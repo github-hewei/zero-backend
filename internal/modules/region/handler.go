@@ -18,10 +18,6 @@ func newHandler(binder *bind.Binder, svc *Service) *Handler {
 }
 
 // Tree 获取区划树
-// @Summary 获取区划树
-// @Tags 区划管理
-// @Success 200 {object} response.Response
-// @Router /region/tree [post]
 func (h *Handler) Tree(c *gin.Context) {
 	result, err := h.svc.Tree(c.Request.Context())
 	if err != nil {

@@ -59,11 +59,6 @@ func storeID(ctx *gin.Context) uint32 {
 }
 
 // login 系统登录
-// @Summary 系统登录
-// @Tags 认证
-// @Param body body AuthLoginRequest true "登录参数"
-// @Success 200 {object} response.Response{data=AdminLoginResponse}
-// @Router /login [post]
 func (h *handler) login(ctx *gin.Context) {
 	req := &AuthLoginRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -80,19 +75,11 @@ func (h *handler) login(ctx *gin.Context) {
 }
 
 // logout 系统登出
-// @Summary 系统登出
-// @Tags 认证
-// @Success 200 {object} response.Response
-// @Router /logout [post]
 func (h *handler) logout(ctx *gin.Context) {
 	response.Success(ctx, "操作成功", nil)
 }
 
 // refreshToken 刷新令牌
-// @Summary 刷新令牌
-// @Tags 认证
-// @Success 200 {object} response.Response{data=AdminLoginResponse}
-// @Router /refresh-token [post]
 func (h *handler) refreshToken(ctx *gin.Context) {
 	cookie, err := ctx.Request.Cookie("token")
 	if err != nil {
@@ -108,11 +95,6 @@ func (h *handler) refreshToken(ctx *gin.Context) {
 }
 
 // changePassword 修改密码
-// @Summary 修改密码
-// @Tags 认证
-// @Param body body ChangePasswordRequest true "修改密码参数"
-// @Success 200 {object} response.Response
-// @Router /change-password [post]
 func (h *handler) changePassword(ctx *gin.Context) {
 	req := &ChangePasswordRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -127,11 +109,6 @@ func (h *handler) changePassword(ctx *gin.Context) {
 }
 
 // permissions 获取用户权限菜单
-// @Summary 获取用户权限菜单
-// @Tags 认证
-// @Param body body AuthGetPermissionsRequest true "查询参数"
-// @Success 200 {object} response.Response{data=[]RbacMenu}
-// @Router /permissions [post]
 func (h *handler) permissions(ctx *gin.Context) {
 	req := &AuthGetPermissionsRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -147,10 +124,6 @@ func (h *handler) permissions(ctx *gin.Context) {
 }
 
 // menuList 获取菜单列表
-// @Summary 获取菜单列表
-// @Tags RBAC菜单管理
-// @Success 200 {object} response.Response{data=ListResult}
-// @Router /rbac/menu/list [post]
 func (h *handler) menuList(ctx *gin.Context) {
 	result, err := h.menuServ.FindTreeList(ctx.Request.Context())
 	if err != nil {
@@ -161,11 +134,6 @@ func (h *handler) menuList(ctx *gin.Context) {
 }
 
 // menuCreate 创建菜单
-// @Summary 创建菜单
-// @Tags RBAC菜单管理
-// @Param body body RbacMenuCreateRequest true "创建参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/menu/create [post]
 func (h *handler) menuCreate(ctx *gin.Context) {
 	req := &RbacMenuCreateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -180,11 +148,6 @@ func (h *handler) menuCreate(ctx *gin.Context) {
 }
 
 // menuUpdate 更新菜单
-// @Summary 更新菜单
-// @Tags RBAC菜单管理
-// @Param body body RbacMenuUpdateRequest true "更新参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/menu/update [post]
 func (h *handler) menuUpdate(ctx *gin.Context) {
 	req := &RbacMenuUpdateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -199,11 +162,6 @@ func (h *handler) menuUpdate(ctx *gin.Context) {
 }
 
 // menuDelete 删除菜单
-// @Summary 删除菜单
-// @Tags RBAC菜单管理
-// @Param body body RbacMenuDeleteRequest true "删除参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/menu/delete [post]
 func (h *handler) menuDelete(ctx *gin.Context) {
 	req := &RbacMenuDeleteRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -218,11 +176,6 @@ func (h *handler) menuDelete(ctx *gin.Context) {
 }
 
 // menuSync 同步菜单
-// @Summary 同步菜单
-// @Tags RBAC菜单管理
-// @Param body body []RbacMenuSyncRequest true "同步参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/menu/sync [post]
 func (h *handler) menuSync(ctx *gin.Context) {
 	var req []RbacMenuSyncRequest
 	if err := h.binder.ShouldBindJSONArray(ctx, &req); err != nil {
@@ -237,11 +190,6 @@ func (h *handler) menuSync(ctx *gin.Context) {
 }
 
 // menuApiList 获取菜单关联的接口列表
-// @Summary 获取菜单关联的接口列表
-// @Tags RBAC菜单管理
-// @Param body body RbacMenuApiListRequest true "查询参数"
-// @Success 200 {object} response.Response{data=ListResult}
-// @Router /rbac/menu/api/list [post]
 func (h *handler) menuApiList(ctx *gin.Context) {
 	req := &RbacMenuApiListRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -257,11 +205,6 @@ func (h *handler) menuApiList(ctx *gin.Context) {
 }
 
 // menuApiSave 保存菜单关联的接口列表
-// @Summary 保存菜单关联的接口列表
-// @Tags RBAC菜单管理
-// @Param body body RbacMenuApiSaveRequest true "保存参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/menu/api/save [post]
 func (h *handler) menuApiSave(ctx *gin.Context) {
 	req := &RbacMenuApiSaveRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -276,10 +219,6 @@ func (h *handler) menuApiSave(ctx *gin.Context) {
 }
 
 // apiList 获取接口列表
-// @Summary 获取接口列表
-// @Tags RBAC接口管理
-// @Success 200 {object} response.Response{data=ListResult}
-// @Router /rbac/api/list [post]
 func (h *handler) apiList(ctx *gin.Context) {
 	result, err := h.apiServ.FindTreeList(ctx.Request.Context())
 	if err != nil {
@@ -290,11 +229,6 @@ func (h *handler) apiList(ctx *gin.Context) {
 }
 
 // apiCreate 创建接口
-// @Summary 创建接口
-// @Tags RBAC接口管理
-// @Param body body RbacApiCreateRequest true "创建参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/api/create [post]
 func (h *handler) apiCreate(ctx *gin.Context) {
 	req := &RbacApiCreateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -309,11 +243,6 @@ func (h *handler) apiCreate(ctx *gin.Context) {
 }
 
 // apiUpdate 更新接口
-// @Summary 更新接口
-// @Tags RBAC接口管理
-// @Param body body RbacApiUpdateRequest true "更新参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/api/update [post]
 func (h *handler) apiUpdate(ctx *gin.Context) {
 	req := &RbacApiUpdateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -328,11 +257,6 @@ func (h *handler) apiUpdate(ctx *gin.Context) {
 }
 
 // apiDelete 删除接口
-// @Summary 删除接口
-// @Tags RBAC接口管理
-// @Param body body RbacApiDeleteRequest true "删除参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/api/delete [post]
 func (h *handler) apiDelete(ctx *gin.Context) {
 	req := &RbacApiDeleteRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -347,11 +271,6 @@ func (h *handler) apiDelete(ctx *gin.Context) {
 }
 
 // storeList 获取企业列表
-// @Summary 获取企业列表
-// @Tags RBAC企业管理
-// @Param body body RbacStoreListRequest true "查询参数"
-// @Success 200 {object} response.Response{data=ListResult}
-// @Router /rbac/store/list [post]
 func (h *handler) storeList(ctx *gin.Context) {
 	req := &RbacStoreListRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -367,11 +286,6 @@ func (h *handler) storeList(ctx *gin.Context) {
 }
 
 // storeCreate 创建企业
-// @Summary 创建企业
-// @Tags RBAC企业管理
-// @Param body body RbacStoreCreateRequest true "创建参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/store/create [post]
 func (h *handler) storeCreate(ctx *gin.Context) {
 	req := &RbacStoreCreateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -386,11 +300,6 @@ func (h *handler) storeCreate(ctx *gin.Context) {
 }
 
 // storeUpdate 更新企业
-// @Summary 更新企业
-// @Tags RBAC企业管理
-// @Param body body RbacStoreUpdateRequest true "更新参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/store/update [post]
 func (h *handler) storeUpdate(ctx *gin.Context) {
 	req := &RbacStoreUpdateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -405,11 +314,6 @@ func (h *handler) storeUpdate(ctx *gin.Context) {
 }
 
 // storeDelete 删除企业
-// @Summary 删除企业
-// @Tags RBAC企业管理
-// @Param body body RbacStoreDeleteRequest true "删除参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/store/delete [post]
 func (h *handler) storeDelete(ctx *gin.Context) {
 	req := &RbacStoreDeleteRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -424,11 +328,6 @@ func (h *handler) storeDelete(ctx *gin.Context) {
 }
 
 // storeRecycle 回收企业
-// @Summary 回收企业
-// @Tags RBAC企业管理
-// @Param body body RbacStoreDeleteRequest true "回收参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/store/recycle [post]
 func (h *handler) storeRecycle(ctx *gin.Context) {
 	req := &RbacStoreDeleteRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -443,11 +342,6 @@ func (h *handler) storeRecycle(ctx *gin.Context) {
 }
 
 // storeRestore 恢复企业
-// @Summary 恢复企业
-// @Tags RBAC企业管理
-// @Param body body RbacStoreDeleteRequest true "恢复参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/store/restore [post]
 func (h *handler) storeRestore(ctx *gin.Context) {
 	req := &RbacStoreDeleteRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -462,11 +356,6 @@ func (h *handler) storeRestore(ctx *gin.Context) {
 }
 
 // roleList 获取角色列表
-// @Summary 获取角色列表
-// @Tags RBAC角色管理
-// @Param body body RbacRoleListRequest true "查询参数"
-// @Success 200 {object} response.Response{data=ListResult}
-// @Router /rbac/role/list [post]
 func (h *handler) roleList(ctx *gin.Context) {
 	req := &RbacRoleListRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -485,11 +374,6 @@ func (h *handler) roleList(ctx *gin.Context) {
 }
 
 // roleCreate 创建角色
-// @Summary 创建角色
-// @Tags RBAC角色管理
-// @Param body body RbacRoleCreateRequest true "创建参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/role/create [post]
 func (h *handler) roleCreate(ctx *gin.Context) {
 	req := &RbacRoleCreateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -507,11 +391,6 @@ func (h *handler) roleCreate(ctx *gin.Context) {
 }
 
 // roleUpdate 更新角色
-// @Summary 更新角色
-// @Tags RBAC角色管理
-// @Param body body RbacRoleUpdateRequest true "更新参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/role/update [post]
 func (h *handler) roleUpdate(ctx *gin.Context) {
 	req := &RbacRoleUpdateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -529,11 +408,6 @@ func (h *handler) roleUpdate(ctx *gin.Context) {
 }
 
 // roleDelete 删除角色
-// @Summary 删除角色
-// @Tags RBAC角色管理
-// @Param body body RbacRoleDeleteRequest true "删除参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/role/delete [post]
 func (h *handler) roleDelete(ctx *gin.Context) {
 	req := &RbacRoleDeleteRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -551,11 +425,6 @@ func (h *handler) roleDelete(ctx *gin.Context) {
 }
 
 // roleSetMenus 设置角色菜单
-// @Summary 设置角色菜单
-// @Tags RBAC角色管理
-// @Param body body RbacRoleMenuSetRequest true "设置参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/role/set-menus [post]
 func (h *handler) roleSetMenus(ctx *gin.Context) {
 	req := &RbacRoleMenuSetRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -573,11 +442,6 @@ func (h *handler) roleSetMenus(ctx *gin.Context) {
 }
 
 // userList 获取后台用户列表
-// @Summary 获取后台用户列表
-// @Tags RBAC用户管理
-// @Param body body RbacUserListRequest true "查询参数"
-// @Success 200 {object} response.Response{data=ListResult}
-// @Router /rbac/user/list [post]
 func (h *handler) userList(ctx *gin.Context) {
 	req := &RbacUserListRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -596,11 +460,6 @@ func (h *handler) userList(ctx *gin.Context) {
 }
 
 // userCreate 创建后台用户
-// @Summary 创建后台用户
-// @Tags RBAC用户管理
-// @Param body body RbacUserCreateRequest true "创建参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/user/create [post]
 func (h *handler) userCreate(ctx *gin.Context) {
 	req := &RbacUserCreateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -618,11 +477,6 @@ func (h *handler) userCreate(ctx *gin.Context) {
 }
 
 // userUpdate 更新后台用户
-// @Summary 更新后台用户
-// @Tags RBAC用户管理
-// @Param body body RbacUserUpdateRequest true "更新参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/user/update [post]
 func (h *handler) userUpdate(ctx *gin.Context) {
 	req := &RbacUserUpdateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -640,11 +494,6 @@ func (h *handler) userUpdate(ctx *gin.Context) {
 }
 
 // userDelete 删除后台用户
-// @Summary 删除后台用户
-// @Tags RBAC用户管理
-// @Param body body RbacUserDeleteRequest true "删除参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/user/delete [post]
 func (h *handler) userDelete(ctx *gin.Context) {
 	req := &RbacUserDeleteRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -662,11 +511,6 @@ func (h *handler) userDelete(ctx *gin.Context) {
 }
 
 // userSetRoles 设置用户角色
-// @Summary 设置用户角色
-// @Tags RBAC用户管理
-// @Param body body RbacUserRoleSetRequest true "设置参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/user/set-roles [post]
 func (h *handler) userSetRoles(ctx *gin.Context) {
 	req := &RbacUserRoleSetRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -684,11 +528,6 @@ func (h *handler) userSetRoles(ctx *gin.Context) {
 }
 
 // userResetPassword 重置用户密码
-// @Summary 重置用户密码
-// @Tags RBAC用户管理
-// @Param body body RbacUserResetPasswordRequest true "重置参数"
-// @Success 200 {object} response.Response
-// @Router /rbac/user/reset-password [post]
 func (h *handler) userResetPassword(ctx *gin.Context) {
 	req := &RbacUserResetPasswordRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {

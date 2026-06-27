@@ -18,21 +18,7 @@ if not "%~1"=="" (
     )
 )
 
-rem 需要生成 Swagger 文档的模块
-set "swag_modules=admin api"
-
 for %%a in (%apps%) do (
-    for %%s in (%swag_modules%) do (
-        if "%%a"=="%%s" (
-            echo [%%a] Running swag init...
-            swag init -g .\cmd\%%a\main.go -o .\docs\%%a --pd
-            if !errorlevel! neq 0 (
-                echo [%%a] swag init failed! Aborting.
-                exit /b 1
-            )
-        )
-    )
-
     echo [%%a] Running wire...
     wire .\cmd\%%a
     if !errorlevel! neq 0 (
