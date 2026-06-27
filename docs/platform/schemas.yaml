@@ -1,0 +1,165 @@
+schemas:
+  CommonResponse:
+    type: object
+    properties:
+      errcode:
+        type: integer
+        description: 错误码，0表示成功
+        example: 0
+      message:
+        type: string
+        description: 消息
+        example: success
+      data:
+        type: object
+        description: 响应数据
+
+  PlatformLoginRequest:
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: string
+        description: 用户名
+        example: admin
+      password:
+        type: string
+        description: 密码
+        example: "123456"
+
+  PlatformLoginResponse:
+    type: object
+    properties:
+      errcode:
+        type: integer
+        example: 0
+      message:
+        type: string
+        example: success
+      data:
+        type: object
+        properties:
+          token:
+            type: string
+            description: JWT令牌
+          ttl:
+            type: integer
+            description: Token有效期（秒）
+          user:
+            $ref: '#/schemas/PlatformUser'
+
+  PlatformUser:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 用户ID
+      username:
+        type: string
+        description: 用户名
+      real_name:
+        type: string
+        description: 姓名
+      avatar_id:
+        type: integer
+        description: 头像文件ID
+      role:
+        type: integer
+        description: 角色 (0超管 1运营 2审计)
+      status:
+        type: integer
+        description: 状态 (1启用 0禁用)
+      last_login_time:
+        type: integer
+        description: 最后登录时间
+      last_login_ip:
+        type: string
+        description: 最后登录IP
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+
+  RbacStore:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 企业ID
+      name:
+        type: string
+        description: 企业名称
+      short_name:
+        type: string
+        description: 企业简称
+      contact:
+        type: string
+        description: 企业联系人
+      contact_phone:
+        type: string
+        description: 联系电话
+      description:
+        type: string
+        description: 简介
+      logo_image_id:
+        type: integer
+        description: LOGO文件ID
+      sort:
+        type: integer
+        description: 排序
+      is_recycle:
+        type: integer
+        description: 是否回收 (0否 1是)
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+
+  RbacUser:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 用户ID
+      username:
+        type: string
+        description: 用户名
+      real_name:
+        type: string
+        description: 姓名
+      is_super:
+        type: integer
+        description: 是否为超级管理员（1是 0否）
+      sort:
+        type: integer
+        description: 排序
+      store_id:
+        type: integer
+        description: 企业ID
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+
+  ChangePasswordRequest:
+    type: object
+    required:
+      - old_password
+      - new_password
+    properties:
+      old_password:
+        type: string
+        description: 旧密码
+      new_password:
+        type: string
+        description: 新密码
+        minLength: 6
+        maxLength: 20

@@ -1,0 +1,75 @@
+/login:
+  post:
+    tags:
+      - 认证管理
+    summary: 平台登录
+    description: 平台管理员使用用户名密码登录系统，获取JWT令牌。
+    operationId: platformLogin
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas.yaml#/schemas/PlatformLoginRequest'
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/PlatformLoginResponse'
+
+/refresh-token:
+  post:
+    tags:
+      - 认证管理
+    summary: 刷新Token
+    description: 从Cookie中读取refresh_token，刷新JWT令牌。
+    operationId: platformRefreshToken
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/PlatformLoginResponse'
+
+/logout:
+  post:
+    tags:
+      - 认证管理
+    summary: 退出登录
+    description: 清除登录状态。
+    operationId: platformLogout
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/change-password:
+  post:
+    tags:
+      - 认证管理
+    summary: 修改密码
+    description: 修改当前登录平台管理员的密码。
+    operationId: platformChangePassword
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas.yaml#/schemas/ChangePasswordRequest'
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'

@@ -1,0 +1,228 @@
+/rbac/user/list:
+  post:
+    tags:
+      - 租户用户管理
+    summary: 获取租户用户列表
+    description: 获取指定企业下的管理员列表。超管和运营可操作。
+    operationId: platformGetRbacUserList
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - page
+              - limit
+            properties:
+              store_id:
+                type: integer
+                description: 企业ID
+                example: 1
+              username:
+                type: string
+                description: 用户名（模糊搜索）
+              real_name:
+                type: string
+                description: 姓名（模糊搜索）
+              page:
+                type: integer
+                description: 页码
+                example: 1
+              limit:
+                type: integer
+                description: 每页数量
+                example: 20
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/RbacUser'
+                    total:
+                      type: integer
+
+/rbac/user/create:
+  post:
+    tags:
+      - 租户用户管理
+    summary: 创建租户用户
+    description: 为指定企业创建管理员账号。超管和运营可操作。
+    operationId: platformCreateRbacUser
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - username
+              - password
+              - real_name
+            properties:
+              username:
+                type: string
+                description: 用户名
+                minLength: 5
+                maxLength: 20
+              password:
+                type: string
+                description: 密码
+                minLength: 6
+                maxLength: 20
+              real_name:
+                type: string
+                description: 姓名
+                minLength: 2
+                maxLength: 20
+              is_super:
+                type: integer
+                description: 是否超级管理员 (0否 1是)
+              store_id:
+                type: integer
+                description: 企业ID
+              sort:
+                type: integer
+                description: 排序
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/user/update:
+  post:
+    tags:
+      - 租户用户管理
+    summary: 更新租户用户
+    description: 更新指定企业下的管理员信息。超管和运营可操作。
+    operationId: platformUpdateRbacUser
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - username
+              - real_name
+              - store_id
+            properties:
+              id:
+                type: integer
+                description: 用户ID
+              username:
+                type: string
+                description: 用户名
+              real_name:
+                type: string
+                description: 姓名
+              is_super:
+                type: integer
+                description: 是否超级管理员
+              store_id:
+                type: integer
+                description: 企业ID
+              sort:
+                type: integer
+                description: 排序
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/user/delete:
+  post:
+    tags:
+      - 租户用户管理
+    summary: 删除租户用户
+    description: 软删除指定企业下的管理员。超管和运营可操作。
+    operationId: platformDeleteRbacUser
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - store_id
+            properties:
+              id:
+                type: integer
+                description: 用户ID
+              store_id:
+                type: integer
+                description: 企业ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/rbac/user/reset-password:
+  post:
+    tags:
+      - 租户用户管理
+    summary: 重置租户用户密码
+    description: 直接重置指定企业下管理员的密码，无需旧密码。超管和运营可操作。
+    operationId: platformResetRbacUserPassword
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - password
+            properties:
+              id:
+                type: integer
+                description: 用户ID
+              store_id:
+                type: integer
+                description: 企业ID
+              password:
+                type: string
+                description: 新密码
+                minLength: 6
+                maxLength: 20
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'

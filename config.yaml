@@ -1,3 +1,18 @@
+# 平台端配置
+platform:
+  # 服务配置
+  server:
+    host: "0.0.0.0"
+    port: 8080
+  # 认证配置
+  auth:
+    # 刷新令牌有效期（秒），默认24小时
+    refresh_token_ttl: 86400
+    # 访问令牌有效期（秒），默认1小时
+    access_token_ttl: 3600
+    # JWT签名密钥
+    hmac_secret: "platform-secret-key-change-in-production"
+
 # 管理后台配置
 admin:
   # 服务配置

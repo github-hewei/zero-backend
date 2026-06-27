@@ -19,12 +19,12 @@ if not "%~1"=="" (
 )
 
 for %%a in (%apps%) do (
-    echo [%%a] Running wire...
-    wire .\cmd\%%a
-    if !errorlevel! neq 0 (
-        echo [%%a] wire failed! Aborting.
-        exit /b 1
-    )
+    @REM echo [%%a] Running wire...
+    @REM wire .\cmd\%%a
+    @REM if !errorlevel! neq 0 (
+    @REM     echo [%%a] wire failed! Aborting.
+    @REM     exit /b 1
+    @REM )
 
     echo [%%a] Running go build...
     go build -o %%a.exe .\cmd\%%a

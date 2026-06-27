@@ -1,0 +1,218 @@
+/platform/user/list:
+  post:
+    tags:
+      - 平台用户管理
+    summary: 获取平台用户列表
+    description: 获取所有平台管理员列表。仅超管可操作。
+    operationId: getPlatformUserList
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - page
+              - limit
+            properties:
+              username:
+                type: string
+                description: 用户名（模糊搜索）
+              real_name:
+                type: string
+                description: 姓名（模糊搜索）
+              page:
+                type: integer
+                description: 页码
+                example: 1
+              limit:
+                type: integer
+                description: 每页数量
+                example: 20
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '../schemas.yaml#/schemas/PlatformUser'
+                    total:
+                      type: integer
+
+/platform/user/create:
+  post:
+    tags:
+      - 平台用户管理
+    summary: 创建平台用户
+    description: 创建一个新的平台管理员账号。仅超管可操作。
+    operationId: createPlatformUser
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - username
+              - password
+              - real_name
+            properties:
+              username:
+                type: string
+                description: 用户名
+                minLength: 5
+                maxLength: 64
+              password:
+                type: string
+                description: 密码
+                minLength: 6
+                maxLength: 20
+              real_name:
+                type: string
+                description: 姓名
+                minLength: 2
+                maxLength: 64
+              role:
+                type: integer
+                description: 角色 (0超管 1运营 2审计)
+                default: 0
+              avatar_id:
+                type: integer
+                description: 头像文件ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/platform/user/update:
+  post:
+    tags:
+      - 平台用户管理
+    summary: 更新平台用户
+    description: 更新平台管理员信息，可选修改密码。仅超管可操作。
+    operationId: updatePlatformUser
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - username
+              - real_name
+            properties:
+              id:
+                type: integer
+                description: 用户ID
+              username:
+                type: string
+                description: 用户名
+              real_name:
+                type: string
+                description: 姓名
+              password:
+                type: string
+                description: 新密码（不传则不修改）
+                maxLength: 20
+              role:
+                type: integer
+                description: 角色 (0超管 1运营 2审计)
+              status:
+                type: integer
+                description: 状态 (1启用 0禁用)
+              avatar_id:
+                type: integer
+                description: 头像文件ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/platform/user/delete:
+  post:
+    tags:
+      - 平台用户管理
+    summary: 删除平台用户
+    description: 软删除平台管理员。仅超管可操作。
+    operationId: deletePlatformUser
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: integer
+                description: 用户ID
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'
+
+/platform/user/reset-password:
+  post:
+    tags:
+      - 平台用户管理
+    summary: 重置平台用户密码
+    description: 直接重置指定平台管理员的密码，无需旧密码。仅超管可操作。
+    operationId: resetPlatformUserPassword
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - password
+            properties:
+              id:
+                type: integer
+                description: 用户ID
+              password:
+                type: string
+                description: 新密码
+                minLength: 6
+                maxLength: 20
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas.yaml#/schemas/CommonResponse'

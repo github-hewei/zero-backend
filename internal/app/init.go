@@ -146,6 +146,14 @@ func LoadApiServerConfig() server.Config {
 	}
 }
 
+// LoadPlatformServerConfig 加载平台端服务器配置
+func LoadPlatformServerConfig() server.Config {
+	return server.Config{
+		Host: config.GetString("platform.server.host"),
+		Port: config.GetInt("platform.server.port"),
+	}
+}
+
 // LoadAdminCorsConfig 加载管理后台 CORS 配置
 func LoadAdminCorsConfig() middleware.CorsConfig {
 	var c middleware.CorsConfig

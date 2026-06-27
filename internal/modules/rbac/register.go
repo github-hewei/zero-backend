@@ -17,6 +17,14 @@ type Deps struct {
 	Captcha CaptchaVerifier
 }
 
+// PlatformDeps 平台端模块依赖（不含 Captcha，不挂 RBAC 中间件）
+type PlatformDeps struct {
+	DB     *gorm.DB
+	Binder *bind.Binder
+	Config Config
+	RDB    *redis.Client
+}
+
 func buildAll(deps Deps) (*handler, *AuthMiddleware) {
 	userRepo := NewRbacUserRepository(deps.DB)
 	userRoleRepo := NewRbacUserRoleRepository(deps.DB)
@@ -93,4 +101,32 @@ func Register(public, protected *gin.RouterGroup, deps Deps) {
 	protected.POST("/rbac/user/delete", h.userDelete)
 	protected.POST("/rbac/user/set-roles", h.userSetRoles)
 	protected.POST("/rbac/user/reset-password", h.userResetPassword)
+}
+
+// RegisterPlatform 注册平台端路由。仅暴露租户管理和租户用户管理，不挂载 RBAC 权限中间件，
+// 由平台端的 RequireRole 中间件控制访问权限。
+func RegisterPlatform(rg *gin.RouterGroup, deps PlatformDeps) {
+	fullDeps := Deps{
+		DB:     deps.DB,
+		Binder: deps.Binder,
+		Config: deps.Config,
+		RDB:    deps.RDB,
+	}
+	h, authMid := buildAll(fullDeps)
+
+	rg.Use(middleware.JWTGuard(deps.Config.HmacSecret))
+	rg.Use(authMid.LoadUser())
+
+	rg.POST("/rbac/store/list", h.storeList)
+	rg.POST("/rbac/store/create", h.storeCreate)
+	rg.POST("/rbac/store/update", h.storeUpdate)
+	rg.POST("/rbac/store/delete", h.storeDelete)
+	rg.POST("/rbac/store/recycle", h.storeRecycle)
+	rg.POST("/rbac/store/restore", h.storeRestore)
+
+	rg.POST("/rbac/user/list", h.userList)
+	rg.POST("/rbac/user/create", h.userCreate)
+	rg.POST("/rbac/user/update", h.userUpdate)
+	rg.POST("/rbac/user/delete", h.userDelete)
+	rg.POST("/rbac/user/reset-password", h.userResetPassword)
 }

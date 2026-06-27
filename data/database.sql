@@ -282,3 +282,22 @@ CREATE TABLE `gaz_article` (
   KEY `category_id` (`category_id`),
   KEY `store_id` (`store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文章记录表';
+
+-- [CHECK POINT] --
+
+CREATE TABLE `gaz_platform_user` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `username` varchar(64) NOT NULL DEFAULT '' COMMENT '用户名',
+  `password` varchar(255) NOT NULL DEFAULT '' COMMENT '登录密码',
+  `real_name` varchar(64) NOT NULL DEFAULT '' COMMENT '姓名',
+  `avatar_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '头像文件ID',
+  `role` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '角色(0超管 1运营 2审计)',
+  `status` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '状态(1启用 0禁用)',
+  `last_login_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '最后登录时间',
+  `last_login_ip` varchar(45) NOT NULL DEFAULT '' COMMENT '最后登录IP',
+  `created_at` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `deleted_at` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '删除时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COMMENT='平台管理员表';

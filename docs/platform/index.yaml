@@ -1,0 +1,76 @@
+openapi: 3.1.0
+info:
+  title: Zero Backend Platform API
+  description: 平台端接口文档（多租户管理）
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080/api'
+    description: API Base Path
+
+paths:
+  /login:
+    $ref: './paths/auth.yaml#/~1login'
+  /refresh-token:
+    $ref: './paths/auth.yaml#/~1refresh-token'
+  /logout:
+    $ref: './paths/auth.yaml#/~1logout'
+  /change-password:
+    $ref: './paths/auth.yaml#/~1change-password'
+
+  /platform/user/list:
+    $ref: './paths/platform-user.yaml#/~1platform~1user~1list'
+  /platform/user/create:
+    $ref: './paths/platform-user.yaml#/~1platform~1user~1create'
+  /platform/user/update:
+    $ref: './paths/platform-user.yaml#/~1platform~1user~1update'
+  /platform/user/delete:
+    $ref: './paths/platform-user.yaml#/~1platform~1user~1delete'
+  /platform/user/reset-password:
+    $ref: './paths/platform-user.yaml#/~1platform~1user~1reset-password'
+
+  /rbac/store/list:
+    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1list'
+  /rbac/store/create:
+    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1create'
+  /rbac/store/update:
+    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1update'
+  /rbac/store/delete:
+    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1delete'
+  /rbac/store/recycle:
+    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1recycle'
+  /rbac/store/restore:
+    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1restore'
+
+  /rbac/user/list:
+    $ref: './paths/rbac-user.yaml#/~1rbac~1user~1list'
+  /rbac/user/create:
+    $ref: './paths/rbac-user.yaml#/~1rbac~1user~1create'
+  /rbac/user/update:
+    $ref: './paths/rbac-user.yaml#/~1rbac~1user~1update'
+  /rbac/user/delete:
+    $ref: './paths/rbac-user.yaml#/~1rbac~1user~1delete'
+  /rbac/user/reset-password:
+    $ref: './paths/rbac-user.yaml#/~1rbac~1user~1reset-password'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT令牌认证
+  schemas:
+    CommonResponse:
+      $ref: './schemas.yaml#/schemas/CommonResponse'
+    PlatformLoginRequest:
+      $ref: './schemas.yaml#/schemas/PlatformLoginRequest'
+    PlatformLoginResponse:
+      $ref: './schemas.yaml#/schemas/PlatformLoginResponse'
+    PlatformUser:
+      $ref: './schemas.yaml#/schemas/PlatformUser'
+    RbacStore:
+      $ref: './schemas.yaml#/schemas/RbacStore'
+    RbacUser:
+      $ref: './schemas.yaml#/schemas/RbacUser'
+    ChangePasswordRequest:
+      $ref: './schemas.yaml#/schemas/ChangePasswordRequest'
