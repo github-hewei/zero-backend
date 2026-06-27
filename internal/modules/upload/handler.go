@@ -23,8 +23,11 @@ func newHandler(binder *bind.Binder, groupSvc *GroupService, fileSvc *FileServic
 	return &Handler{binder: binder, groupSvc: groupSvc, fileSvc: fileSvc}
 }
 
-// --- group (admin only) ---
-
+// ListGroup 获取上传分组列表
+// @Summary 获取上传分组列表
+// @Tags 上传分组管理
+// @Success 200 {object} response.Response{data=ListResult}
+// @Router /upload/group/list [post]
 func (h *Handler) ListGroup(ctx *gin.Context) {
 	storeId := ctxkeys.StoreID(ctx.Request.Context())
 	result, err := h.groupSvc.FindTreeList(ctx.Request.Context(), storeId)
@@ -35,6 +38,12 @@ func (h *Handler) ListGroup(ctx *gin.Context) {
 	response.Success(ctx, "请求成功", result)
 }
 
+// CreateGroup 创建上传分组
+// @Summary 创建上传分组
+// @Tags 上传分组管理
+// @Param body body GroupCreateRequest true "创建参数"
+// @Success 200 {object} response.Response
+// @Router /upload/group/create [post]
 func (h *Handler) CreateGroup(ctx *gin.Context) {
 	req := &GroupCreateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -49,6 +58,12 @@ func (h *Handler) CreateGroup(ctx *gin.Context) {
 	response.Success(ctx, "创建成功", nil)
 }
 
+// UpdateGroup 更新上传分组
+// @Summary 更新上传分组
+// @Tags 上传分组管理
+// @Param body body GroupUpdateRequest true "更新参数"
+// @Success 200 {object} response.Response
+// @Router /upload/group/update [post]
 func (h *Handler) UpdateGroup(ctx *gin.Context) {
 	req := &GroupUpdateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -63,6 +78,12 @@ func (h *Handler) UpdateGroup(ctx *gin.Context) {
 	response.Success(ctx, "更新成功", nil)
 }
 
+// DeleteGroup 删除上传分组
+// @Summary 删除上传分组
+// @Tags 上传分组管理
+// @Param body body GroupDeleteRequest true "删除参数"
+// @Success 200 {object} response.Response
+// @Router /upload/group/delete [post]
 func (h *Handler) DeleteGroup(ctx *gin.Context) {
 	req := &GroupDeleteRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -77,8 +98,12 @@ func (h *Handler) DeleteGroup(ctx *gin.Context) {
 	response.Success(ctx, "删除成功", nil)
 }
 
-// --- file ---
-
+// ListFile 获取文件列表
+// @Summary 获取文件列表
+// @Tags 文件管理
+// @Param body body FileListRequest true "查询参数"
+// @Success 200 {object} response.Response{data=ListResult}
+// @Router /upload/file/list [post]
 func (h *Handler) ListFile(ctx *gin.Context) {
 	req := &FileListRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
@@ -94,6 +119,15 @@ func (h *Handler) ListFile(ctx *gin.Context) {
 	response.Success(ctx, "请求成功", result)
 }
 
+// UploadFile 上传文件
+// @Summary 上传文件
+// @Tags 文件管理
+// @Accept mpfd
+// @Produce json
+// @Param file formData file true "上传文件"
+// @Param group_id formData int false "分组ID"
+// @Success 200 {object} response.Response
+// @Router /upload/file/upload [post]
 func (h *Handler) UploadFile(ctx *gin.Context) {
 	file, err := ctx.FormFile("file")
 	if err != nil {
@@ -114,6 +148,15 @@ func (h *Handler) UploadFile(ctx *gin.Context) {
 	response.Success(ctx, "上传成功", result)
 }
 
+// UploadFileAdmin 上传文件(管理端)
+// @Summary 上传文件(管理端)
+// @Tags 文件管理
+// @Accept mpfd
+// @Produce json
+// @Param file formData file true "上传文件"
+// @Param group_id formData int false "分组ID"
+// @Success 200 {object} response.Response
+// @Router /upload/file/upload [post]
 func (h *Handler) UploadFileAdmin(ctx *gin.Context) {
 	file, err := ctx.FormFile("file")
 	if err != nil {
@@ -134,6 +177,12 @@ func (h *Handler) UploadFileAdmin(ctx *gin.Context) {
 	response.Success(ctx, "上传成功", result)
 }
 
+// DeleteFile 删除文件
+// @Summary 删除文件
+// @Tags 文件管理
+// @Param body body FileDeleteRequest true "删除参数"
+// @Success 200 {object} response.Response
+// @Router /upload/file/delete [post]
 func (h *Handler) DeleteFile(ctx *gin.Context) {
 	req := &FileDeleteRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {

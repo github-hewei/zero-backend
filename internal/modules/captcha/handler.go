@@ -17,6 +17,11 @@ func newHandler(binder *bind.Binder, svc *Service) *Handler {
 	return &Handler{binder: binder, svc: svc}
 }
 
+// Generate 生成验证码
+// @Summary 生成验证码
+// @Tags 验证码
+// @Success 200 {object} response.Response{data=GenerateResponse}
+// @Router /captcha/generate [post]
 func (h *Handler) Generate(c *gin.Context) {
 	result, err := h.svc.Generate(c.Request.Context())
 	if err != nil {

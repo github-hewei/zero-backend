@@ -6,6 +6,10 @@ import (
 )
 
 // Register 注册健康检查路由
+// @Summary 健康检查
+// @Tags 系统
+// @Success 200 {object} response.Response
+// @Router /health [get]
 func Register(r *gin.Engine) {
 	r.GET("/health", func(c *gin.Context) {
 		response.Success(c, "ok", gin.H{"status": "UP"})
