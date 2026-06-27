@@ -16,6 +16,7 @@ type RbacUserFilterField struct {
 	StoreId  uint32
 }
 
+// Apply 应用过滤条件
 func (f *RbacUserFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -38,6 +39,7 @@ type RbacUserUsernameFilterField struct {
 	Username string
 }
 
+// Apply 应用过滤条件
 func (f *RbacUserUsernameFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -56,6 +58,7 @@ type RbacUserRepository struct {
 	*baserepo.BaseRepository[RbacUser]
 }
 
+// NewRbacUserRepository 创建用户数据操作
 func NewRbacUserRepository(db *gorm.DB) *RbacUserRepository {
 	return &RbacUserRepository{BaseRepository: baserepo.NewBaseRepository[RbacUser](db)}
 }
@@ -66,6 +69,7 @@ type RbacUserRoleFilterField struct {
 	UserId  uint32
 }
 
+// Apply 应用过滤条件
 func (f *RbacUserRoleFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -84,6 +88,7 @@ type RbacUserRoleRepository struct {
 	*baserepo.BaseRepository[RbacUserRole]
 }
 
+// NewRbacUserRoleRepository 创建用户关联角色数据操作
 func NewRbacUserRoleRepository(db *gorm.DB) *RbacUserRoleRepository {
 	return &RbacUserRoleRepository{BaseRepository: baserepo.NewBaseRepository[RbacUserRole](db)}
 }
@@ -95,6 +100,7 @@ type RbacMenuFilterField struct {
 	Name string
 }
 
+// Apply 应用过滤条件
 func (f *RbacMenuFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -116,6 +122,7 @@ type RbacMenuRepository struct {
 	*baserepo.BaseRepository[RbacMenu]
 }
 
+// NewRbacMenuRepository 创建菜单数据操作
 func NewRbacMenuRepository(db *gorm.DB) *RbacMenuRepository {
 	return &RbacMenuRepository{BaseRepository: baserepo.NewBaseRepository[RbacMenu](db)}
 }
@@ -127,6 +134,7 @@ type RbacMenuApiFilterField struct {
 	MenuIDs []uint32
 }
 
+// Apply 应用过滤条件
 func (f *RbacMenuApiFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -148,6 +156,7 @@ type RbacMenuApiRepository struct {
 	*baserepo.BaseRepository[RbacMenuApi]
 }
 
+// NewRbacMenuApiRepository 创建菜单关联接口数据操作
 func NewRbacMenuApiRepository(db *gorm.DB) *RbacMenuApiRepository {
 	return &RbacMenuApiRepository{BaseRepository: baserepo.NewBaseRepository[RbacMenuApi](db)}
 }
@@ -159,6 +168,7 @@ type RbacRoleFilterField struct {
 	RoleName string
 }
 
+// Apply 应用过滤条件
 func (f *RbacRoleFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -180,6 +190,7 @@ type RbacRoleRepository struct {
 	*baserepo.BaseRepository[RbacRole]
 }
 
+// NewRbacRoleRepository 创建角色数据操作
 func NewRbacRoleRepository(db *gorm.DB) *RbacRoleRepository {
 	return &RbacRoleRepository{BaseRepository: baserepo.NewBaseRepository[RbacRole](db)}
 }
@@ -200,6 +211,7 @@ type RbacRoleMenuFilterField struct {
 	RoleId  uint32
 }
 
+// Apply 应用过滤条件
 func (f *RbacRoleMenuFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -218,6 +230,7 @@ type RbacRoleMenuRepository struct {
 	*baserepo.BaseRepository[RbacRoleMenu]
 }
 
+// NewRbacRoleMenuRepository 创建角色关联菜单数据操作
 func NewRbacRoleMenuRepository(db *gorm.DB) *RbacRoleMenuRepository {
 	return &RbacRoleMenuRepository{BaseRepository: baserepo.NewBaseRepository[RbacRoleMenu](db)}
 }
@@ -227,6 +240,7 @@ type RbacApiFilterField struct {
 	Name string
 }
 
+// Apply 应用过滤条件
 func (f *RbacApiFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -242,6 +256,7 @@ type RbacApiRepository struct {
 	*baserepo.BaseRepository[RbacApi]
 }
 
+// NewRbacApiRepository 创建接口数据操作
 func NewRbacApiRepository(db *gorm.DB) *RbacApiRepository {
 	return &RbacApiRepository{BaseRepository: baserepo.NewBaseRepository[RbacApi](db)}
 }
@@ -272,6 +287,7 @@ type RbacStoreFilterField struct {
 	IsRecycle int8
 }
 
+// Apply 应用过滤条件
 func (f *RbacStoreFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -290,6 +306,7 @@ type RbacStoreNameFilterField struct {
 	Name string
 }
 
+// Apply 应用过滤条件
 func (f *RbacStoreNameFilterField) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -305,6 +322,7 @@ type RbacStoreRepository struct {
 	*baserepo.BaseRepository[RbacStore]
 }
 
+// NewRbacStoreRepository 创建企业数据操作
 func NewRbacStoreRepository(db *gorm.DB) *RbacStoreRepository {
 	return &RbacStoreRepository{BaseRepository: baserepo.NewBaseRepository[RbacStore](db)}
 }

@@ -13,6 +13,7 @@ type GroupFilter struct {
 	Name    string
 }
 
+// Apply 应用过滤条件
 func (f *GroupFilter) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -34,6 +35,7 @@ type GroupRepository struct {
 	*baserepo.BaseRepository[Group]
 }
 
+// NewGroupRepository 创建文件分组仓库
 func NewGroupRepository(db *gorm.DB) *GroupRepository {
 	return &GroupRepository{BaseRepository: baserepo.NewBaseRepository[Group](db)}
 }
@@ -47,6 +49,7 @@ type FileFilter struct {
 	FileName string
 }
 
+// Apply 应用过滤条件
 func (f *FileFilter) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -74,6 +77,7 @@ type FileRepository struct {
 	*baserepo.BaseRepository[File]
 }
 
+// NewFileRepository 创建文件仓库
 func NewFileRepository(db *gorm.DB) *FileRepository {
 	return &FileRepository{BaseRepository: baserepo.NewBaseRepository[File](db)}
 }

@@ -23,6 +23,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// NewGin 创建一个 gin.Engine 实例
 func NewGin(
 	log logger.Logger,
 	db *gorm.DB,
@@ -38,7 +39,7 @@ func NewGin(
 	protected := public.Group("")
 
 	captchaSvc := app.Must(app.NewCaptchaService(rdb, app.LoadCaptchaConfig()))
-	captcha.RegisterWith(public, binder, captchaSvc)
+	captcha.Register(public, binder, captchaSvc)
 
 	authCfg := app.Must(rbac.LoadConfig())
 	rbac.Register(public, protected, rbac.Deps{

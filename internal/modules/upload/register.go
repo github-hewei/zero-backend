@@ -13,6 +13,7 @@ type Deps struct {
 	Settings SettingProvider
 }
 
+// buildHandler 创建上传模块处理器
 func buildHandler(deps Deps) *Handler {
 	groupRepo := NewGroupRepository(deps.DB)
 	groupSvc := NewGroupService(groupRepo)

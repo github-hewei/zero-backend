@@ -31,10 +31,12 @@ type GroupService struct {
 	repo *GroupRepository
 }
 
+// NewGroupService 创建文件分组服务
 func NewGroupService(repo *GroupRepository) *GroupService {
 	return &GroupService{repo: repo}
 }
 
+// FindTreeList 获取文件分组树列表
 func (s *GroupService) FindTreeList(ctx context.Context, storeId uint32) ([]*Group, error) {
 	filter := &GroupFilter{StoreId: storeId}
 	list, err := s.repo.FindAll(ctx, filter, nil, nil)
@@ -51,6 +53,7 @@ func (s *GroupService) FindTreeList(ctx context.Context, storeId uint32) ([]*Gro
 	return list, nil
 }
 
+// Create 创建文件分组
 func (s *GroupService) Create(ctx context.Context, req *GroupCreateRequest) error {
 	if err := s.checkName(ctx, req.Name, req.StoreId); err != nil {
 		return err
@@ -62,6 +65,7 @@ func (s *GroupService) Create(ctx context.Context, req *GroupCreateRequest) erro
 	return nil
 }
 
+// checkName 检查文件分组名称
 func (s *GroupService) checkName(ctx context.Context, name string, storeId uint32) error {
 	filter := &GroupFilter{Name: name, StoreId: storeId}
 	_, err := s.repo.FindOne(ctx, filter)
@@ -74,6 +78,7 @@ func (s *GroupService) checkName(ctx context.Context, name string, storeId uint3
 	return apperror.New(errcode.Conflict, apperror.WithMsg("分组名称已存在"))
 }
 
+// Update 更新文件分组
 func (s *GroupService) Update(ctx context.Context, req *GroupUpdateRequest) error {
 	filter := &GroupFilter{Id: req.ID, StoreId: req.StoreId}
 	item, err := s.repo.FindOne(ctx, filter)
@@ -95,6 +100,7 @@ func (s *GroupService) Update(ctx context.Context, req *GroupUpdateRequest) erro
 	return nil
 }
 
+// Delete 删除文件分组
 func (s *GroupService) Delete(ctx context.Context, req *GroupDeleteRequest) error {
 	filter := &GroupFilter{Id: req.ID, StoreId: req.StoreId}
 	_, err := s.repo.FindOne(ctx, filter)
@@ -116,10 +122,12 @@ type FileService struct {
 	settSvc SettingProvider
 }
 
+// NewFileService 创建文件服务
 func NewFileService(repo *FileRepository, settSvc SettingProvider) *FileService {
 	return &FileService{repo: repo, settSvc: settSvc}
 }
 
+// FindList 获取文件列表
 func (s *FileService) FindList(ctx context.Context, req *FileListRequest) (*ListResult, error) {
 	result := &ListResult{List: []*File{}, Total: 0}
 	filter := &FileFilter{StoreId: req.StoreId, GroupId: req.GroupId, FileType: req.FileType, FileName: req.FileName}
@@ -141,6 +149,7 @@ func (s *FileService) FindList(ctx context.Context, req *FileListRequest) (*List
 	return result, nil
 }
 
+// getUploadConfig 获取上传配置
 func (s *FileService) getUploadConfig(ctx context.Context) (*UploadConfig, error) {
 	config := &UploadConfig{}
 	if err := s.settSvc.GetSettingValue(ctx, "upload", config); err != nil {
@@ -149,6 +158,7 @@ func (s *FileService) getUploadConfig(ctx context.Context) (*UploadConfig, error
 	return config, nil
 }
 
+// sanitizeFilename 清理文件名
 func (s *FileService) sanitizeFilename(filename string) string {
 	filename = filepath.Base(filename)
 	filename = strings.ReplaceAll(filename, " ", "_")
@@ -158,6 +168,7 @@ func (s *FileService) sanitizeFilename(filename string) string {
 	return filename
 }
 
+// validateFileContent 验证文件内容
 func (s *FileService) validateFileContent(fileHeader []byte, fileExt string, allowedTypes []string) error {
 	detectedType := http.DetectContentType(fileHeader)
 	if detectedType == "application/octet-stream" {
@@ -192,6 +203,7 @@ func (s *FileService) validateFileContent(fileHeader []byte, fileExt string, all
 	return apperror.New(errcode.InvalidInput, apperror.WithMsg("文件内容类型与扩展名不匹配"))
 }
 
+// generateFilePath 生成文件路径
 func (s *FileService) generateFilePath(file *multipart.FileHeader) (string, error) {
 	src, err := file.Open()
 	if err != nil {
@@ -217,6 +229,7 @@ func (s *FileService) generateFilePath(file *multipart.FileHeader) (string, erro
 	return path, nil
 }
 
+// Upload 上传文件
 func (s *FileService) Upload(ctx context.Context, req *FileRequest) (*File, error) {
 	config, err := s.getUploadConfig(ctx)
 	if err != nil {
@@ -302,6 +315,7 @@ func (s *FileService) Upload(ctx context.Context, req *FileRequest) (*File, erro
 	return uploadFile, nil
 }
 
+// checkFileExt 检查文件扩展名
 func (s *FileService) checkFileExt(allowedTypes []string, fileExt string) bool {
 	for _, allowedType := range allowedTypes {
 		switch allowedType {
@@ -326,6 +340,7 @@ func (s *FileService) checkFileExt(allowedTypes []string, fileExt string) bool {
 	return false
 }
 
+// Delete 删除文件
 func (s *FileService) Delete(ctx context.Context, req *FileDeleteRequest) error {
 	filter := &FileFilter{Id: req.ID, StoreId: req.StoreId}
 	_, err := s.repo.FindOne(ctx, filter)

@@ -84,6 +84,7 @@ func (a *App) Run() {
 	}
 }
 
+// setupHooks 设置命令行的预运行和后运行钩子。
 func (a *App) setupHooks() {
 	a.root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		traceID := uuid.New().String()

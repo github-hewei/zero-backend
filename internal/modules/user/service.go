@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// PointsChangeTypeAdd 积分变更类型：增加
 const PointsChangeTypeReduce = 2
 
 // Service 用户业务逻辑
@@ -20,10 +21,12 @@ type Service struct {
 	pointsLogRepo *PointsLogRepo
 }
 
+// NewService 创建用户业务逻辑实例
 func NewService(db *gorm.DB, repo *Repository, pointsLogRepo *PointsLogRepo) *Service {
 	return &Service{db: db, repo: repo, pointsLogRepo: pointsLogRepo}
 }
 
+// List 获取用户列表
 func (s *Service) List(ctx context.Context, req *ListRequest) (*ListResult, error) {
 	result := &ListResult{List: []*User{}, Total: 0}
 	filter := &Filter{StoreId: req.StoreId, Username: req.Username, Mobile: req.Mobile, Status: req.Status}
@@ -44,6 +47,7 @@ func (s *Service) List(ctx context.Context, req *ListRequest) (*ListResult, erro
 	return result, nil
 }
 
+// Create 创建用户
 func (s *Service) Create(ctx context.Context, req *CreateRequest) error {
 	if err := s.checkUsername(ctx, req.Username); err != nil {
 		return err
@@ -59,6 +63,7 @@ func (s *Service) Create(ctx context.Context, req *CreateRequest) error {
 	return nil
 }
 
+// Update 更新用户
 func (s *Service) Update(ctx context.Context, req *UpdateRequest) error {
 	filter := &Filter{Id: req.Id, StoreId: req.StoreId}
 	user, err := s.repo.FindOne(ctx, filter)
@@ -90,6 +95,7 @@ func (s *Service) Update(ctx context.Context, req *UpdateRequest) error {
 	return nil
 }
 
+// checkUsername 检查用户名是否已存在
 func (s *Service) checkUsername(ctx context.Context, username string) error {
 	filter := &Filter{Username: username}
 	_, err := s.repo.FindOne(ctx, filter)
@@ -102,6 +108,7 @@ func (s *Service) checkUsername(ctx context.Context, username string) error {
 	return apperror.New(errcode.Conflict, apperror.WithMsg("用户名已存在"))
 }
 
+// GetPointsLogs 获取用户积分记录
 func (s *Service) GetPointsLogs(ctx context.Context, req *PointsLogListRequest) (*ListResult, error) {
 	result := &ListResult{List: []*PointsLog{}, Total: 0}
 	filter := &PointsLogFilter{StoreId: req.StoreId, UserId: req.UserId}
@@ -122,6 +129,7 @@ func (s *Service) GetPointsLogs(ctx context.Context, req *PointsLogListRequest) 
 	return result, nil
 }
 
+// ChangePoints 变更用户积分
 func (s *Service) ChangePoints(ctx context.Context, req *PointsChangeRequest) error {
 	if req.Points <= 0 {
 		return apperror.New(errcode.InvalidInput, apperror.WithMsg("积分变更值必须为正整数"))
@@ -154,6 +162,7 @@ func (s *Service) ChangePoints(ctx context.Context, req *PointsChangeRequest) er
 	})
 }
 
+// Detail 获取用户详情
 func (s *Service) Detail(ctx context.Context, id uint32) (*User, error) {
 	user, err := s.repo.FindOne(ctx, id)
 	if err != nil {
@@ -165,6 +174,7 @@ func (s *Service) Detail(ctx context.Context, id uint32) (*User, error) {
 	return user, nil
 }
 
+// Delete 删除用户
 func (s *Service) Delete(ctx context.Context, req *DeleteRequest) error {
 	filter := &Filter{Id: req.Id, StoreId: req.StoreId}
 	item, err := s.repo.FindOne(ctx, filter)

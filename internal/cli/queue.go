@@ -24,6 +24,7 @@ func QueueCmd(manager *queue.QueueManager) *cobra.Command {
 	return cmd
 }
 
+// queuePublishCmd 发布测试任务命令。
 func queuePublishCmd(manager *queue.QueueManager) *cobra.Command {
 	var (
 		queueName string

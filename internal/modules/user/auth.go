@@ -123,11 +123,13 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*U
 	}, nil
 }
 
+// getRefreshToken 获取刷新令牌
 func (s *AuthService) getRefreshToken() (string, error) {
 	token := helper.StringMd5(fmt.Sprintf("%d", time.Now().UnixNano()) + helper.RandomString(16))
 	return token, nil
 }
 
+// getAccessToken 获取访问令牌
 func (s *AuthService) getAccessToken(item *User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iat":      time.Now().Unix(),

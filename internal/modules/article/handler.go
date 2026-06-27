@@ -14,11 +14,10 @@ type Handler struct {
 	articleSvc  *Service
 }
 
+// NewHandler 创建处理器
 func NewHandler(binder *bind.Binder, categorySvc *CategoryService, articleSvc *Service) *Handler {
 	return &Handler{binder: binder, categorySvc: categorySvc, articleSvc: articleSvc}
 }
-
-// --- category ---
 
 func (h *Handler) ListCategory(ctx *gin.Context) {
 	req := &CategoryListRequest{}
@@ -76,8 +75,6 @@ func (h *Handler) DeleteCategory(ctx *gin.Context) {
 	}
 	response.Success(ctx, "删除成功", nil)
 }
-
-// --- article ---
 
 func (h *Handler) List(ctx *gin.Context) {
 	req := &ListRequest{}

@@ -18,10 +18,12 @@ type Service struct {
 	defaultRepo *DefaultRepository
 }
 
+// NewService 创建设置服务
 func NewService(repo *Repository, defaultRepo *DefaultRepository) *Service {
 	return &Service{repo: repo, defaultRepo: defaultRepo}
 }
 
+// FindList 获取设置列表
 func (s *Service) FindList(ctx context.Context, req *ListRequest) (*ListResult, error) {
 	result := &ListResult{List: []*Setting{}, Total: 0}
 	filter := &Filter{SettingKey: req.SettingKey, StoreId: req.StoreId}
@@ -42,6 +44,7 @@ func (s *Service) FindList(ctx context.Context, req *ListRequest) (*ListResult, 
 	return result, nil
 }
 
+// Create 创建设置
 func (s *Service) Create(ctx context.Context, req *CreateRequest) error {
 	if err := s.checkSettingKey(ctx, req.SettingKey, req.StoreId); err != nil {
 		return err
@@ -53,6 +56,7 @@ func (s *Service) Create(ctx context.Context, req *CreateRequest) error {
 	return nil
 }
 
+// Update 更新设置
 func (s *Service) Update(ctx context.Context, req *UpdateRequest) error {
 	filter := &Filter{Id: req.ID, StoreId: req.StoreId}
 	item, err := s.repo.FindOne(ctx, filter)
@@ -74,6 +78,7 @@ func (s *Service) Update(ctx context.Context, req *UpdateRequest) error {
 	return nil
 }
 
+// Delete 删除设置
 func (s *Service) Delete(ctx context.Context, req *DeleteRequest) error {
 	filter := &Filter{Id: req.ID, StoreId: req.StoreId}
 	item, err := s.repo.FindOne(ctx, filter)
@@ -89,6 +94,7 @@ func (s *Service) Delete(ctx context.Context, req *DeleteRequest) error {
 	return nil
 }
 
+// checkSettingKey 检查设置key
 func (s *Service) checkSettingKey(ctx context.Context, key string, storeId uint32) error {
 	filter := Filter{SettingKey: key, StoreId: storeId}
 	_, err := s.repo.FindOne(ctx, filter)
@@ -127,6 +133,7 @@ func (s *Service) GetSettingValue(ctx context.Context, key string, out any) erro
 	return nil
 }
 
+// FormConfigs 获取表单配置
 func (s *Service) FormConfigs(ctx context.Context, req *FormConfigsRequest) ([]FormGroup, error) {
 	configs := GetFormConfigs()
 	if req.OnlyPlatform {
@@ -141,6 +148,7 @@ func (s *Service) FormConfigs(ctx context.Context, req *FormConfigsRequest) ([]F
 	return configs, nil
 }
 
+// QiniuToken 获取七牛上传凭证
 func (s *Service) QiniuToken(ctx context.Context) (*QiniuTokenResponse, error) {
 	qiniu := &QiniuConfig{}
 	if err := s.GetSettingValue(ctx, "qiniu", qiniu); err != nil {
@@ -157,10 +165,12 @@ type DefaultService struct {
 	repo *DefaultRepository
 }
 
+// NewDefaultService 创建默认设置服务
 func NewDefaultService(repo *DefaultRepository) *DefaultService {
 	return &DefaultService{repo: repo}
 }
 
+// FindList 获取默认设置列表
 func (s *DefaultService) FindList(ctx context.Context, req *DefaultListRequest) (*ListResult, error) {
 	result := &ListResult{List: []*DefaultSetting{}, Total: 0}
 	filter := &DefaultFilter{SettingKey: req.SettingKey}
@@ -181,6 +191,7 @@ func (s *DefaultService) FindList(ctx context.Context, req *DefaultListRequest) 
 	return result, nil
 }
 
+// Create 创建默认设置
 func (s *DefaultService) Create(ctx context.Context, req *DefaultCreateRequest) error {
 	if err := s.checkSettingKey(ctx, req.SettingKey); err != nil {
 		return err
@@ -192,6 +203,7 @@ func (s *DefaultService) Create(ctx context.Context, req *DefaultCreateRequest) 
 	return nil
 }
 
+// Update 更新默认设置
 func (s *DefaultService) Update(ctx context.Context, req *DefaultUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID)
 	if err != nil {
@@ -212,6 +224,7 @@ func (s *DefaultService) Update(ctx context.Context, req *DefaultUpdateRequest) 
 	return nil
 }
 
+// Delete 删除默认设置
 func (s *DefaultService) Delete(ctx context.Context, req *DefaultDeleteRequest) error {
 	if _, err := s.repo.FindOne(ctx, req.ID); err != nil {
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
@@ -222,6 +235,7 @@ func (s *DefaultService) Delete(ctx context.Context, req *DefaultDeleteRequest) 
 	return s.repo.Delete(ctx, req.ID)
 }
 
+// checkSettingKey 检查默认设置key
 func (s *DefaultService) checkSettingKey(ctx context.Context, key string) error {
 	filter := &DefaultFilter{SettingKey: key}
 	_, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))

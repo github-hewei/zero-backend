@@ -33,10 +33,12 @@ func NewUploader(storageType string, ctx context.Context) (Uploader, error) {
 // LocalUploader 本地文件上传实现
 type LocalUploader struct{}
 
+// NewLocalUploader 创建本地文件上传器实例
 func NewLocalUploader() *LocalUploader {
 	return &LocalUploader{}
 }
 
+// Upload 上传文件到本地
 func (u *LocalUploader) Upload(ctx context.Context, file *multipart.FileHeader, savePath string) (string, error) {
 	src, err := file.Open()
 	if err != nil {
@@ -65,6 +67,7 @@ func (u *LocalUploader) Upload(ctx context.Context, file *multipart.FileHeader, 
 	return "", nil
 }
 
+// Delete 删除本地文件
 func (u *LocalUploader) Delete(ctx context.Context, filePath string) error {
 	return os.Remove(filePath)
 }

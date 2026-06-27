@@ -14,6 +14,7 @@ type CategoryFilter struct {
 	Status  int8
 }
 
+// Apply 过滤条件
 func (f *CategoryFilter) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -38,6 +39,7 @@ type CategoryRepository struct {
 	*baserepo.BaseRepository[Category]
 }
 
+// NewCategoryRepository 创建文章分类数据操作
 func NewCategoryRepository(db *gorm.DB) *CategoryRepository {
 	return &CategoryRepository{BaseRepository: baserepo.NewBaseRepository[Category](db)}
 }
@@ -51,6 +53,7 @@ type Filter struct {
 	Status     int8
 }
 
+// Apply 过滤条件
 func (f *Filter) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -78,6 +81,7 @@ type Repository struct {
 	*baserepo.BaseRepository[Article]
 }
 
+// NewRepository 创建文章数据操作
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{BaseRepository: baserepo.NewBaseRepository[Article](db)}
 }

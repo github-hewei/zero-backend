@@ -3,6 +3,8 @@ package app
 import (
 	"strings"
 	"zero-backend/internal/config"
+	"zero-backend/internal/modules/captcha"
+	"zero-backend/internal/modules/setting"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/logger"
@@ -10,7 +12,11 @@ import (
 	"github.com/241x/zero-kit/mysql"
 	"github.com/241x/zero-kit/redis"
 	"github.com/241x/zero-web/errcode"
+	"github.com/241x/zero-web/middleware"
+	"github.com/241x/zero-web/server"
+	goredis "github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 )
 
 // LoggerConfig 日志配置
@@ -31,16 +37,7 @@ type FileLogConfig struct {
 	LocalTime  bool
 }
 
-func ProvideBindErrCode() apperror.Code { return errcode.InvalidInput }
-
-// Must 泛型辅助：err != nil 时 panic，用于启动阶段集中处理错误。
-func Must[T any](v T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
+// LoadLogger 加载日志组件
 func LoadLogger(db *mongo.Database) *logger.ZeroLogger {
 	var cfg LoggerConfig
 	config.UnmarshalKey("logger", &cfg)
@@ -58,10 +55,13 @@ func LoadLogger(db *mongo.Database) *logger.ZeroLogger {
 			options = append(options, logger.WithConsole())
 		case "file":
 			options = append(options, logger.WithFileWithConfig(logger.FileConfig{
-				Path: cfg.File.Path, Filename: cfg.File.Filename,
-				MaxSize: cfg.File.MaxSize, MaxAge: cfg.File.MaxAge,
-				MaxBackups: cfg.File.MaxBackups, Compress: cfg.File.Compress,
-				LocalTime: cfg.File.LocalTime,
+				Path:       cfg.File.Path,
+				Filename:   cfg.File.Filename,
+				MaxSize:    cfg.File.MaxSize,
+				MaxAge:     cfg.File.MaxAge,
+				MaxBackups: cfg.File.MaxBackups,
+				Compress:   cfg.File.Compress,
+				LocalTime:  cfg.File.LocalTime,
 			}))
 		case "mongodb":
 			options = append(options, logger.WithMongo(db))
@@ -78,10 +78,12 @@ func LoadLogger(db *mongo.Database) *logger.ZeroLogger {
 	case "error":
 		level = logger.ErrorLevel
 	}
+
 	options = append(options, logger.WithLevel(level))
 	return logger.New(options...)
 }
 
+// LoadMongoConfig 加载 MongoDB 配置
 func LoadMongoConfig() mongodb.Config {
 	return mongodb.Config{
 		URI:      config.GetString("mongodb.uri"),
@@ -90,6 +92,7 @@ func LoadMongoConfig() mongodb.Config {
 	}
 }
 
+// LoadMySQLConfig 加载 MySQL 配置
 func LoadMySQLConfig() mysql.Config {
 	return mysql.Config{
 		Dsn:    config.GetString("mysql.dsn"),
@@ -97,6 +100,7 @@ func LoadMySQLConfig() mysql.Config {
 	}
 }
 
+// LoadRedisConfig 加载 Redis 配置
 func LoadRedisConfig() redis.Config {
 	return redis.Config{
 		Host:     config.GetString("redis.host"),
@@ -106,12 +110,74 @@ func LoadRedisConfig() redis.Config {
 	}
 }
 
+// splitComma 分割逗号分隔的字符串
 func splitComma(s string) []string {
 	var res []string
-	for _, item := range strings.Split(s, ",") {
+	for item := range strings.SplitSeq(s, ",") {
 		if t := strings.TrimSpace(item); t != "" {
 			res = append(res, t)
 		}
 	}
 	return res
+}
+
+// ProvideBindErrCode 提供绑定组件错误码
+func ProvideBindErrCode() apperror.Code { return errcode.InvalidInput }
+
+// ProvideServerOptions 提供服务器选项
+func ProvideServerOptions() []server.Option { return nil }
+
+// LoadAdminServerConfig 加载管理后台服务器配置
+func LoadAdminServerConfig() server.Config {
+	return server.Config{
+		Host: config.GetString("admin.server.host"),
+		Port: config.GetInt("admin.server.port"),
+	}
+}
+
+// LoadApiServerConfig 加载 API 服务器配置
+func LoadApiServerConfig() server.Config {
+	return server.Config{
+		Host: config.GetString("api.server.host"),
+		Port: config.GetInt("api.server.port"),
+	}
+}
+
+// LoadAdminCorsConfig 加载管理后台 CORS 配置
+func LoadAdminCorsConfig() middleware.CorsConfig {
+	var c middleware.CorsConfig
+	config.UnmarshalKey("admin.cors", &c)
+	return c
+}
+
+// LoadApiCorsConfig 加载 API CORS 配置
+func LoadApiCorsConfig() middleware.CorsConfig {
+	var c middleware.CorsConfig
+	config.UnmarshalKey("api.cors", &c)
+	return c
+}
+
+// LoadCaptchaConfig 加载验证码配置
+func LoadCaptchaConfig() captcha.Config {
+	var c captcha.Config
+	config.UnmarshalKey("admin.captcha", &c)
+	return c
+}
+
+// NewSettingService 创建设置服务
+func NewSettingService(db *gorm.DB) *setting.Service {
+	return setting.NewService(setting.NewRepository(db), setting.NewDefaultRepository(db))
+}
+
+// NewCaptchaService 创建验证码服务
+func NewCaptchaService(rdb *goredis.Client, cfg captcha.Config) (*captcha.Service, error) {
+	return captcha.NewService(rdb, cfg, "ZAG:CAPTCHA")
+}
+
+// Must 泛型辅助：err != nil 时 panic，用于启动阶段集中处理错误。
+func Must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

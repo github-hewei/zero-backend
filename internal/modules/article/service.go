@@ -14,10 +14,12 @@ type CategoryService struct {
 	repo *CategoryRepository
 }
 
+// NewCategoryService 创建文章分类业务逻辑层
 func NewCategoryService(repo *CategoryRepository) *CategoryService {
 	return &CategoryService{repo: repo}
 }
 
+// List 获取文章分类列表
 func (s *CategoryService) List(ctx context.Context, req *CategoryListRequest) (*ListResult, error) {
 	result := &ListResult{List: []*Category{}, Total: 0}
 
@@ -41,6 +43,7 @@ func (s *CategoryService) List(ctx context.Context, req *CategoryListRequest) (*
 	return result, nil
 }
 
+// Create 创建文章分类
 func (s *CategoryService) Create(ctx context.Context, req *CategoryCreateRequest) error {
 	category := &Category{Name: req.Name, Status: req.Status, Sort: req.Sort, StoreId: req.StoreId}
 	if err := s.repo.Create(ctx, category); err != nil {
@@ -49,6 +52,7 @@ func (s *CategoryService) Create(ctx context.Context, req *CategoryCreateRequest
 	return nil
 }
 
+// Update 更新文章分类
 func (s *CategoryService) Update(ctx context.Context, req *CategoryUpdateRequest) error {
 	filter := &CategoryFilter{Id: req.Id, StoreId: req.StoreId}
 	category, err := s.repo.FindOne(ctx, filter)
@@ -65,6 +69,7 @@ func (s *CategoryService) Update(ctx context.Context, req *CategoryUpdateRequest
 	return nil
 }
 
+// Delete 删除文章分类
 func (s *CategoryService) Delete(ctx context.Context, req *CategoryDeleteRequest) error {
 	filter := &CategoryFilter{Id: req.Id, StoreId: req.StoreId}
 	category, err := s.repo.FindOne(ctx, filter)
@@ -85,10 +90,12 @@ type Service struct {
 	repo *Repository
 }
 
+// NewService 创建文章业务逻辑层
 func NewService(repo *Repository) *Service {
 	return &Service{repo: repo}
 }
 
+// List 获取文章列表
 func (s *Service) List(ctx context.Context, req *ListRequest) (*ListResult, error) {
 	result := &ListResult{List: []*Article{}, Total: 0}
 
@@ -112,6 +119,7 @@ func (s *Service) List(ctx context.Context, req *ListRequest) (*ListResult, erro
 	return result, nil
 }
 
+// Create 创建文章
 func (s *Service) Create(ctx context.Context, req *CreateRequest) error {
 	article := &Article{
 		Title: req.Title, ShowType: req.ShowType, Content: req.Content,
@@ -124,6 +132,7 @@ func (s *Service) Create(ctx context.Context, req *CreateRequest) error {
 	return nil
 }
 
+// Update 更新文章
 func (s *Service) Update(ctx context.Context, req *UpdateRequest) error {
 	filter := &Filter{Id: req.Id, StoreId: req.StoreId}
 	article, err := s.repo.FindOne(ctx, filter)
@@ -143,6 +152,7 @@ func (s *Service) Update(ctx context.Context, req *UpdateRequest) error {
 	return nil
 }
 
+// Delete 删除文章
 func (s *Service) Delete(ctx context.Context, req *DeleteRequest) error {
 	filter := &Filter{Id: req.Id, StoreId: req.StoreId}
 	article, err := s.repo.FindOne(ctx, filter)

@@ -19,10 +19,12 @@ type Handler struct {
 	authCfg  Config
 }
 
+// NewHandler 创建用户模块处理器
 func newHandler(binder *bind.Binder, svc *Service) *Handler {
 	return &Handler{binder: binder, svc: svc}
 }
 
+// NewAuthHandler 创建用户认证模块处理器
 func newAuthHandler(binder *bind.Binder, svc *Service, authServ *AuthService, authCfg Config) *Handler {
 	return &Handler{binder: binder, svc: svc, authServ: authServ, authCfg: authCfg}
 }

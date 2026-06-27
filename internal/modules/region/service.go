@@ -12,10 +12,12 @@ type Service struct {
 	repo *Repository
 }
 
+// NewService 创建区划服务
 func NewService(repo *Repository) *Service {
 	return &Service{repo: repo}
 }
 
+// Tree 获取区划树
 func (s *Service) Tree(ctx context.Context) ([]*Region, error) {
 	regions, err := s.repo.FindAll(ctx)
 	if err != nil {

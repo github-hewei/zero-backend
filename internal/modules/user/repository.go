@@ -16,6 +16,7 @@ type Filter struct {
 	Status   int8
 }
 
+// Apply 应用过滤条件
 func (f *Filter) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -43,6 +44,7 @@ type Repository struct {
 	*baserepo.BaseRepository[User]
 }
 
+// NewRepository 创建用户数据操作实例
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{BaseRepository: baserepo.NewBaseRepository[User](db)}
 }
@@ -56,6 +58,7 @@ type PointsLogFilter struct {
 	ChangeType int8
 }
 
+// Apply 应用过滤条件
 func (f *PointsLogFilter) Apply(db *gorm.DB) *gorm.DB {
 	if f == nil {
 		return db
@@ -87,6 +90,7 @@ type PointsLogRepo struct {
 	*baserepo.BaseRepository[PointsLog]
 }
 
+// NewPointsLogRepo 创建用户积分记录数据操作实例
 func NewPointsLogRepo(db *gorm.DB) *PointsLogRepo {
 	return &PointsLogRepo{BaseRepository: baserepo.NewBaseRepository[PointsLog](db)}
 }

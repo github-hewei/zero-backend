@@ -14,6 +14,7 @@ type Handler struct {
 	defaultSvc *DefaultService
 }
 
+// newHandler 创建设置模块处理器
 func newHandler(binder *bind.Binder, svc *Service, defaultSvc *DefaultService) *Handler {
 	return &Handler{binder: binder, svc: svc, defaultSvc: defaultSvc}
 }

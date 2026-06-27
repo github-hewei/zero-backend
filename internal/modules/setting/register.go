@@ -12,6 +12,7 @@ type Deps struct {
 	Binder *bind.Binder
 }
 
+// buildHandler 创建设置模块处理器
 func buildHandler(deps Deps) *Handler {
 	repo := NewRepository(deps.DB)
 	defaultRepo := NewDefaultRepository(deps.DB)

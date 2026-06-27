@@ -18,6 +18,7 @@ type RbacUserService struct {
 	userRoleRepo *RbacUserRoleRepository
 }
 
+// NewRbacUserService 创建用户服务
 func NewRbacUserService(db *gorm.DB, repo *RbacUserRepository, userRoleRepo *RbacUserRoleRepository) *RbacUserService {
 	return &RbacUserService{db: db, repo: repo, userRoleRepo: userRoleRepo}
 }
@@ -197,6 +198,7 @@ func (s *RbacUserService) SetRoles(ctx context.Context, req *RbacUserRoleSetRequ
 	})
 }
 
+// checkUsername 检查用户名
 func (s *RbacUserService) checkUsername(ctx context.Context, username string, storeId uint32) error {
 	filter := &RbacUserUsernameFilterField{Username: username, StoreId: storeId}
 	_, err := s.repo.FindOne(ctx, filter)
@@ -242,6 +244,7 @@ type RbacMenuService struct {
 	Db      *gorm.DB
 }
 
+// NewRbacMenuService 创建菜单服务
 func NewRbacMenuService(repo *RbacMenuRepository, apiRepo *RbacMenuApiRepository, db *gorm.DB) *RbacMenuService {
 	return &RbacMenuService{repo: repo, apiRepo: apiRepo, Db: db}
 }
@@ -397,6 +400,7 @@ func (s *RbacMenuService) SyncMenuList(ctx context.Context, req []RbacMenuSyncRe
 	return nil
 }
 
+// checkName 检查菜单名称
 func (s *RbacMenuService) checkName(ctx context.Context, name string) error {
 	filter := &RbacMenuFilterField{Name: name}
 	_, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))
@@ -473,6 +477,7 @@ type RbacRoleService struct {
 	roleMenuRepo *RbacRoleMenuRepository
 }
 
+// NewRbacRoleService 创建角色服务
 func NewRbacRoleService(repo *RbacRoleRepository, roleMenuRepo *RbacRoleMenuRepository, db *gorm.DB) *RbacRoleService {
 	return &RbacRoleService{db: db, repo: repo, roleMenuRepo: roleMenuRepo}
 }
@@ -632,6 +637,7 @@ func (s *RbacRoleService) SetMenus(ctx context.Context, req *RbacRoleMenuSetRequ
 	})
 }
 
+// checkName 检查角色名称
 func (s *RbacRoleService) checkName(ctx context.Context, name string, StoreId uint32) error {
 	_, err := s.repo.FindByName(ctx, name, StoreId)
 	if err != nil {
@@ -643,6 +649,7 @@ func (s *RbacRoleService) checkName(ctx context.Context, name string, StoreId ui
 	return apperror.New(errcode.Conflict, apperror.WithMsg("角色名已存在"))
 }
 
+// checkParent 检查父级角色
 func (s *RbacRoleService) checkParent(ctx context.Context, parentId uint32, StoreId uint32) error {
 	parent, err := s.repo.FindOne(ctx, parentId)
 	if err != nil {
@@ -662,6 +669,7 @@ type RbacApiService struct {
 	repo *RbacApiRepository
 }
 
+// NewRbacApiService 创建接口服务
 func NewRbacApiService(repo *RbacApiRepository) *RbacApiService {
 	return &RbacApiService{repo: repo}
 }
@@ -741,6 +749,7 @@ func (s *RbacApiService) Delete(ctx context.Context, req *RbacApiDeleteRequest) 
 	return nil
 }
 
+// checkName 检查接口名称
 func (s *RbacApiService) checkName(ctx context.Context, name string) error {
 	filter := &RbacApiFilterField{Name: name}
 	_, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))
@@ -758,6 +767,7 @@ type RbacStoreService struct {
 	repo *RbacStoreRepository
 }
 
+// NewRbacStoreService 创建企业服务
 func NewRbacStoreService(repo *RbacStoreRepository) *RbacStoreService {
 	return &RbacStoreService{repo: repo}
 }
@@ -814,6 +824,7 @@ func (s *RbacStoreService) Create(ctx context.Context, req *RbacStoreCreateReque
 	return nil
 }
 
+// checkName 检查企业名称
 func (s *RbacStoreService) checkName(ctx context.Context, name string) error {
 	filter := &RbacStoreNameFilterField{Name: name}
 	_, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))

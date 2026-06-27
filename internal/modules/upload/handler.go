@@ -18,6 +18,7 @@ type Handler struct {
 	fileSvc  *FileService
 }
 
+// newHandler 创建上传模块处理器
 func newHandler(binder *bind.Binder, groupSvc *GroupService, fileSvc *FileService) *Handler {
 	return &Handler{binder: binder, groupSvc: groupSvc, fileSvc: fileSvc}
 }

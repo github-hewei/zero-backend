@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/baserepo"
 	"github.com/241x/zero-kit/helper"
@@ -12,7 +14,6 @@ import (
 	"github.com/241x/zero-web/errcode"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
-	"time"
 )
 
 const (
@@ -39,6 +40,7 @@ type AuthService struct {
 	captcha      CaptchaVerifier
 }
 
+// NewAuthService 创建认证服务
 func NewAuthService(
 	userRepo *RbacUserRepository,
 	apiRepo *RbacApiRepository,
@@ -145,11 +147,13 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*A
 	}, nil
 }
 
+// getRefreshToken 获取刷新Token
 func (s *AuthService) getRefreshToken() (string, error) {
 	token := helper.StringMd5(fmt.Sprintf("%d", time.Now().UnixNano()) + helper.RandomString(16))
 	return token, nil
 }
 
+// getAccessToken 获取访问Token
 func (s *AuthService) getAccessToken(item *RbacUser) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iat":      time.Now().Unix(),

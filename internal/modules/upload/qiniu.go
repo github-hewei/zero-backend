@@ -16,10 +16,12 @@ type QiniuUploader struct {
 	config *QiniuConfig
 }
 
+// NewQiniuUploader 创建七牛云文件上传实现
 func NewQiniuUploader(config *QiniuConfig) *QiniuUploader {
 	return &QiniuUploader{config: config}
 }
 
+// getZone 获取七牛云区域
 func (u *QiniuUploader) getZone(zone string) *storage.Zone {
 	switch zone {
 	case "z0":
@@ -37,6 +39,7 @@ func (u *QiniuUploader) getZone(zone string) *storage.Zone {
 	}
 }
 
+// Upload 上传文件到七牛云
 func (u *QiniuUploader) Upload(ctx context.Context, file *multipart.FileHeader, savePath string) (string, error) {
 	putPolicy := storage.PutPolicy{Scope: u.config.Bucket}
 	mac := qbox.NewMac(u.config.AccessKey, u.config.SecretKey)
@@ -61,6 +64,7 @@ func (u *QiniuUploader) Upload(ctx context.Context, file *multipart.FileHeader, 
 	return u.config.Domain, nil
 }
 
+// Delete 从七牛云删除文件
 func (u *QiniuUploader) Delete(ctx context.Context, filePath string) error {
 	mac := qbox.NewMac(u.config.AccessKey, u.config.SecretKey)
 	cfg := storage.Config{Zone: u.getZone(u.config.Zone)}

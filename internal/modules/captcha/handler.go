@@ -12,6 +12,7 @@ type Handler struct {
 	svc    *Service
 }
 
+// newHandler 创建处理器
 func newHandler(binder *bind.Binder, svc *Service) *Handler {
 	return &Handler{binder: binder, svc: svc}
 }
