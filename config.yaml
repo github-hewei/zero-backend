@@ -27,8 +27,6 @@ admin:
     access_token_ttl: 3600
     # JWT签名密钥
     hmac_secret: "your-secret-key-change-in-production"
-    # 超级管理员ID
-    super_user_id: 1001
   # 跨域配置
   cors:
     allow_origins:

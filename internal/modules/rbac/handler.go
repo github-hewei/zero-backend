@@ -47,12 +47,6 @@ func newHandler(
 	}
 }
 
-// isSuperUser 是否超管
-func isSuperUser(ctx *gin.Context) bool {
-	user, ok := ctxkeys.User(ctx.Request.Context()).(*RbacUser)
-	return ok && user.SU
-}
-
 // storeID 获取当前请求的店铺ID
 func storeID(ctx *gin.Context) uint32 {
 	return ctxkeys.StoreID(ctx.Request.Context())
@@ -362,8 +356,8 @@ func (h *handler) roleList(ctx *gin.Context) {
 		response.Error(ctx, err)
 		return
 	}
-	if !isSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = storeID(ctx)
+	if sid := storeID(ctx); sid != 0 {
+		req.StoreId = sid
 	}
 	result, err := h.roleServ.FindTreeList(ctx.Request.Context(), req)
 	if err != nil {
@@ -380,8 +374,8 @@ func (h *handler) roleCreate(ctx *gin.Context) {
 		response.Error(ctx, err)
 		return
 	}
-	if !isSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = storeID(ctx)
+	if sid := storeID(ctx); sid != 0 {
+		req.StoreId = sid
 	}
 	if err := h.roleServ.Create(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
@@ -397,8 +391,8 @@ func (h *handler) roleUpdate(ctx *gin.Context) {
 		response.Error(ctx, err)
 		return
 	}
-	if !isSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = storeID(ctx)
+	if sid := storeID(ctx); sid != 0 {
+		req.StoreId = sid
 	}
 	if err := h.roleServ.Update(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
@@ -414,8 +408,8 @@ func (h *handler) roleDelete(ctx *gin.Context) {
 		response.Error(ctx, err)
 		return
 	}
-	if !isSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = storeID(ctx)
+	if sid := storeID(ctx); sid != 0 {
+		req.StoreId = sid
 	}
 	if err := h.roleServ.Delete(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
@@ -431,8 +425,8 @@ func (h *handler) roleSetMenus(ctx *gin.Context) {
 		response.Error(ctx, err)
 		return
 	}
-	if !isSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = storeID(ctx)
+	if sid := storeID(ctx); sid != 0 {
+		req.StoreId = sid
 	}
 	if err := h.roleServ.SetMenus(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
@@ -448,8 +442,8 @@ func (h *handler) userList(ctx *gin.Context) {
 		response.Error(ctx, err)
 		return
 	}
-	if !isSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = storeID(ctx)
+	if sid := storeID(ctx); sid != 0 {
+		req.StoreId = sid
 	}
 	result, err := h.userServ.FindList(ctx.Request.Context(), req)
 	if err != nil {
@@ -466,8 +460,8 @@ func (h *handler) userCreate(ctx *gin.Context) {
 		response.Error(ctx, err)
 		return
 	}
-	if !isSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = storeID(ctx)
+	if sid := storeID(ctx); sid != 0 {
+		req.StoreId = sid
 	}
 	if err := h.userServ.Create(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
@@ -483,8 +477,8 @@ func (h *handler) userUpdate(ctx *gin.Context) {
 		response.Error(ctx, err)
 		return
 	}
-	if !isSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = storeID(ctx)
+	if sid := storeID(ctx); sid != 0 {
+		req.StoreId = sid
 	}
 	if err := h.userServ.Update(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
@@ -500,8 +494,8 @@ func (h *handler) userDelete(ctx *gin.Context) {
 		response.Error(ctx, err)
 		return
 	}
-	if !isSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = storeID(ctx)
+	if sid := storeID(ctx); sid != 0 {
+		req.StoreId = sid
 	}
 	if err := h.userServ.Delete(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
@@ -517,8 +511,8 @@ func (h *handler) userSetRoles(ctx *gin.Context) {
 		response.Error(ctx, err)
 		return
 	}
-	if !isSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = storeID(ctx)
+	if sid := storeID(ctx); sid != 0 {
+		req.StoreId = sid
 	}
 	if err := h.userServ.SetRoles(ctx.Request.Context(), req); err != nil {
 		response.Error(ctx, err)
@@ -534,8 +528,8 @@ func (h *handler) userResetPassword(ctx *gin.Context) {
 		response.Error(ctx, err)
 		return
 	}
-	if !isSuperUser(ctx) || req.StoreId == 0 {
-		req.StoreId = storeID(ctx)
+	if sid := storeID(ctx); sid != 0 {
+		req.StoreId = sid
 	}
 	newPassword, err := h.userServ.ResetPassword(ctx.Request.Context(), req)
 	if err != nil {

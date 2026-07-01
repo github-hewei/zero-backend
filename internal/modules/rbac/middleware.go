@@ -54,11 +54,6 @@ func (m *AuthMiddleware) CheckAPIPermission() gin.HandlerFunc {
 			return
 		}
 
-		if user.SU {
-			c.Next()
-			return
-		}
-
 		apiPath := strings.TrimPrefix(c.Request.URL.Path, "/api")
 		hasPerm, err := m.authServ.CheckAPIPermission(ctx, user, apiPath)
 		if err != nil || !hasPerm {

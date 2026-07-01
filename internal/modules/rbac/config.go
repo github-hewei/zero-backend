@@ -10,7 +10,6 @@ type Config struct {
 	HmacSecret      string
 	AccessTokenTtl  int
 	RefreshTokenTtl int
-	SuperUserId     int
 }
 
 // Validate 校验配置有效性。
@@ -33,7 +32,6 @@ func LoadConfig() (Config, error) {
 		HmacSecret:      config.GetString("admin.auth.hmac_secret"),
 		AccessTokenTtl:  config.GetInt("admin.auth.access_token_ttl"),
 		RefreshTokenTtl: config.GetInt("admin.auth.refresh_token_ttl"),
-		SuperUserId:     config.GetInt("admin.auth.super_user_id"),
 	}
 	if err := c.Validate(); err != nil {
 		return Config{}, err

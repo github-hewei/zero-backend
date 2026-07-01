@@ -175,8 +175,6 @@ type RbacUser struct {
 
 	DeletedAt    soft_delete.DeletedAt `json:"-" gorm:"not null;default:0;comment:删除时间"`
 	RbacUserRole []*RbacUserRole       `json:"rbac_user_role" gorm:"foreignKey:UserId"`
-
-	SU bool `json:"su" gorm:"-"`
 }
 
 // RbacUserRole 用户角色关联表

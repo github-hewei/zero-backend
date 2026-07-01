@@ -55,6 +55,7 @@ func buildAll(deps Deps) (*handler, *AuthMiddleware) {
 }
 
 // Register 注册 rbac 模块路由。public 注册公开路由，protected 注册需认证的路由并挂载 JWT 中间件。
+// admin 端仅管理自身租户的角色和用户，store/menu/api 管理已迁移到平台端。
 func Register(public, protected *gin.RouterGroup, deps Deps) {
 	h, authMid := buildAll(deps)
 
@@ -68,26 +69,6 @@ func Register(public, protected *gin.RouterGroup, deps Deps) {
 	protected.POST("/logout", h.logout)
 	protected.POST("/change-password", h.changePassword)
 	protected.POST("/permissions", h.permissions)
-
-	protected.POST("/rbac/menu/list", h.menuList)
-	protected.POST("/rbac/menu/create", h.menuCreate)
-	protected.POST("/rbac/menu/update", h.menuUpdate)
-	protected.POST("/rbac/menu/delete", h.menuDelete)
-	protected.POST("/rbac/menu/sync", h.menuSync)
-	protected.POST("/rbac/menu/api/list", h.menuApiList)
-	protected.POST("/rbac/menu/api/save", h.menuApiSave)
-
-	protected.POST("/rbac/api/list", h.apiList)
-	protected.POST("/rbac/api/create", h.apiCreate)
-	protected.POST("/rbac/api/update", h.apiUpdate)
-	protected.POST("/rbac/api/delete", h.apiDelete)
-
-	protected.POST("/rbac/store/list", h.storeList)
-	protected.POST("/rbac/store/create", h.storeCreate)
-	protected.POST("/rbac/store/update", h.storeUpdate)
-	protected.POST("/rbac/store/delete", h.storeDelete)
-	protected.POST("/rbac/store/recycle", h.storeRecycle)
-	protected.POST("/rbac/store/restore", h.storeRestore)
 
 	protected.POST("/rbac/role/list", h.roleList)
 	protected.POST("/rbac/role/create", h.roleCreate)
@@ -103,8 +84,7 @@ func Register(public, protected *gin.RouterGroup, deps Deps) {
 	protected.POST("/rbac/user/reset-password", h.userResetPassword)
 }
 
-// RegisterPlatform 注册平台端路由。仅暴露租户管理和租户用户管理，不挂载 RBAC 权限中间件，
-// 由平台端的 RequireRole 中间件控制访问权限。
+// RegisterPlatform 注册平台端路由。不挂载 RBAC 权限中间件，由平台端的 RequireRole 中间件控制访问权限。
 func RegisterPlatform(rg *gin.RouterGroup, deps PlatformDeps) {
 	fullDeps := Deps{
 		DB:     deps.DB,
@@ -117,12 +97,31 @@ func RegisterPlatform(rg *gin.RouterGroup, deps PlatformDeps) {
 	rg.Use(middleware.JWTGuard(deps.Config.HmacSecret))
 	rg.Use(authMid.LoadUser())
 
+	rg.POST("/rbac/menu/list", h.menuList)
+	rg.POST("/rbac/menu/create", h.menuCreate)
+	rg.POST("/rbac/menu/update", h.menuUpdate)
+	rg.POST("/rbac/menu/delete", h.menuDelete)
+	rg.POST("/rbac/menu/sync", h.menuSync)
+	rg.POST("/rbac/menu/api/list", h.menuApiList)
+	rg.POST("/rbac/menu/api/save", h.menuApiSave)
+
+	rg.POST("/rbac/api/list", h.apiList)
+	rg.POST("/rbac/api/create", h.apiCreate)
+	rg.POST("/rbac/api/update", h.apiUpdate)
+	rg.POST("/rbac/api/delete", h.apiDelete)
+
 	rg.POST("/rbac/store/list", h.storeList)
 	rg.POST("/rbac/store/create", h.storeCreate)
 	rg.POST("/rbac/store/update", h.storeUpdate)
 	rg.POST("/rbac/store/delete", h.storeDelete)
 	rg.POST("/rbac/store/recycle", h.storeRecycle)
 	rg.POST("/rbac/store/restore", h.storeRestore)
+
+	rg.POST("/rbac/role/list", h.roleList)
+	rg.POST("/rbac/role/create", h.roleCreate)
+	rg.POST("/rbac/role/update", h.roleUpdate)
+	rg.POST("/rbac/role/delete", h.roleDelete)
+	rg.POST("/rbac/role/set-menus", h.roleSetMenus)
 
 	rg.POST("/rbac/user/list", h.userList)
 	rg.POST("/rbac/user/create", h.userCreate)

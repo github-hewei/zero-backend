@@ -113,8 +113,6 @@ func (s *AuthService) Login(ctx context.Context, req *AuthLoginRequest) (*AdminL
 		return nil, "", apperror.Wrap(errcode.Internal, err, apperror.WithMsg("登录失败"))
 	}
 
-	s.WithSU(item)
-
 	return &AdminLoginResponse{
 		Token: tokenString,
 		Ttl:   s.cfg.RefreshTokenTtl,
@@ -192,7 +190,6 @@ func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*RbacUser
 		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取用户信息失败"))
 	}
 
-	s.WithSU(user)
 	userBytes, err := json.Marshal(user)
 	if err != nil {
 		return user, nil
@@ -202,29 +199,11 @@ func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*RbacUser
 	return user, nil
 }
 
-// WithSU 设置是否为超级管理员
-func (s *AuthService) WithSU(user *RbacUser) {
-	if int(user.ID) == s.cfg.SuperUserId {
-		user.SU = true
-	}
-}
-
 // GetPermissions 获取用户菜单权限
 func (s *AuthService) GetPermissions(ctx context.Context, req *AuthGetPermissionsRequest) ([]*RbacMenu, error) {
 	user := ctxkeys.User(ctx).(*RbacUser)
 	if user == nil {
 		return nil, nil
-	}
-
-	if user.SU {
-		menus, err := s.menuRepo.FindAll(ctx, nil, nil, nil, baserepo.WithScopes(nil))
-		if err != nil {
-			return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取菜单权限失败"))
-		}
-		if req.IsTree {
-			return RbacMenuList(menus).Tree(), nil
-		}
-		return menus, nil
 	}
 
 	roles, err := s.GetUserRoles(ctx, user.ID)
@@ -342,10 +321,6 @@ func (s *AuthService) ChangePassword(ctx context.Context, req *ChangePasswordReq
 
 // CheckAPIPermission 检查API权限
 func (s *AuthService) CheckAPIPermission(ctx context.Context, user *RbacUser, apiPath string) (bool, error) {
-	if user.SU {
-		return true, nil
-	}
-
 	roles, err := s.GetUserRoles(ctx, user.ID)
 	if err != nil {
 		return false, err
