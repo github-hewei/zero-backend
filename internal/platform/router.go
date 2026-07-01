@@ -4,6 +4,7 @@ import (
 	"zero-backend/internal/app"
 	"zero-backend/internal/modules/platform_user"
 	"zero-backend/internal/modules/rbac"
+	"zero-backend/internal/modules/setting"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/logger"
@@ -48,6 +49,8 @@ func NewGin(
 		},
 		RDB: rdb,
 	})
+
+	setting.RegisterPlatform(platformGroup, setting.Deps{DB: db, Binder: binder})
 
 	return r
 }

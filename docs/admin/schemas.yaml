@@ -183,6 +183,35 @@ schemas:
           $ref: '#/schemas/RbacMenu'
         description: 操作列表
 
+  RbacApi:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 接口ID
+      name:
+        type: string
+        description: 接口名称
+      url:
+        type: string
+        description: 接口URL
+      parent_id:
+        type: integer
+        description: 父级ID
+      sort:
+        type: integer
+        description: 排序
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+      children:
+        type: array
+        items:
+          $ref: '#/schemas/RbacApi'
+
   RbacRole:
     type: object
     properties:
@@ -425,28 +454,6 @@ schemas:
       store_id:
         type: integer
         description: 企业ID
-      created_at:
-        type: integer
-        description: 创建时间
-      updated_at:
-        type: integer
-        description: 更新时间
-
-  SettingDefault:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: 设置ID
-      setting_key:
-        type: string
-        description: 设置项标识
-      setting_values:
-        type: string
-        description: 设置内容(JSON格式)
-      description:
-        type: string
-        description: 设置项描述
       created_at:
         type: integer
         description: 创建时间

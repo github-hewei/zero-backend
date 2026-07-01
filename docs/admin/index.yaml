@@ -57,14 +57,6 @@ paths:
     $ref: './paths/setting.yaml#/~1setting~1form-configs'
   /setting/qiniu-token:
     $ref: './paths/setting.yaml#/~1setting~1qiniu-token'
-  /setting/default/list:
-    $ref: './paths/setting.yaml#/~1setting~1default~1list'
-  /setting/default/create:
-    $ref: './paths/setting.yaml#/~1setting~1default~1create'
-  /setting/default/update:
-    $ref: './paths/setting.yaml#/~1setting~1default~1update'
-  /setting/default/delete:
-    $ref: './paths/setting.yaml#/~1setting~1default~1delete'
 
   /article/category/list:
     $ref: './paths/article.yaml#/~1article~1category~1list'
@@ -146,8 +138,6 @@ components:
       $ref: './schemas.yaml#/schemas/UploadFile'
     Setting:
       $ref: './schemas.yaml#/schemas/Setting'
-    SettingDefault:
-      $ref: './schemas.yaml#/schemas/SettingDefault'
     CaptchaGenerateResponse:
       $ref: './schemas.yaml#/schemas/CaptchaGenerateResponse'
     CaptchaClickPoint:

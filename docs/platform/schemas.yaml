@@ -264,3 +264,25 @@ schemas:
       updated_at:
         type: integer
         description: 更新时间
+
+  SettingDefault:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 设置ID
+      setting_key:
+        type: string
+        description: 设置项标识
+      setting_values:
+        type: string
+        description: 设置内容(JSON格式)
+      description:
+        type: string
+        description: 设置项描述
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间

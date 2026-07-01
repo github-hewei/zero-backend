@@ -21,7 +21,7 @@ func buildHandler(deps Deps) *Handler {
 	return newHandler(deps.Binder, svc, defaultSvc)
 }
 
-// RegisterAdmin 注册设置模块路由（管理端）
+// RegisterAdmin 注册设置模块路由（管理端）。仅暴露租户级设置和工具接口，不暴露系统级默认设置。
 func RegisterAdmin(rg *gin.RouterGroup, deps Deps) {
 	h := buildHandler(deps)
 	rg.POST("/setting/list", h.List)
@@ -30,10 +30,16 @@ func RegisterAdmin(rg *gin.RouterGroup, deps Deps) {
 	rg.POST("/setting/delete", h.Delete)
 	rg.POST("/setting/form-configs", h.FormConfigs)
 	rg.POST("/setting/qiniu-token", h.QiniuToken)
+}
+
+// RegisterPlatform 注册设置模块路由（平台端）。暴露系统级默认设置和工具接口。
+func RegisterPlatform(rg *gin.RouterGroup, deps Deps) {
+	h := buildHandler(deps)
 	rg.POST("/setting/default/list", h.DefaultList)
 	rg.POST("/setting/default/create", h.DefaultCreate)
 	rg.POST("/setting/default/update", h.DefaultUpdate)
 	rg.POST("/setting/default/delete", h.DefaultDelete)
+	rg.POST("/setting/qiniu-token", h.QiniuToken)
 }
 
 // RegisterApi 注册设置模块路由（API端）
