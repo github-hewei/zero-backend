@@ -223,16 +223,3 @@ type RbacUserRole struct {
 func (m *RbacUserRole) TableName() string {
 	return tablePrefix + "rbac_user_role"
 }
-
-// RoleMenus 角色关联菜单表模型
-type RoleMenus struct {
-	ID        uint32 `json:"id" gorm:"primaryKey"`
-	RoleId    int32  `json:"role_id" gorm:"default:0;comment:角色ID"`
-	MenuId    int32  `json:"menu_id" gorm:"default:0;comment:菜单ID"`
-	CreatedAt int64  `json:"created_at" gorm:"default:0;autoCreateTime"`
-	UpdatedAt int64  `json:"updated_at" gorm:"default:0;autoUpdateTime"`
-}
-
-func (m *RoleMenus) TableName() string {
-	return tablePrefix + "role_menus"
-}
