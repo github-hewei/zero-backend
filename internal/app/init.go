@@ -156,23 +156,52 @@ func LoadPlatformServerConfig() server.Config {
 
 // LoadAdminCorsConfig 加载管理后台 CORS 配置
 func LoadAdminCorsConfig() middleware.CorsConfig {
-	var c middleware.CorsConfig
-	config.UnmarshalKey("admin.cors", &c)
-	return c
+	type adapter struct {
+		AllowOrigins     []string `mapstructure:"allow_origins"`
+		AllowMethods     []string `mapstructure:"allow_methods"`
+		AllowHeaders     []string `mapstructure:"allow_headers"`
+		AllowCredentials bool     `mapstructure:"allow_credentials"`
+	}
+	var a adapter
+	config.UnmarshalKey("admin.cors", &a)
+	return middleware.CorsConfig{
+		AllowOrigins:     a.AllowOrigins,
+		AllowMethods:     a.AllowMethods,
+		AllowHeaders:     a.AllowHeaders,
+		AllowCredentials: a.AllowCredentials,
+	}
 }
 
 // LoadApiCorsConfig 加载 API CORS 配置
 func LoadApiCorsConfig() middleware.CorsConfig {
-	var c middleware.CorsConfig
-	config.UnmarshalKey("api.cors", &c)
-	return c
+	type adapter struct {
+		AllowOrigins     []string `mapstructure:"allow_origins"`
+		AllowMethods     []string `mapstructure:"allow_methods"`
+		AllowHeaders     []string `mapstructure:"allow_headers"`
+		AllowCredentials bool     `mapstructure:"allow_credentials"`
+	}
+	var a adapter
+	config.UnmarshalKey("api.cors", &a)
+	return middleware.CorsConfig{
+		AllowOrigins:     a.AllowOrigins,
+		AllowMethods:     a.AllowMethods,
+		AllowHeaders:     a.AllowHeaders,
+		AllowCredentials: a.AllowCredentials,
+	}
 }
 
 // LoadCaptchaConfig 加载验证码配置
 func LoadCaptchaConfig() captcha.Config {
-	var c captcha.Config
-	config.UnmarshalKey("admin.captcha", &c)
-	return c
+	type adapter struct {
+		Enabled bool `mapstructure:"enabled"`
+		TTL     int  `mapstructure:"ttl"`
+	}
+	var a adapter
+	config.UnmarshalKey("admin.captcha", &a)
+	return captcha.Config{
+		Enabled: a.Enabled,
+		TTL:     a.TTL,
+	}
 }
 
 // NewSettingService 创建设置服务
