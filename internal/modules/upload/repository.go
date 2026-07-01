@@ -32,12 +32,12 @@ func (f *GroupFilter) Apply(db *gorm.DB) *gorm.DB {
 
 // GroupRepository 文件分组仓库
 type GroupRepository struct {
-	*baserepo.BaseRepository[Group]
+	*baserepo.BaseRepository[UploadGroup]
 }
 
 // NewGroupRepository 创建文件分组仓库
 func NewGroupRepository(db *gorm.DB) *GroupRepository {
-	return &GroupRepository{BaseRepository: baserepo.NewBaseRepository[Group](db)}
+	return &GroupRepository{BaseRepository: baserepo.NewBaseRepository[UploadGroup](db)}
 }
 
 // FileFilter 文件查询过滤字段
@@ -74,10 +74,10 @@ func (f *FileFilter) Apply(db *gorm.DB) *gorm.DB {
 
 // FileRepository 文件仓库
 type FileRepository struct {
-	*baserepo.BaseRepository[File]
+	*baserepo.BaseRepository[UploadFile]
 }
 
 // NewFileRepository 创建文件仓库
 func NewFileRepository(db *gorm.DB) *FileRepository {
-	return &FileRepository{BaseRepository: baserepo.NewBaseRepository[File](db)}
+	return &FileRepository{BaseRepository: baserepo.NewBaseRepository[UploadFile](db)}
 }

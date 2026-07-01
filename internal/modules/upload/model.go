@@ -2,10 +2,8 @@ package upload
 
 import "gorm.io/plugin/soft_delete"
 
-const tablePrefix = "gaz_"
-
-// Group 文件分组
-type Group struct {
+// UploadGroup 文件分组
+type UploadGroup struct {
 	ID        uint32                `json:"id" gorm:"primaryKey"`
 	Name      string                `json:"name" gorm:"size:30;not null;default:'';comment:分组名称"`
 	ParentId  uint32                `json:"parent_id" gorm:"not null;default:0;comment:上级分组ID"`
@@ -14,27 +12,25 @@ type Group struct {
 	CreatedAt int64                 `json:"created_at" gorm:"not null;comment:创建时间;autoCreateTime"`
 	UpdatedAt int64                 `json:"updated_at" gorm:"not null;comment:更新时间;autoUpdateTime"`
 	DeletedAt soft_delete.DeletedAt `json:"-" gorm:"not null;default:0;comment:删除时间"`
-	Children  []*Group              `json:"children" gorm:"-"`
+	Children  []*UploadGroup      `json:"children" gorm:"-"`
 }
 
-func (Group) TableName() string { return tablePrefix + "upload_group" }
-
 // GroupList 分组列表类型
-type GroupList []*Group
+type GroupList []*UploadGroup
 
 // Tree 转换为树形结构
-func (list GroupList) Tree() []*Group {
-	groupMap := make(map[uint32]*Group)
+func (list GroupList) Tree() []*UploadGroup {
+	groupMap := make(map[uint32]*UploadGroup)
 	for _, group := range list {
 		groupMap[group.ID] = group
 	}
-	var tree []*Group
+	var tree []*UploadGroup
 	for _, group := range list {
 		if group.ParentId == 0 {
 			tree = append(tree, group)
 		} else if parent, ok := groupMap[group.ParentId]; ok {
 			if parent.Children == nil {
-				parent.Children = make([]*Group, 0)
+				parent.Children = make([]*UploadGroup, 0)
 			}
 			parent.Children = append(parent.Children, group)
 		}
@@ -42,8 +38,8 @@ func (list GroupList) Tree() []*Group {
 	return tree
 }
 
-// File 上传文件
-type File struct {
+// UploadFile 上传文件
+type UploadFile struct {
 	ID         uint32                `json:"id" gorm:"primaryKey"`
 	GroupId    uint32                `json:"group_id" gorm:"not null;default:0;comment:文件分组ID;index:group_id"`
 	Channel    int8                  `json:"channel" gorm:"type:tinyint;not null;default:10;comment:上传来源 ( 10后台 20客户端 ) "`
@@ -61,5 +57,3 @@ type File struct {
 	UpdatedAt  int64                 `json:"updated_at" gorm:"not null;comment:更新时间;autoUpdateTime"`
 	DeletedAt  soft_delete.DeletedAt `json:"-" gorm:"not null;default:0;comment:删除时间"`
 }
-
-func (File) TableName() string { return tablePrefix + "upload_file" }

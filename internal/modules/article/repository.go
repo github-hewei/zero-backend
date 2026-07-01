@@ -36,12 +36,12 @@ func (f *CategoryFilter) Apply(db *gorm.DB) *gorm.DB {
 
 // CategoryRepository 文章分类数据操作
 type CategoryRepository struct {
-	*baserepo.BaseRepository[Category]
+	*baserepo.BaseRepository[ArticleCategory]
 }
 
 // NewCategoryRepository 创建文章分类数据操作
 func NewCategoryRepository(db *gorm.DB) *CategoryRepository {
-	return &CategoryRepository{BaseRepository: baserepo.NewBaseRepository[Category](db)}
+	return &CategoryRepository{BaseRepository: baserepo.NewBaseRepository[ArticleCategory](db)}
 }
 
 // Filter 文章过滤条件

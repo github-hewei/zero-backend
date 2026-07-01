@@ -1,7 +1,5 @@
 package setting
 
-const tablePrefix = "gaz_"
-
 // Setting 系统设置
 type Setting struct {
 	ID            uint32 `json:"id" gorm:"primaryKey"`
@@ -13,10 +11,8 @@ type Setting struct {
 	UpdatedAt     int64  `json:"updated_at" gorm:"not null;comment:更新时间;autoUpdateTime"`
 }
 
-func (Setting) TableName() string { return tablePrefix + "setting" }
-
-// DefaultSetting 系统默认设置
-type DefaultSetting struct {
+// SettingDefault 系统默认设置
+type SettingDefault struct {
 	ID            uint32 `json:"id" gorm:"primaryKey"`
 	SettingKey    string `json:"setting_key" gorm:"size:30;not null;comment:设置项标识"`
 	SettingValues string `json:"setting_values" gorm:"not null;comment:设置内容（json格式）"`
@@ -25,4 +21,4 @@ type DefaultSetting struct {
 	UpdatedAt     int64  `json:"updated_at" gorm:"not null;comment:更新时间;autoUpdateTime"`
 }
 
-func (DefaultSetting) TableName() string { return tablePrefix + "setting_default" }
+

@@ -21,7 +21,7 @@ func NewCategoryService(repo *CategoryRepository) *CategoryService {
 
 // List 获取文章分类列表
 func (s *CategoryService) List(ctx context.Context, req *CategoryListRequest) (*ListResult, error) {
-	result := &ListResult{List: []*Category{}, Total: 0}
+	result := &ListResult{List: []*ArticleCategory{}, Total: 0}
 
 	filter := &CategoryFilter{StoreId: req.StoreId, Name: req.Name, Status: req.Status}
 
@@ -45,7 +45,7 @@ func (s *CategoryService) List(ctx context.Context, req *CategoryListRequest) (*
 
 // Create 创建文章分类
 func (s *CategoryService) Create(ctx context.Context, req *CategoryCreateRequest) error {
-	category := &Category{Name: req.Name, Status: req.Status, Sort: req.Sort, StoreId: req.StoreId}
+	category := &ArticleCategory{Name: req.Name, Status: req.Status, Sort: req.Sort, StoreId: req.StoreId}
 	if err := s.repo.Create(ctx, category); err != nil {
 		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("创建文章分类失败"))
 	}

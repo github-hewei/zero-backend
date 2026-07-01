@@ -4,8 +4,6 @@ import (
 	"gorm.io/plugin/soft_delete"
 )
 
-const tablePrefix = "gaz_"
-
 // RbacMenu 菜单表模型
 type RbacMenu struct {
 	ID         uint32 `json:"id" gorm:"primaryKey"`
@@ -22,10 +20,6 @@ type RbacMenu struct {
 
 	Children []*RbacMenu `json:"children" gorm:"-"`
 	Actions  []*RbacMenu `json:"actions" gorm:"-"`
-}
-
-func (m *RbacMenu) TableName() string {
-	return tablePrefix + "rbac_menu"
 }
 
 // RbacMenuList 菜单列表
@@ -69,10 +63,6 @@ type RbacApi struct {
 	Children  []*RbacApi `json:"children" gorm:"-"`
 }
 
-func (m *RbacApi) TableName() string {
-	return tablePrefix + "rbac_api"
-}
-
 // RbacApiList 接口列表
 type RbacApiList []*RbacApi
 
@@ -104,10 +94,6 @@ type RbacMenuApi struct {
 	CreatedAt int64  `json:"created_at" gorm:"not null;comment:创建时间;autoCreateTime"`
 }
 
-func (m *RbacMenuApi) TableName() string {
-	return tablePrefix + "rbac_menu_api"
-}
-
 // RbacRole 角色表模型
 type RbacRole struct {
 	ID        uint32 `json:"id" gorm:"primaryKey"`
@@ -120,10 +106,6 @@ type RbacRole struct {
 
 	Children     []*RbacRole     `json:"children" gorm:"-"`
 	RbacRoleMenu []*RbacRoleMenu `json:"rbac_role_menu" gorm:"foreignKey:RoleId"`
-}
-
-func (m *RbacRole) TableName() string {
-	return tablePrefix + "rbac_role"
 }
 
 // RbacRoleList 角色列表
@@ -162,10 +144,6 @@ type RbacRoleMenu struct {
 	RbacMenu *RbacMenu `json:"rbac_menu" gorm:"foreignKey:MenuId"`
 }
 
-func (m *RbacRoleMenu) TableName() string {
-	return tablePrefix + "rbac_role_menu"
-}
-
 // RbacStore 企业表模型
 type RbacStore struct {
 	ID           uint32 `json:"id" gorm:"primaryKey"`
@@ -181,10 +159,6 @@ type RbacStore struct {
 	UpdatedAt    int64  `json:"updated_at" gorm:"not null;comment:更新时间;autoUpdateTime"`
 
 	DeletedAt soft_delete.DeletedAt `json:"-" gorm:"not null;default:0;comment:删除时间"`
-}
-
-func (m *RbacStore) TableName() string {
-	return tablePrefix + "rbac_store"
 }
 
 // RbacUser 管理员表模型
@@ -205,10 +179,6 @@ type RbacUser struct {
 	SU bool `json:"su" gorm:"-"`
 }
 
-func (m *RbacUser) TableName() string {
-	return tablePrefix + "rbac_user"
-}
-
 // RbacUserRole 用户角色关联表
 type RbacUserRole struct {
 	ID        uint32 `json:"id" gorm:"primaryKey"`
@@ -220,6 +190,4 @@ type RbacUserRole struct {
 	RbacRole *RbacRole `json:"rbac_role" gorm:"foreignKey:RoleId"`
 }
 
-func (m *RbacUserRole) TableName() string {
-	return tablePrefix + "rbac_user_role"
-}
+

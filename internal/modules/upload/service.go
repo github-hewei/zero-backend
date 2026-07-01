@@ -37,7 +37,7 @@ func NewGroupService(repo *GroupRepository) *GroupService {
 }
 
 // FindTreeList 获取文件分组树列表
-func (s *GroupService) FindTreeList(ctx context.Context, storeId uint32) ([]*Group, error) {
+func (s *GroupService) FindTreeList(ctx context.Context, storeId uint32) ([]*UploadGroup, error) {
 	filter := &GroupFilter{StoreId: storeId}
 	list, err := s.repo.FindAll(ctx, filter, nil, nil)
 	if err != nil {
@@ -58,7 +58,7 @@ func (s *GroupService) Create(ctx context.Context, req *GroupCreateRequest) erro
 	if err := s.checkName(ctx, req.Name, req.StoreId); err != nil {
 		return err
 	}
-	group := &Group{StoreId: req.StoreId, Name: req.Name, ParentId: req.ParentId, Sort: req.Sort}
+	group := &UploadGroup{StoreId: req.StoreId, Name: req.Name, ParentId: req.ParentId, Sort: req.Sort}
 	if err := s.repo.Create(ctx, group); err != nil {
 		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("创建分组失败"))
 	}
@@ -129,7 +129,7 @@ func NewFileService(repo *FileRepository, settSvc SettingProvider) *FileService 
 
 // FindList 获取文件列表
 func (s *FileService) FindList(ctx context.Context, req *FileListRequest) (*ListResult, error) {
-	result := &ListResult{List: []*File{}, Total: 0}
+	result := &ListResult{List: []*UploadFile{}, Total: 0}
 	filter := &FileFilter{StoreId: req.StoreId, GroupId: req.GroupId, FileType: req.FileType, FileName: req.FileName}
 	pagination := baserepo.NewPagination(req.Page, req.Limit)
 	orders := baserepo.Orders{{Field: "id", Sort: "desc"}}
@@ -230,7 +230,7 @@ func (s *FileService) generateFilePath(file *multipart.FileHeader) (string, erro
 }
 
 // Upload 上传文件
-func (s *FileService) Upload(ctx context.Context, req *FileRequest) (*File, error) {
+func (s *FileService) Upload(ctx context.Context, req *FileRequest) (*UploadFile, error) {
 	config, err := s.getUploadConfig(ctx)
 	if err != nil {
 		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("获取上传配置失败"))
@@ -279,7 +279,7 @@ func (s *FileService) Upload(ctx context.Context, req *FileRequest) (*File, erro
 	}
 
 	filePath := "/" + strings.ReplaceAll(savePath, "\\", "/")
-	uploadFile := &File{
+	uploadFile := &UploadFile{
 		GroupId: req.GroupId, Channel: 10, Storage: config.StorageType,
 		Domain: "", FileType: fileType, FilePath: filePath,
 		FileName: req.File.Filename, FileSize: uint32(req.File.Size),

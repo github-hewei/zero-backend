@@ -172,7 +172,7 @@ func NewDefaultService(repo *DefaultRepository) *DefaultService {
 
 // FindList 获取默认设置列表
 func (s *DefaultService) FindList(ctx context.Context, req *DefaultListRequest) (*ListResult, error) {
-	result := &ListResult{List: []*DefaultSetting{}, Total: 0}
+	result := &ListResult{List: []*SettingDefault{}, Total: 0}
 	filter := &DefaultFilter{SettingKey: req.SettingKey}
 	total, err := s.repo.Count(ctx, filter, baserepo.WithScopes(nil))
 	if err != nil {
@@ -196,7 +196,7 @@ func (s *DefaultService) Create(ctx context.Context, req *DefaultCreateRequest) 
 	if err := s.checkSettingKey(ctx, req.SettingKey); err != nil {
 		return err
 	}
-	item := &DefaultSetting{SettingKey: req.SettingKey, SettingValues: req.SettingValues, Description: req.Description}
+	item := &SettingDefault{SettingKey: req.SettingKey, SettingValues: req.SettingValues, Description: req.Description}
 	if err := s.repo.Create(ctx, item); err != nil {
 		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("创建默认设置失败"))
 	}

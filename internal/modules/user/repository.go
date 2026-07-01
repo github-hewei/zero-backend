@@ -87,10 +87,10 @@ func (f *PointsLogFilter) Apply(db *gorm.DB) *gorm.DB {
 
 // PointsLogRepo 用户积分记录数据操作
 type PointsLogRepo struct {
-	*baserepo.BaseRepository[PointsLog]
+	*baserepo.BaseRepository[UserPointsLog]
 }
 
 // NewPointsLogRepo 创建用户积分记录数据操作实例
 func NewPointsLogRepo(db *gorm.DB) *PointsLogRepo {
-	return &PointsLogRepo{BaseRepository: baserepo.NewBaseRepository[PointsLog](db)}
+	return &PointsLogRepo{BaseRepository: baserepo.NewBaseRepository[UserPointsLog](db)}
 }

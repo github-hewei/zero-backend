@@ -4,8 +4,6 @@ import (
 	"gorm.io/plugin/soft_delete"
 )
 
-const tablePrefix = "gaz_"
-
 // PlatformUser 平台管理员表模型
 type PlatformUser struct {
 	ID            uint32 `json:"id" gorm:"primaryKey"`
@@ -21,10 +19,6 @@ type PlatformUser struct {
 	UpdatedAt     int64  `json:"updated_at" gorm:"not null;comment:更新时间;autoUpdateTime"`
 
 	DeletedAt soft_delete.DeletedAt `json:"-" gorm:"not null;default:0;comment:删除时间"`
-}
-
-func (m *PlatformUser) TableName() string {
-	return tablePrefix + "platform_user"
 }
 
 // PlatformRole 平台角色

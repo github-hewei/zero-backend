@@ -110,7 +110,7 @@ func (s *Service) checkUsername(ctx context.Context, username string) error {
 
 // GetPointsLogs 获取用户积分记录
 func (s *Service) GetPointsLogs(ctx context.Context, req *PointsLogListRequest) (*ListResult, error) {
-	result := &ListResult{List: []*PointsLog{}, Total: 0}
+	result := &ListResult{List: []*UserPointsLog{}, Total: 0}
 	filter := &PointsLogFilter{StoreId: req.StoreId, UserId: req.UserId}
 	total, err := s.pointsLogRepo.Count(ctx, filter)
 	if err != nil {
@@ -154,7 +154,7 @@ func (s *Service) ChangePoints(ctx context.Context, req *PointsChangeRequest) er
 		if err := s.repo.Updates(ctx, user, updateData, baserepo.WithDB[*baserepo.UpdateConfig](tx)); err != nil {
 			return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("变更用户积分失败"))
 		}
-		pointsLog := &PointsLog{UserId: req.UserId, Points: req.Points, ChangeType: req.ChangeType, SourceType: req.SourceType, SourceId: req.SourceId, Remark: req.Remark, StoreId: req.StoreId}
+		pointsLog := &UserPointsLog{UserId: req.UserId, Points: req.Points, ChangeType: req.ChangeType, SourceType: req.SourceType, SourceId: req.SourceId, Remark: req.Remark, StoreId: req.StoreId}
 		if err := s.pointsLogRepo.Create(ctx, pointsLog, baserepo.WithDB[*baserepo.CreateConfig](tx)); err != nil {
 			return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("变更用户积分失败"))
 		}

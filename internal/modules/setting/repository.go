@@ -57,10 +57,10 @@ func (f *DefaultFilter) Apply(db *gorm.DB) *gorm.DB {
 
 // DefaultRepository 默认数据仓库
 type DefaultRepository struct {
-	*baserepo.BaseRepository[DefaultSetting]
+	*baserepo.BaseRepository[SettingDefault]
 }
 
 // NewDefaultRepository 创建默认数据仓库
 func NewDefaultRepository(db *gorm.DB) *DefaultRepository {
-	return &DefaultRepository{BaseRepository: baserepo.NewBaseRepository[DefaultSetting](db)}
+	return &DefaultRepository{BaseRepository: baserepo.NewBaseRepository[SettingDefault](db)}
 }

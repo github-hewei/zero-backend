@@ -1,7 +1,5 @@
 package region
 
-const tablePrefix = "gaz_"
-
 // Region 区划模型
 type Region struct {
 	ID       uint32    `json:"id" gorm:"primaryKey"`
@@ -11,8 +9,6 @@ type Region struct {
 	Level    int8      `json:"level" gorm:"type:tinyint;not null;default:1;comment:层级 ( 1省级 2市级 3区/县级 ) "`
 	Children []*Region `json:"children,omitempty" gorm:"-"`
 }
-
-func (Region) TableName() string { return tablePrefix + "region" }
 
 // List 地区列表
 type List []Region

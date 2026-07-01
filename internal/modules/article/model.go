@@ -2,10 +2,8 @@ package article
 
 import "gorm.io/plugin/soft_delete"
 
-const tablePrefix = "gaz_"
-
-// Category 文章分类
-type Category struct {
+// ArticleCategory 文章分类
+type ArticleCategory struct {
 	ID        uint32 `json:"id" gorm:"primaryKey"`
 	Name      string `json:"name" gorm:"size:50;not null;default:'';comment:分类名称"`
 	Status    int8   `json:"status" gorm:"type:tinyint;not null;default:1;comment:状态 ( 1显示 0隐藏 ) "`
@@ -14,8 +12,6 @@ type Category struct {
 	CreatedAt uint32 `json:"created_at" gorm:"not null;comment:创建时间;autoCreateTime"`
 	UpdatedAt uint32 `json:"updated_at" gorm:"not null;comment:更新时间;autoUpdateTime"`
 }
-
-func (Category) TableName() string { return tablePrefix + "article_category" }
 
 // Article 文章
 type Article struct {
@@ -34,5 +30,3 @@ type Article struct {
 	UpdatedAt    uint32                `json:"updated_at" gorm:"not null;comment:更新时间;autoUpdateTime"`
 	DeletedAt    soft_delete.DeletedAt `json:"deleted_at" gorm:"not null;default:0;comment:是否删除"`
 }
-
-func (Article) TableName() string { return tablePrefix + "article" }

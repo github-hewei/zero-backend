@@ -7,5 +7,3 @@ type UploadFile struct {
 	FileName string `json:"file_name"`
 	Domain   string `json:"domain"`
 }
-
-func (UploadFile) TableName() string { return tablePrefix + "upload_file" }
