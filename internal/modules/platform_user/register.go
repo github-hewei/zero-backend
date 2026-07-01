@@ -10,15 +10,16 @@ import (
 
 // Deps 模块依赖
 type Deps struct {
-	DB     *gorm.DB
-	Binder *bind.Binder
-	Config Config
-	RDB    *redis.Client
+	DB      *gorm.DB
+	Binder  *bind.Binder
+	Config  Config
+	RDB     *redis.Client
+	Captcha CaptchaVerifier
 }
 
 func buildAll(deps Deps) (*handler, *AuthMiddleware) {
 	repo := NewPlatformUserRepository(deps.DB)
-	authServ := NewAuthService(repo, deps.Config, deps.RDB)
+	authServ := NewAuthService(repo, deps.Config, deps.RDB, deps.Captcha)
 	authMid := NewAuthMiddleware(deps.Config, authServ)
 	userServ := NewPlatformUserService(repo)
 

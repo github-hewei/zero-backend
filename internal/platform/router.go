@@ -2,6 +2,7 @@ package platform
 
 import (
 	"zero-backend/internal/app"
+	"zero-backend/internal/modules/captcha"
 	"zero-backend/internal/modules/platform_user"
 	"zero-backend/internal/modules/rbac"
 	"zero-backend/internal/modules/setting"
@@ -28,12 +29,16 @@ func NewGin(
 	public := r.Group("/api")
 	protected := public.Group("")
 
+	captchaSvc := app.Must(app.NewCaptchaService(rdb, app.LoadCaptchaConfig()))
+	captcha.Register(public, binder, captchaSvc)
+
 	authCfg := app.Must(platform_user.LoadConfig())
 	authMid := platform_user.Register(public, protected, platform_user.Deps{
-		DB:     db,
-		Binder: binder,
-		Config: authCfg,
-		RDB:    rdb,
+		DB:      db,
+		Binder:  binder,
+		Config:  authCfg,
+		RDB:     rdb,
+		Captcha: captchaSvc,
 	})
 
 	platformGroup := protected.Group("")

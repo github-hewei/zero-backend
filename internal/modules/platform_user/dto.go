@@ -2,8 +2,10 @@ package platform_user
 
 // PlatformLoginRequest 平台登录请求
 type PlatformLoginRequest struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Username    string `json:"username" validate:"required"`
+	Password    string `json:"password" validate:"required"`
+	CaptchaID   string `json:"captcha_id" validate:"required"`
+	CaptchaCode string `json:"captcha_code" validate:"required"`
 }
 
 // PlatformLoginResponse 平台登录响应

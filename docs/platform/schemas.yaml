@@ -19,6 +19,8 @@ schemas:
     required:
       - username
       - password
+      - captcha_id
+      - captcha_code
     properties:
       username:
         type: string
@@ -28,6 +30,12 @@ schemas:
         type: string
         description: 密码
         example: "123456"
+      captcha_id:
+        type: string
+        description: 验证码ID
+      captcha_code:
+        type: string
+        description: 验证码点选坐标（JSON字符串）
 
   PlatformLoginResponse:
     type: object
@@ -286,3 +294,23 @@ schemas:
       updated_at:
         type: integer
         description: 更新时间
+
+  CaptchaGenerateResponse:
+    type: object
+    properties:
+      errcode:
+        type: integer
+      message:
+        type: string
+      data:
+        type: object
+        properties:
+          captcha_id:
+            type: string
+            description: 验证码ID
+          master_image:
+            type: string
+            description: 主图(base64)
+          thumb_image:
+            type: string
+            description: 缩略图(base64)

@@ -21,20 +21,30 @@ const (
 	redisPlatformLoginKey        = "ZAG:PLATFORM:LOGIN"
 )
 
+// CaptchaVerifier 验证码验证接口（由宿主注入）
+type CaptchaVerifier interface {
+	Verify(ctx context.Context, captchaID, captchaCode string) error
+}
+
 // AuthService 平台认证服务
 type AuthService struct {
-	repo *PlatformUserRepository
-	cfg  Config
-	rdb  *redis.Client
+	repo    *PlatformUserRepository
+	cfg     Config
+	rdb     *redis.Client
+	captcha CaptchaVerifier
 }
 
 // NewAuthService 创建平台认证服务
-func NewAuthService(repo *PlatformUserRepository, cfg Config, rdb *redis.Client) *AuthService {
-	return &AuthService{repo: repo, cfg: cfg, rdb: rdb}
+func NewAuthService(repo *PlatformUserRepository, cfg Config, rdb *redis.Client, captcha CaptchaVerifier) *AuthService {
+	return &AuthService{repo: repo, cfg: cfg, rdb: rdb, captcha: captcha}
 }
 
 // Login 平台登录
 func (s *AuthService) Login(ctx context.Context, req *PlatformLoginRequest) (*PlatformLoginResponse, string, error) {
+	if err := s.captcha.Verify(ctx, req.CaptchaID, req.CaptchaCode); err != nil {
+		return nil, "", err
+	}
+
 	filter := &PlatformUserUsernameFilterField{Username: req.Username}
 	item, err := s.repo.FindOne(ctx, filter, baserepo.WithScopes(nil))
 	if err != nil {
