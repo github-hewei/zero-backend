@@ -163,3 +163,104 @@ schemas:
         description: 新密码
         minLength: 6
         maxLength: 20
+
+  RbacMenu:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 菜单ID
+      type:
+        type: integer
+        description: 菜单类型 (10页面 20操作)
+      name:
+        type: string
+        description: 菜单名称
+      path:
+        type: string
+        description: 菜单路径
+      is_page:
+        type: integer
+        description: 是否为页面 (1是 0否)
+      module_key:
+        type: string
+        description: 功能模块key
+      action_mark:
+        type: string
+        description: 操作标识
+      parent_id:
+        type: integer
+        description: 上级菜单ID
+      sort:
+        type: integer
+        description: 排序
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+      children:
+        type: array
+        items:
+          $ref: '#/schemas/RbacMenu'
+        description: 子菜单
+      actions:
+        type: array
+        items:
+          $ref: '#/schemas/RbacMenu'
+        description: 操作列表
+
+  RbacApi:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 接口ID
+      name:
+        type: string
+        description: 接口名称
+      url:
+        type: string
+        description: 接口URL
+      parent_id:
+        type: integer
+        description: 父级ID
+      sort:
+        type: integer
+        description: 排序
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间
+      children:
+        type: array
+        items:
+          $ref: '#/schemas/RbacApi'
+
+  RbacRole:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 角色ID
+      role_name:
+        type: string
+        description: 角色名称
+      parent_id:
+        type: integer
+        description: 父级角色ID
+      sort:
+        type: integer
+        description: 排序
+      store_id:
+        type: integer
+        description: 企业ID
+      created_at:
+        type: integer
+        description: 创建时间
+      updated_at:
+        type: integer
+        description: 更新时间

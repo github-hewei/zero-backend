@@ -41,6 +41,41 @@ paths:
   /rbac/store/restore:
     $ref: './paths/rbac-store.yaml#/~1rbac~1store~1restore'
 
+  /rbac/menu/list:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1list'
+  /rbac/menu/create:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1create'
+  /rbac/menu/update:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1update'
+  /rbac/menu/delete:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1delete'
+  /rbac/menu/sync:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1sync'
+  /rbac/menu/api/list:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1api~1list'
+  /rbac/menu/api/save:
+    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1api~1save'
+
+  /rbac/api/list:
+    $ref: './paths/rbac-api.yaml#/~1rbac~1api~1list'
+  /rbac/api/create:
+    $ref: './paths/rbac-api.yaml#/~1rbac~1api~1create'
+  /rbac/api/update:
+    $ref: './paths/rbac-api.yaml#/~1rbac~1api~1update'
+  /rbac/api/delete:
+    $ref: './paths/rbac-api.yaml#/~1rbac~1api~1delete'
+
+  /rbac/role/list:
+    $ref: './paths/rbac-role.yaml#/~1rbac~1role~1list'
+  /rbac/role/create:
+    $ref: './paths/rbac-role.yaml#/~1rbac~1role~1create'
+  /rbac/role/update:
+    $ref: './paths/rbac-role.yaml#/~1rbac~1role~1update'
+  /rbac/role/delete:
+    $ref: './paths/rbac-role.yaml#/~1rbac~1role~1delete'
+  /rbac/role/set-menus:
+    $ref: './paths/rbac-role.yaml#/~1rbac~1role~1set-menus'
+
   /rbac/user/list:
     $ref: './paths/rbac-user.yaml#/~1rbac~1user~1list'
   /rbac/user/create:
@@ -72,5 +107,11 @@ components:
       $ref: './schemas.yaml#/schemas/RbacStore'
     RbacUser:
       $ref: './schemas.yaml#/schemas/RbacUser'
+    RbacMenu:
+      $ref: './schemas.yaml#/schemas/RbacMenu'
+    RbacApi:
+      $ref: './schemas.yaml#/schemas/RbacApi'
+    RbacRole:
+      $ref: './schemas.yaml#/schemas/RbacRole'
     ChangePasswordRequest:
       $ref: './schemas.yaml#/schemas/ChangePasswordRequest'

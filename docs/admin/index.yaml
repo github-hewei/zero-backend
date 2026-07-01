@@ -21,43 +21,6 @@ paths:
   /permissions:
     $ref: './paths/auth.yaml#/~1permissions'
 
-  /rbac/menu/list:
-    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1list'
-  /rbac/menu/create:
-    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1create'
-  /rbac/menu/update:
-    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1update'
-  /rbac/menu/delete:
-    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1delete'
-  /rbac/menu/sync:
-    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1sync'
-  /rbac/menu/api/list:
-    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1api~1list'
-  /rbac/menu/api/save:
-    $ref: './paths/rbac-menu.yaml#/~1rbac~1menu~1api~1save'
-
-  /rbac/api/list:
-    $ref: './paths/rbac-api.yaml#/~1rbac~1api~1list'
-  /rbac/api/create:
-    $ref: './paths/rbac-api.yaml#/~1rbac~1api~1create'
-  /rbac/api/update:
-    $ref: './paths/rbac-api.yaml#/~1rbac~1api~1update'
-  /rbac/api/delete:
-    $ref: './paths/rbac-api.yaml#/~1rbac~1api~1delete'
-
-  /rbac/store/list:
-    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1list'
-  /rbac/store/create:
-    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1create'
-  /rbac/store/update:
-    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1update'
-  /rbac/store/delete:
-    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1delete'
-  /rbac/store/recycle:
-    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1recycle'
-  /rbac/store/restore:
-    $ref: './paths/rbac-store.yaml#/~1rbac~1store~1restore'
-
   /rbac/role/list:
     $ref: './paths/rbac-role.yaml#/~1rbac~1role~1list'
   /rbac/role/create:
@@ -169,14 +132,8 @@ components:
       $ref: './schemas.yaml#/schemas/AuthLoginResponse'
     RbacUser:
       $ref: './schemas.yaml#/schemas/RbacUser'
-    RbacMenu:
-      $ref: './schemas.yaml#/schemas/RbacMenu'
-    RbacApi:
-      $ref: './schemas.yaml#/schemas/RbacApi'
     RbacRole:
       $ref: './schemas.yaml#/schemas/RbacRole'
-    RbacStore:
-      $ref: './schemas.yaml#/schemas/RbacStore'
     User:
       $ref: './schemas.yaml#/schemas/User'
     ArticleCategory:
