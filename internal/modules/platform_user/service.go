@@ -131,24 +131,25 @@ func (s *PlatformUserService) Delete(ctx context.Context, req *PlatformUserDelet
 }
 
 // ResetPassword 重置平台用户密码
-func (s *PlatformUserService) ResetPassword(ctx context.Context, req *PlatformUserResetPasswordRequest) error {
+func (s *PlatformUserService) ResetPassword(ctx context.Context, req *PlatformUserResetPasswordRequest) (string, error) {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
-			return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
+			return "", apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))
 		}
-		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("重置密码失败"))
+		return "", apperror.Wrap(errcode.Internal, err, apperror.WithMsg("重置密码失败"))
 	}
 
-	hashedPassword, err := helper.HashPassword(req.Password)
+	newPassword := helper.RandomStringWithSymbols(12)
+	hashedPassword, err := helper.HashPassword(newPassword)
 	if err != nil {
-		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("密码加密失败"))
+		return "", apperror.Wrap(errcode.Internal, err, apperror.WithMsg("密码加密失败"))
 	}
 
 	if err := s.repo.Updates(ctx, item, map[string]any{"password": hashedPassword}); err != nil {
-		return apperror.Wrap(errcode.Internal, err, apperror.WithMsg("重置密码失败"))
+		return "", apperror.Wrap(errcode.Internal, err, apperror.WithMsg("重置密码失败"))
 	}
-	return nil
+	return newPassword, nil
 }
 
 // checkUsername 检查用户名是否已存在

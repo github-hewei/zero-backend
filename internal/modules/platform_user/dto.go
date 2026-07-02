@@ -56,8 +56,7 @@ type PlatformUserDeleteRequest struct {
 
 // PlatformUserResetPasswordRequest 重置平台用户密码请求
 type PlatformUserResetPasswordRequest struct {
-	ID       uint32 `json:"id" validate:"required"`
-	Password string `json:"password" validate:"required,min=6,max=20"`
+	ID uint32 `json:"id" validate:"required"`
 }
 
 // ListResult 列表数据响应

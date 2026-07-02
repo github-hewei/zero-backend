@@ -145,9 +145,12 @@ func (h *handler) userResetPassword(ctx *gin.Context) {
 		response.Error(ctx, err)
 		return
 	}
-	if err := h.userServ.ResetPassword(ctx.Request.Context(), req); err != nil {
+	newPassword, err := h.userServ.ResetPassword(ctx.Request.Context(), req)
+	if err != nil {
 		response.Error(ctx, err)
 		return
 	}
-	response.Success(ctx, "重置成功", nil)
+	response.Success(ctx, "重置成功", gin.H{
+		"new_password": newPassword,
+	})
 }

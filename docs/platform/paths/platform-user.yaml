@@ -187,7 +187,7 @@
     tags:
       - 平台用户管理
     summary: 重置平台用户密码
-    description: 直接重置指定平台管理员的密码，无需旧密码。仅超管可操作。
+    description: 系统自动生成随机密码并重置指定平台管理员的密码，无需旧密码。仅超管可操作。
     operationId: resetPlatformUserPassword
     security:
       - BearerAuth: []
@@ -199,20 +199,25 @@
             type: object
             required:
               - id
-              - password
             properties:
               id:
                 type: integer
                 description: 用户ID
-              password:
-                type: string
-                description: 新密码
-                minLength: 6
-                maxLength: 20
     responses:
       '200':
         description: 成功
         content:
           application/json:
             schema:
-              $ref: '../schemas.yaml#/schemas/CommonResponse'
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    new_password:
+                      type: string
+                      description: 系统生成的新密码
