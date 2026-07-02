@@ -23,13 +23,14 @@ func NewGin(
 	rdb *redis.Client,
 ) *gin.Engine {
 	r := gin.Default()
+	r.Use(middleware.CORS(app.LoadPlatformCorsConfig()))
 	r.Use(middleware.Trace(log))
 	r.Use(middleware.RequestLog())
 
 	public := r.Group("/api")
 	protected := public.Group("")
 
-	captchaSvc := app.Must(app.NewCaptchaService(rdb, app.LoadCaptchaConfig()))
+	captchaSvc := app.Must(app.NewCaptchaService(rdb, app.LoadPlatformCaptchaConfig()))
 	captcha.Register(public, binder, captchaSvc)
 
 	authCfg := app.Must(platform_user.LoadConfig())

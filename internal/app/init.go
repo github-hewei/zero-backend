@@ -190,6 +190,24 @@ func LoadApiCorsConfig() middleware.CorsConfig {
 	}
 }
 
+// LoadPlatformCorsConfig 加载平台端 CORS 配置
+func LoadPlatformCorsConfig() middleware.CorsConfig {
+	type adapter struct {
+		AllowOrigins     []string `mapstructure:"allow_origins"`
+		AllowMethods     []string `mapstructure:"allow_methods"`
+		AllowHeaders     []string `mapstructure:"allow_headers"`
+		AllowCredentials bool     `mapstructure:"allow_credentials"`
+	}
+	var a adapter
+	config.UnmarshalKey("platform.cors", &a)
+	return middleware.CorsConfig{
+		AllowOrigins:     a.AllowOrigins,
+		AllowMethods:     a.AllowMethods,
+		AllowHeaders:     a.AllowHeaders,
+		AllowCredentials: a.AllowCredentials,
+	}
+}
+
 // LoadCaptchaConfig 加载验证码配置
 func LoadCaptchaConfig() captcha.Config {
 	type adapter struct {
@@ -198,6 +216,20 @@ func LoadCaptchaConfig() captcha.Config {
 	}
 	var a adapter
 	config.UnmarshalKey("admin.captcha", &a)
+	return captcha.Config{
+		Enabled: a.Enabled,
+		TTL:     a.TTL,
+	}
+}
+
+// LoadPlatformCaptchaConfig 加载平台端验证码配置
+func LoadPlatformCaptchaConfig() captcha.Config {
+	type adapter struct {
+		Enabled bool `mapstructure:"enabled"`
+		TTL     int  `mapstructure:"ttl"`
+	}
+	var a adapter
+	config.UnmarshalKey("platform.captcha", &a)
 	return captcha.Config{
 		Enabled: a.Enabled,
 		TTL:     a.TTL,
