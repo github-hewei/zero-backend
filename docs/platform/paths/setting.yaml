@@ -31,6 +31,41 @@
                       type: string
                       description: 上传地址
 
+/setting/form-configs:
+  post:
+    tags:
+      - 设置管理
+    summary: 获取设置表单配置
+    description: 获取系统设置的表单配置信息，包含所有设置分组及字段定义。平台端返回全部配置（含平台专属）。
+    operationId: getPlatformFormConfigs
+    security:
+      - BearerAuth: []
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              only_platform:
+                type: boolean
+                description: 仅获取平台级配置
+    responses:
+      '200':
+        description: 成功
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errcode:
+                  type: integer
+                message:
+                  type: string
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas.yaml#/schemas/FormGroup'
+
 /setting/default/list:
   post:
     tags:

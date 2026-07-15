@@ -39,6 +39,7 @@ func RegisterPlatform(rg *gin.RouterGroup, deps Deps) {
 	rg.POST("/setting/default/create", h.DefaultCreate)
 	rg.POST("/setting/default/update", h.DefaultUpdate)
 	rg.POST("/setting/default/delete", h.DefaultDelete)
+	rg.POST("/setting/form-configs", h.FormConfigs)
 	rg.POST("/setting/qiniu-token", h.QiniuToken)
 }
 

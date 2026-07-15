@@ -15,6 +15,12 @@
 | 平台用户管理 | `/platform/user/update` | 更新平台用户 | 超管 |
 | 平台用户管理 | `/platform/user/delete` | 删除平台用户 | 超管 |
 | 平台用户管理 | `/platform/user/reset-password` | 重置平台用户密码 | 超管 |
+| 设置管理 | `/setting/default/list` | 获取默认设置列表 | 超管、运营 |
+| 设置管理 | `/setting/default/create` | 创建默认设置 | 超管、运营 |
+| 设置管理 | `/setting/default/update` | 更新默认设置 | 超管、运营 |
+| 设置管理 | `/setting/default/delete` | 删除默认设置 | 超管、运营 |
+| 设置管理 | `/setting/form-configs` | 获取设置表单配置 | 超管、运营 |
+| 设置管理 | `/setting/qiniu-token` | 获取七牛上传Token | 超管、运营 |
 | 企业管理 | `/rbac/store/list` | 企业列表 | 超管、运营 |
 | 企业管理 | `/rbac/store/create` | 创建企业 | 超管、运营 |
 | 企业管理 | `/rbac/store/update` | 更新企业 | 超管、运营 |

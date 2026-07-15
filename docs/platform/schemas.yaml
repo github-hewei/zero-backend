@@ -314,3 +314,52 @@ schemas:
           thumb_image:
             type: string
             description: 缩略图(base64)
+
+  FormGroup:
+    type: object
+    properties:
+      key:
+        type: string
+        description: 分组标识
+      label:
+        type: string
+        description: 分组名称
+      description:
+        type: string
+        description: 分组描述
+      only_platform:
+        type: boolean
+        description: 是否仅平台可用
+      fields:
+        type: array
+        items:
+          $ref: '#/schemas/FormField'
+
+  FormField:
+    type: object
+    properties:
+      key:
+        type: string
+        description: 字段标识
+      label:
+        type: string
+        description: 字段名称
+      type:
+        type: string
+        description: 表单类型（text/textarea/select/checkbox/switch/image/file）
+      required:
+        type: boolean
+        description: 是否必填
+      options:
+        type: array
+        items:
+          $ref: '#/schemas/FormOption'
+
+  FormOption:
+    type: object
+    properties:
+      label:
+        type: string
+        description: 选项名称
+      value:
+        description: 选项值
