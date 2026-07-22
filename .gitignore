@@ -9,3 +9,4 @@
 .qoder
 .roo
 /data/*.sql.progress
+/logs

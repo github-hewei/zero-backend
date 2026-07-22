@@ -17,7 +17,7 @@ func main() {
 	config.Init()
 
 	conn := mongodb.MustNewConn(provider.LoadMongoConfig())
-	log := provider.LoadLogger(conn.DB, "admin.log")
+	log := provider.NewLogger(conn.DB, "admin.log")
 
 	gormLog := gormutil.NewLogger(log)
 	db := mysql.MustNewDB(provider.LoadMySQLConfig(), gormLog)

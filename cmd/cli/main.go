@@ -18,7 +18,7 @@ func main() {
 	config.Init()
 
 	conn := mongodb.MustNewConn(provider.LoadMongoConfig())
-	l := provider.LoadLogger(conn.DB, "cli.log")
+	l := provider.NewLogger(conn.DB, "cli.log")
 
 	rdb := redis.New(provider.LoadRedisConfig())
 

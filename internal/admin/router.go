@@ -36,10 +36,7 @@ func NewGin(
 	public := r.Group("/api")
 	protected := public.Group("")
 
-	captchaSvc, err := provider.NewCaptchaService(rdb, provider.LoadCaptchaConfig())
-	if err != nil {
-		panic(err)
-	}
+	captchaSvc := provider.MustNewCaptchaService(rdb, provider.LoadAdminCaptchaConfig())
 	captcha.Register(public, binder, captchaSvc)
 
 	authCfg := rbac.MustLoadConfig()
