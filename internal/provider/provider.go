@@ -1,4 +1,4 @@
-package app
+package provider
 
 import (
 	"strings"
@@ -19,59 +19,49 @@ import (
 	"gorm.io/gorm"
 )
 
-// LoggerConfig 日志配置
-type LoggerConfig struct {
-	Level   string
-	Writers []string
-	File    FileLogConfig
-}
-
-// FileLogConfig 文件日志配置
-type FileLogConfig struct {
-	Path       string
-	Filename   string
-	MaxSize    int
-	MaxAge     int
-	MaxBackups int
-	Compress   bool
-	LocalTime  bool
-}
-
 // LoadLogger 加载日志组件。filename 为空时使用配置文件中的默认文件名。
 func LoadLogger(db *mongo.Database, filename string) *logger.ZeroLogger {
-	var cfg LoggerConfig
-	config.UnmarshalKey("logger", &cfg)
-	if lv := config.GetString("logger.level"); lv != "" {
-		cfg.Level = lv
+	type fileLogConfigAdapter struct {
+		Path       string `mapstructure:"path"`
+		Filename   string `mapstructure:"filename"`
+		MaxSize    int    `mapstructure:"max_size"`
+		MaxAge     int    `mapstructure:"max_age"`
+		MaxBackups int    `mapstructure:"max_backups"`
+		Compress   bool   `mapstructure:"compress"`
+		LocalTime  bool   `mapstructure:"local_time"`
 	}
-	if s := config.GetString("logger.writers"); s != "" {
-		cfg.Writers = splitComma(s)
+	type adapter struct {
+		Level   string               `mapstructure:"level"`
+		Writers []string             `mapstructure:"writers"`
+		File    fileLogConfigAdapter `mapstructure:"file"`
 	}
+	var a adapter
+	config.UnmarshalKey("logger", &a)
 	if filename != "" {
-		cfg.File.Filename = filename
+		a.File.Filename = filename
 	}
 
 	options := []logger.Option{}
-	for _, writer := range cfg.Writers {
+	for _, writer := range a.Writers {
 		switch writer {
 		case "console":
 			options = append(options, logger.WithConsole())
 		case "file":
 			options = append(options, logger.WithFileWithConfig(logger.FileConfig{
-				Path:       cfg.File.Path,
-				Filename:   cfg.File.Filename,
-				MaxSize:    cfg.File.MaxSize,
-				MaxAge:     cfg.File.MaxAge,
-				MaxBackups: cfg.File.MaxBackups,
-				Compress:   cfg.File.Compress,
-				LocalTime:  cfg.File.LocalTime,
+				Path:       a.File.Path,
+				Filename:   a.File.Filename,
+				MaxSize:    a.File.MaxSize,
+				MaxAge:     a.File.MaxAge,
+				MaxBackups: a.File.MaxBackups,
+				Compress:   a.File.Compress,
+				LocalTime:  a.File.LocalTime,
 			}))
 		case "mongodb":
 			options = append(options, logger.WithMongo(db))
 		}
 	}
 	level := logger.Disabled
-	switch cfg.Level {
+	switch a.Level {
 	case "info":
 		level = logger.InfoLevel
 	case "debug":
@@ -88,28 +78,49 @@ func LoadLogger(db *mongo.Database, filename string) *logger.ZeroLogger {
 
 // LoadMongoConfig 加载 MongoDB 配置
 func LoadMongoConfig() mongodb.Config {
+	type adapter struct {
+		URI      string `mapstructure:"uri"`
+		Database string `mapstructure:"database"`
+		Enabled  bool   `mapstructure:"enabled"`
+	}
+	var a adapter
+	config.UnmarshalKey("mongodb", &a)
 	return mongodb.Config{
-		URI:      config.GetString("mongodb.uri"),
-		Database: config.GetString("mongodb.database"),
-		Enabled:  config.GetBool("mongodb.enabled"),
+		URI:      a.URI,
+		Database: a.Database,
+		Enabled:  a.Enabled,
 	}
 }
 
 // LoadMySQLConfig 加载 MySQL 配置
 func LoadMySQLConfig() mysql.Config {
+	type adapter struct {
+		Dsn    string `mapstructure:"dsn"`
+		Prefix string `mapstructure:"prefix"`
+	}
+	var a adapter
+	config.UnmarshalKey("mysql", &a)
 	return mysql.Config{
-		Dsn:    config.GetString("mysql.dsn"),
-		Prefix: config.GetString("mysql.prefix"),
+		Dsn:    a.Dsn,
+		Prefix: a.Prefix,
 	}
 }
 
 // LoadRedisConfig 加载 Redis 配置
 func LoadRedisConfig() redis.Config {
+	type adapter struct {
+		Host     string `mapstructure:"host"`
+		Port     int    `mapstructure:"port"`
+		Password string `mapstructure:"password"`
+		DB       int    `mapstructure:"db"`
+	}
+	var a adapter
+	config.UnmarshalKey("redis", &a)
 	return redis.Config{
-		Host:     config.GetString("redis.host"),
-		Port:     config.GetInt("redis.port"),
-		Password: config.GetString("redis.password"),
-		DB:       config.GetInt("redis.db"),
+		Host:     a.Host,
+		Port:     a.Port,
+		Password: a.Password,
+		DB:       a.DB,
 	}
 }
 
@@ -125,32 +136,54 @@ func splitComma(s string) []string {
 }
 
 // ProvideBindErrCode 提供绑定组件错误码
-func ProvideBindErrCode() apperror.Code { return errcode.InvalidInput }
+func ProvideBindErrCode() apperror.Code {
+	return errcode.InvalidInput
+}
 
 // ProvideServerOptions 提供服务器选项
-func ProvideServerOptions() []server.Option { return nil }
+func ProvideServerOptions() []server.Option {
+	return []server.Option{}
+}
 
 // LoadAdminServerConfig 加载管理后台服务器配置
 func LoadAdminServerConfig() server.Config {
+	type adapter struct {
+		Host string `mapstructure:"host"`
+		Port int    `mapstructure:"port"`
+	}
+	var a adapter
+	config.UnmarshalKey("admin.server", &a)
 	return server.Config{
-		Host: config.GetString("admin.server.host"),
-		Port: config.GetInt("admin.server.port"),
+		Host: a.Host,
+		Port: a.Port,
 	}
 }
 
 // LoadApiServerConfig 加载 API 服务器配置
 func LoadApiServerConfig() server.Config {
+	type adapter struct {
+		Host string `mapstructure:"host"`
+		Port int    `mapstructure:"port"`
+	}
+	var a adapter
+	config.UnmarshalKey("api.server", &a)
 	return server.Config{
-		Host: config.GetString("api.server.host"),
-		Port: config.GetInt("api.server.port"),
+		Host: a.Host,
+		Port: a.Port,
 	}
 }
 
 // LoadPlatformServerConfig 加载平台端服务器配置
 func LoadPlatformServerConfig() server.Config {
+	type adapter struct {
+		Host string `mapstructure:"host"`
+		Port int    `mapstructure:"port"`
+	}
+	var a adapter
+	config.UnmarshalKey("platform.server", &a)
 	return server.Config{
-		Host: config.GetString("platform.server.host"),
-		Port: config.GetInt("platform.server.port"),
+		Host: a.Host,
+		Port: a.Port,
 	}
 }
 
@@ -247,9 +280,9 @@ func NewCaptchaService(rdb *goredis.Client, cfg captcha.Config) (*captcha.Servic
 }
 
 // Must 泛型辅助：err != nil 时 panic，用于启动阶段集中处理错误。
-func Must[T any](v T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+// func Must[T any](v T, err error) T {
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	return v
+// }

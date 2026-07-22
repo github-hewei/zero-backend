@@ -187,5 +187,3 @@ type RbacUserRole struct {
 
 	RbacRole *RbacRole `json:"rbac_role" gorm:"foreignKey:RoleId"`
 }
-
-

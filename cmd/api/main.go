@@ -2,9 +2,9 @@ package main
 
 import (
 	"zero-backend/internal/api"
-	"zero-backend/internal/app"
 	"zero-backend/internal/config"
 	"zero-backend/internal/modules/user"
+	"zero-backend/internal/provider"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/gormutil"
@@ -17,21 +17,21 @@ import (
 func main() {
 	config.Init()
 
-	conn := app.Must(mongodb.NewConn(app.LoadMongoConfig()))
-	l := app.LoadLogger(conn.DB, "api.log")
+	conn := mongodb.MustNewConn(provider.LoadMongoConfig())
+	l := provider.LoadLogger(conn.DB, "api.log")
 
 	gormLog := gormutil.NewLogger(l)
-	db := app.Must(mysql.NewDB(app.LoadMySQLConfig(), gormLog))
+	db := mysql.MustNewDB(provider.LoadMySQLConfig(), gormLog)
 
 	v := bind.NewValidate()
-	t := app.Must(bind.NewTrans(v))
-	binder := bind.New(v, t, app.ProvideBindErrCode())
+	t := bind.MustNewTrans(v)
+	binder := bind.New(v, t, provider.ProvideBindErrCode())
 
-	rdb := redis.New(app.LoadRedisConfig())
-	authCfg := app.Must(user.LoadConfig())
+	rdb := redis.New(provider.LoadRedisConfig())
+	authCfg := user.MustLoadConfig()
 
 	engine := api.NewGin(l, db, binder, rdb, authCfg)
 
-	srv := server.New(app.LoadApiServerConfig(), engine, l, app.ProvideServerOptions()...)
+	srv := server.New(provider.LoadApiServerConfig(), engine, l, provider.ProvideServerOptions()...)
 	srv.Run()
 }

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"zero-backend/internal/app"
 	"zero-backend/internal/config"
+	"zero-backend/internal/provider"
 	"zero-backend/internal/worker"
 
 	"github.com/241x/zero-kit/mongodb"
@@ -13,11 +13,11 @@ import (
 func main() {
 	config.Init()
 
-	rdb := redis.New(app.LoadRedisConfig())
+	rdb := redis.New(provider.LoadRedisConfig())
 	mgr := queue.NewQueueManager(rdb)
 
-	conn := app.Must(mongodb.NewConn(app.LoadMongoConfig()))
-	l := app.LoadLogger(conn.DB, "worker.log")
+	conn := mongodb.MustNewConn(provider.LoadMongoConfig())
+	l := provider.LoadLogger(conn.DB, "worker.log")
 
 	registry := worker.NewRegistry(l)
 	registry.Register("example", &worker.ExampleHandler{L: l})

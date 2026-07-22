@@ -38,10 +38,10 @@ func UnmarshalKey(key string, target any) {
 }
 
 // GetString 读取字符串配置（支持 env 覆盖）。
-func GetString(key string) string { return v.GetString(key) }
+// func GetString(key string) string { return v.GetString(key) }
 
 // GetInt 读取整数配置（支持 env 覆盖）。
-func GetInt(key string) int { return v.GetInt(key) }
+// func GetInt(key string) int { return v.GetInt(key) }
 
 // GetBool 读取布尔配置（支持 env 覆盖）。
-func GetBool(key string) bool { return v.GetBool(key) }
+// func GetBool(key string) bool { return v.GetBool(key) }

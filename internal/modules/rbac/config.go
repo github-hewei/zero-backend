@@ -28,13 +28,28 @@ func (c Config) Validate() error {
 
 // LoadConfig 从全局配置加载模块配置，校验失败返回 error。
 func LoadConfig() (Config, error) {
+	type adapter struct {
+		HmacSecret      string `mapstructure:"hmac_secret"`
+		AccessTokenTtl  int    `mapstructure:"access_token_ttl"`
+		RefreshTokenTtl int    `mapstructure:"refresh_token_ttl"`
+	}
+	var a adapter
+	config.UnmarshalKey("admin.auth", &a)
 	c := Config{
-		HmacSecret:      config.GetString("admin.auth.hmac_secret"),
-		AccessTokenTtl:  config.GetInt("admin.auth.access_token_ttl"),
-		RefreshTokenTtl: config.GetInt("admin.auth.refresh_token_ttl"),
+		HmacSecret:      a.HmacSecret,
+		AccessTokenTtl:  a.AccessTokenTtl,
+		RefreshTokenTtl: a.RefreshTokenTtl,
 	}
 	if err := c.Validate(); err != nil {
 		return Config{}, err
 	}
 	return c, nil
+}
+
+func MustLoadConfig() Config {
+	cfg, err := LoadConfig()
+	if err != nil {
+		panic(err)
+	}
+	return cfg
 }

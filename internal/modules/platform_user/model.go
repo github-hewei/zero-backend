@@ -1,6 +1,8 @@
 package platform_user
 
 import (
+	"slices"
+
 	"gorm.io/plugin/soft_delete"
 )
 
@@ -32,10 +34,5 @@ const (
 
 // HasPermission 检查角色是否拥有指定操作权限
 func (r PlatformRole) HasPermission(required ...PlatformRole) bool {
-	for _, role := range required {
-		if r == role {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(required, r)
 }

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"zero-backend/internal/app"
 	"zero-backend/internal/cli"
 	"zero-backend/internal/cli/runner"
 	"zero-backend/internal/config"
 	"zero-backend/internal/modules/rbac"
+	"zero-backend/internal/provider"
 
 	"github.com/241x/zero-kit/gormutil"
 	"github.com/241x/zero-kit/mongodb"
@@ -17,13 +17,13 @@ import (
 func main() {
 	config.Init()
 
-	conn := app.Must(mongodb.NewConn(app.LoadMongoConfig()))
-	l := app.LoadLogger(conn.DB, "cli.log")
+	conn := mongodb.MustNewConn(provider.LoadMongoConfig())
+	l := provider.LoadLogger(conn.DB, "cli.log")
 
-	rdb := redis.New(app.LoadRedisConfig())
+	rdb := redis.New(provider.LoadRedisConfig())
 
 	gormLog := gormutil.NewLogger(l)
-	db := app.Must(mysql.NewDB(app.LoadMySQLConfig(), gormLog))
+	db := mysql.MustNewDB(provider.LoadMySQLConfig(), gormLog)
 
 	cliApp := cli.New(l, rdb)
 	cliApp.AddCommand(cli.MigrateCmd(db, l))

@@ -12,7 +12,7 @@ type UploadGroup struct {
 	CreatedAt int64                 `json:"created_at" gorm:"not null;comment:创建时间;autoCreateTime"`
 	UpdatedAt int64                 `json:"updated_at" gorm:"not null;comment:更新时间;autoUpdateTime"`
 	DeletedAt soft_delete.DeletedAt `json:"-" gorm:"not null;default:0;comment:删除时间"`
-	Children  []*UploadGroup      `json:"children" gorm:"-"`
+	Children  []*UploadGroup        `json:"children" gorm:"-"`
 }
 
 // GroupList 分组列表类型

@@ -20,5 +20,3 @@ type SettingDefault struct {
 	CreatedAt     int64  `json:"created_at" gorm:"not null;comment:创建时间;autoCreateTime"`
 	UpdatedAt     int64  `json:"updated_at" gorm:"not null;comment:更新时间;autoUpdateTime"`
 }
-
-

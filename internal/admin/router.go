@@ -2,8 +2,7 @@ package admin
 
 import (
 	"net/http"
-	
-	"zero-backend/internal/app"
+
 	"zero-backend/internal/modules/article"
 	"zero-backend/internal/modules/captcha"
 	"zero-backend/internal/modules/health"
@@ -12,6 +11,7 @@ import (
 	"zero-backend/internal/modules/setting"
 	"zero-backend/internal/modules/upload"
 	"zero-backend/internal/modules/user"
+	"zero-backend/internal/provider"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/logger"
@@ -29,17 +29,20 @@ func NewGin(
 	rdb *redis.Client,
 ) *gin.Engine {
 	r := gin.Default()
-	r.Use(middleware.CORS(app.LoadAdminCorsConfig()))
+	r.Use(middleware.CORS(provider.LoadAdminCorsConfig()))
 	r.Use(middleware.Trace(log))
 	r.Use(middleware.RequestLog())
 
 	public := r.Group("/api")
 	protected := public.Group("")
 
-	captchaSvc := app.Must(app.NewCaptchaService(rdb, app.LoadCaptchaConfig()))
+	captchaSvc, err := provider.NewCaptchaService(rdb, provider.LoadCaptchaConfig())
+	if err != nil {
+		panic(err)
+	}
 	captcha.Register(public, binder, captchaSvc)
 
-	authCfg := app.Must(rbac.LoadConfig())
+	authCfg := rbac.MustLoadConfig()
 	rbac.Register(public, protected, rbac.Deps{
 		DB:      db,
 		Binder:  binder,
@@ -48,7 +51,7 @@ func NewGin(
 		Captcha: captchaSvc,
 	})
 
-	settingSvc := app.NewSettingService(db)
+	settingSvc := provider.NewSettingService(db)
 
 	setting.RegisterAdmin(protected, setting.Deps{DB: db, Binder: binder})
 	article.Register(protected, article.Deps{DB: db, Binder: binder})

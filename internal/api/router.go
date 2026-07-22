@@ -1,12 +1,11 @@
 package api
 
 import (
-	
-	"zero-backend/internal/app"
 	"zero-backend/internal/modules/region"
 	"zero-backend/internal/modules/setting"
 	"zero-backend/internal/modules/upload"
 	"zero-backend/internal/modules/user"
+	"zero-backend/internal/provider"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/logger"
@@ -25,7 +24,7 @@ func NewGin(
 	authCfg user.Config,
 ) *gin.Engine {
 	r := gin.Default()
-	r.Use(middleware.CORS(app.LoadApiCorsConfig()))
+	r.Use(middleware.CORS(provider.LoadApiCorsConfig()))
 	r.Use(middleware.Trace(log))
 	r.Use(middleware.RequestLog())
 
@@ -39,7 +38,7 @@ func NewGin(
 		RDB:     rdb,
 	})
 
-	settingSvc := app.NewSettingService(db)
+	settingSvc := provider.NewSettingService(db)
 
 	upload.RegisterApi(protected, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
 	setting.RegisterApi(protected, setting.Deps{DB: db, Binder: binder})

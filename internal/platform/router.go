@@ -1,11 +1,11 @@
 package platform
 
 import (
-	"zero-backend/internal/app"
 	"zero-backend/internal/modules/captcha"
 	"zero-backend/internal/modules/platform_user"
 	"zero-backend/internal/modules/rbac"
 	"zero-backend/internal/modules/setting"
+	"zero-backend/internal/provider"
 
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-kit/logger"
@@ -23,17 +23,20 @@ func NewGin(
 	rdb *redis.Client,
 ) *gin.Engine {
 	r := gin.Default()
-	r.Use(middleware.CORS(app.LoadPlatformCorsConfig()))
+	r.Use(middleware.CORS(provider.LoadPlatformCorsConfig()))
 	r.Use(middleware.Trace(log))
 	r.Use(middleware.RequestLog())
 
 	public := r.Group("/api")
 	protected := public.Group("")
 
-	captchaSvc := app.Must(app.NewCaptchaService(rdb, app.LoadPlatformCaptchaConfig()))
+	captchaSvc, err := provider.NewCaptchaService(rdb, provider.LoadPlatformCaptchaConfig())
+	if err != nil {
+		panic(err)
+	}
 	captcha.Register(public, binder, captchaSvc)
 
-	authCfg := app.Must(platform_user.LoadConfig())
+	authCfg := platform_user.MustLoadConfig()
 	authMid := platform_user.Register(public, protected, platform_user.Deps{
 		DB:      db,
 		Binder:  binder,
