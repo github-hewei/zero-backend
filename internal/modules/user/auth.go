@@ -38,14 +38,14 @@ type UserLoginResponse struct {
 
 // AuthService 用户认证服务
 type AuthService struct {
-	userRepo *Repository
+	userRepo RepositoryInterface
 	cfg      Config
 	rdb      *redis.Client
 }
 
 // NewAuthService 创建AuthService实例
 func NewAuthService(
-	userRepo *Repository,
+	userRepo RepositoryInterface,
 	cfg Config,
 	rdb *redis.Client,
 ) *AuthService {

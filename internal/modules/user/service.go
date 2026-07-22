@@ -28,12 +28,12 @@ const PointsChangeTypeReduce = 2
 // Service 用户业务逻辑
 type Service struct {
 	db            *gorm.DB
-	repo          *Repository
-	pointsLogRepo *PointsLogRepository
+	repo          RepositoryInterface
+	pointsLogRepo PointsLogRepositoryInterface
 }
 
 // NewService 创建用户业务逻辑实例
-func NewService(db *gorm.DB, repo *Repository, pointsLogRepo *PointsLogRepository) *Service {
+func NewService(db *gorm.DB, repo RepositoryInterface, pointsLogRepo PointsLogRepositoryInterface) *Service {
 	return &Service{db: db, repo: repo, pointsLogRepo: pointsLogRepo}
 }
 
