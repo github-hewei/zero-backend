@@ -11,6 +11,17 @@ import (
 	"gorm.io/gorm"
 )
 
+// ServiceInterface 用户业务逻辑接口
+type ServiceInterface interface {
+	List(ctx context.Context, req *ListRequest) (*ListResult, error)
+	Create(ctx context.Context, req *CreateRequest) error
+	Update(ctx context.Context, req *UpdateRequest) error
+	Delete(ctx context.Context, req *DeleteRequest) error
+	Detail(ctx context.Context, id uint32) (*User, error)
+	GetPointsLogs(ctx context.Context, req *PointsLogListRequest) (*ListResult, error)
+	ChangePoints(ctx context.Context, req *PointsChangeRequest) error
+}
+
 // PointsChangeTypeAdd 积分变更类型：增加
 const PointsChangeTypeReduce = 2
 
@@ -18,11 +29,11 @@ const PointsChangeTypeReduce = 2
 type Service struct {
 	db            *gorm.DB
 	repo          *Repository
-	pointsLogRepo *PointsLogRepo
+	pointsLogRepo *PointsLogRepository
 }
 
 // NewService 创建用户业务逻辑实例
-func NewService(db *gorm.DB, repo *Repository, pointsLogRepo *PointsLogRepo) *Service {
+func NewService(db *gorm.DB, repo *Repository, pointsLogRepo *PointsLogRepository) *Service {
 	return &Service{db: db, repo: repo, pointsLogRepo: pointsLogRepo}
 }
 

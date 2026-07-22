@@ -1,11 +1,29 @@
 package user
 
 import (
+	"context"
 	"time"
 
 	"github.com/241x/zero-kit/baserepo"
 	"gorm.io/gorm"
 )
+
+// RepositoryInterface 用户数据操作接口
+type RepositoryInterface interface {
+	FindOne(ctx context.Context, id any, opts ...baserepo.QueryOption) (*User, error)
+	FindAll(ctx context.Context, filter baserepo.Filter, pagination baserepo.Paginator, orders baserepo.Orders, opts ...baserepo.QueryOption) ([]*User, error)
+	Count(ctx context.Context, filter baserepo.Filter, opts ...baserepo.QueryOption) (int64, error)
+	Create(ctx context.Context, user *User, opts ...baserepo.CreateOption) error
+	Updates(ctx context.Context, user *User, updates map[string]any, opts ...baserepo.UpdateOption) error
+	Delete(ctx context.Context, id any, opts ...baserepo.DeleteOption) error
+}
+
+// PointsLogRepositoryInterface 用户积分记录数据操作接口
+type PointsLogRepositoryInterface interface {
+	FindAll(ctx context.Context, filter baserepo.Filter, pagination baserepo.Paginator, orders baserepo.Orders, opts ...baserepo.QueryOption) ([]*UserPointsLog, error)
+	Count(ctx context.Context, filter baserepo.Filter, opts ...baserepo.QueryOption) (int64, error)
+	Create(ctx context.Context, log *UserPointsLog, opts ...baserepo.CreateOption) error
+}
 
 // Filter 用户表过滤字段
 type Filter struct {
@@ -85,12 +103,12 @@ func (f *PointsLogFilter) Apply(db *gorm.DB) *gorm.DB {
 	return db
 }
 
-// PointsLogRepo 用户积分记录数据操作
-type PointsLogRepo struct {
+// PointsLogRepository 用户积分记录数据操作
+type PointsLogRepository struct {
 	*baserepo.BaseRepository[UserPointsLog]
 }
 
-// NewPointsLogRepo 创建用户积分记录数据操作实例
-func NewPointsLogRepo(db *gorm.DB) *PointsLogRepo {
-	return &PointsLogRepo{BaseRepository: baserepo.NewBaseRepository[UserPointsLog](db)}
+// NewPointsLogRepository 创建用户积分记录数据操作实例
+func NewPointsLogRepository(db *gorm.DB) *PointsLogRepository {
+	return &PointsLogRepository{BaseRepository: baserepo.NewBaseRepository[UserPointsLog](db)}
 }

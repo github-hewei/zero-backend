@@ -11,7 +11,7 @@ import (
 // RegisterAdmin 注册用户模块路由（管理端）
 func RegisterAdmin(rg *gin.RouterGroup, db *gorm.DB, binder *bind.Binder) {
 	repo := NewRepository(db)
-	pointsLogRepo := NewPointsLogRepo(db)
+	pointsLogRepo := NewPointsLogRepository(db)
 	svc := NewService(db, repo, pointsLogRepo)
 	h := newHandler(binder, svc)
 
@@ -29,7 +29,7 @@ func RegisterApi(public, protected *gin.RouterGroup, db *gorm.DB, binder *bind.B
 	repo := NewRepository(db)
 	authServ := NewAuthService(repo, cfg, rdb)
 	authMid := NewAuthMiddleware(cfg, authServ)
-	pointsLogRepo := NewPointsLogRepo(db)
+	pointsLogRepo := NewPointsLogRepository(db)
 	svc := NewService(db, repo, pointsLogRepo)
 	h := newAuthHandler(binder, svc, authServ, cfg)
 

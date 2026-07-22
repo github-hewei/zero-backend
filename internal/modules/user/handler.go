@@ -12,18 +12,18 @@ import (
 // Handler 用户模块处理器
 type Handler struct {
 	binder   *bind.Binder
-	svc      *Service
-	authServ *AuthService
+	svc      ServiceInterface
+	authServ AuthServiceInterface
 	authCfg  Config
 }
 
 // NewHandler 创建用户模块处理器
-func newHandler(binder *bind.Binder, svc *Service) *Handler {
+func newHandler(binder *bind.Binder, svc ServiceInterface) *Handler {
 	return &Handler{binder: binder, svc: svc}
 }
 
 // NewAuthHandler 创建用户认证模块处理器
-func newAuthHandler(binder *bind.Binder, svc *Service, authServ *AuthService, authCfg Config) *Handler {
+func newAuthHandler(binder *bind.Binder, svc ServiceInterface, authServ AuthServiceInterface, authCfg Config) *Handler {
 	return &Handler{binder: binder, svc: svc, authServ: authServ, authCfg: authCfg}
 }
 

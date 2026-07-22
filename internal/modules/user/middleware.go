@@ -12,11 +12,11 @@ import (
 // AuthMiddleware 用户认证中间件
 type AuthMiddleware struct {
 	config   Config
-	authServ *AuthService
+	authServ AuthServiceInterface
 }
 
 // NewAuthMiddleware 创建认证中间件
-func NewAuthMiddleware(cfg Config, authServ *AuthService) *AuthMiddleware {
+func NewAuthMiddleware(cfg Config, authServ AuthServiceInterface) *AuthMiddleware {
 	return &AuthMiddleware{config: cfg, authServ: authServ}
 }
 

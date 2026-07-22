@@ -16,6 +16,14 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+// AuthServiceInterface 用户认证服务接口
+type AuthServiceInterface interface {
+	Login(ctx context.Context, req *AuthLoginRequest) (*UserLoginResponse, string, error)
+	RefreshToken(ctx context.Context, refreshToken string) (*UserLoginResponse, error)
+	ChangePassword(ctx context.Context, req *ChangePasswordRequest) error
+	GetUserInfo(ctx context.Context, userId uint32) (*User, error)
+}
+
 const (
 	redisUserLoginKey        = "ZAG:USER:LOGIN"
 	redisUserRefreshTokenKey = "ZAG:USER:REFRESH:TOKEN"
