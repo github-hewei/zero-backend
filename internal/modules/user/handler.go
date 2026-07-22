@@ -1,8 +1,6 @@
 package user
 
 import (
-	"zero-backend/internal/modules/rbac"
-
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/bind"
 	"github.com/241x/zero-web/ctxkeys"
@@ -138,7 +136,7 @@ func (h *Handler) Detail(c *gin.Context) {
 
 // login 用户登录
 func (h *Handler) login(c *gin.Context) {
-	req := &rbac.AuthLoginRequest{}
+	req := &AuthLoginRequest{}
 	if err := h.binder.ShouldBindJSON(c, req); err != nil {
 		response.Error(c, err)
 		return
@@ -174,7 +172,7 @@ func (h *Handler) refreshToken(c *gin.Context) {
 
 // changePassword 用户修改密码
 func (h *Handler) changePassword(c *gin.Context) {
-	req := &rbac.ChangePasswordRequest{}
+	req := &ChangePasswordRequest{}
 	if err := h.binder.ShouldBindJSON(c, req); err != nil {
 		response.Error(c, err)
 		return

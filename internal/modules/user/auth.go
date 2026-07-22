@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"zero-backend/internal/modules/rbac"
 
 	"github.com/241x/zero-kit/apperror"
 	"github.com/241x/zero-kit/baserepo"
@@ -50,7 +49,7 @@ func NewAuthService(
 }
 
 // Login 用户登录
-func (s *AuthService) Login(ctx context.Context, req *rbac.AuthLoginRequest) (*UserLoginResponse, string, error) {
+func (s *AuthService) Login(ctx context.Context, req *AuthLoginRequest) (*UserLoginResponse, string, error) {
 	filter := Filter{Username: req.Username}
 	item, err := s.userRepo.FindOne(ctx, filter)
 	if err != nil {
@@ -178,7 +177,7 @@ func (s *AuthService) GetUserInfo(ctx context.Context, userId uint32) (*User, er
 }
 
 // ChangePassword 修改用户密码
-func (s *AuthService) ChangePassword(ctx context.Context, req *rbac.ChangePasswordRequest) error {
+func (s *AuthService) ChangePassword(ctx context.Context, req *ChangePasswordRequest) error {
 	user := ctxkeys.User(ctx).(*User)
 	if user == nil || user.ID == 0 {
 		return apperror.New(errcode.NotFound, apperror.WithMsg("用户不存在"))

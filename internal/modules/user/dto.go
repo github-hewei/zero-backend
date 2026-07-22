@@ -81,3 +81,17 @@ type UploadFile struct {
 	FileName string `json:"file_name"`
 	Domain   string `json:"domain"`
 }
+
+// AuthLoginRequest 登录参数
+type AuthLoginRequest struct {
+	Username    string `json:"username" validate:"required"`
+	Password    string `json:"password" validate:"required"`
+	CaptchaID   string `json:"captcha_id" validate:"required"`
+	CaptchaCode string `json:"captcha_code" validate:"required"`
+}
+
+// ChangePasswordRequest 修改密码请求参数
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password" validate:"required"`
+	NewPassword string `json:"new_password" validate:"required,min=6,max=20"`
+}
