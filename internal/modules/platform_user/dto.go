@@ -1,15 +1,15 @@
 package platform_user
 
-// PlatformLoginRequest 平台登录请求
-type PlatformLoginRequest struct {
+// LoginRequest 平台登录请求
+type LoginRequest struct {
 	Username    string `json:"username" validate:"required"`
 	Password    string `json:"password" validate:"required"`
 	CaptchaID   string `json:"captcha_id" validate:"required"`
 	CaptchaCode string `json:"captcha_code" validate:"required"`
 }
 
-// PlatformLoginResponse 平台登录响应
-type PlatformLoginResponse struct {
+// LoginResponse 平台登录响应
+type LoginResponse struct {
 	Token string        `json:"token"`
 	Ttl   int           `json:"ttl"`
 	User  *PlatformUser `json:"user,omitempty"`
@@ -21,16 +21,16 @@ type ChangePasswordRequest struct {
 	NewPassword string `json:"new_password" validate:"required,min=6,max=20"`
 }
 
-// PlatformUserListRequest 平台用户列表请求
-type PlatformUserListRequest struct {
+// UserListRequest 平台用户列表请求
+type UserListRequest struct {
 	Username string `json:"username"`
 	RealName string `json:"real_name"`
 	Page     int    `json:"page" validate:"required,min=1"`
 	Limit    int    `json:"limit" validate:"required,min=1,max=100"`
 }
 
-// PlatformUserCreateRequest 创建平台用户请求
-type PlatformUserCreateRequest struct {
+// UserCreateRequest 创建平台用户请求
+type UserCreateRequest struct {
 	Username string `json:"username" validate:"required,min=5,max=64,alphanum"`
 	Password string `json:"password" validate:"required,min=6,max=20"`
 	RealName string `json:"real_name" validate:"required,min=2,max=64"`
@@ -38,8 +38,8 @@ type PlatformUserCreateRequest struct {
 	AvatarID uint32 `json:"avatar_id"`
 }
 
-// PlatformUserUpdateRequest 更新平台用户请求
-type PlatformUserUpdateRequest struct {
+// UserUpdateRequest 更新平台用户请求
+type UserUpdateRequest struct {
 	ID       uint32 `json:"id" validate:"required"`
 	Username string `json:"username" validate:"required,min=5,max=64,alphanum"`
 	RealName string `json:"real_name" validate:"required,min=2,max=64"`
@@ -49,13 +49,13 @@ type PlatformUserUpdateRequest struct {
 	AvatarID uint32 `json:"avatar_id"`
 }
 
-// PlatformUserDeleteRequest 删除平台用户请求
-type PlatformUserDeleteRequest struct {
+// UserDeleteRequest 删除平台用户请求
+type UserDeleteRequest struct {
 	ID uint32 `json:"id" validate:"required"`
 }
 
-// PlatformUserResetPasswordRequest 重置平台用户密码请求
-type PlatformUserResetPasswordRequest struct {
+// UserResetPasswordRequest 重置平台用户密码请求
+type UserResetPasswordRequest struct {
 	ID uint32 `json:"id" validate:"required"`
 }
 

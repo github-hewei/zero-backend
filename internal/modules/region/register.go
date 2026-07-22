@@ -6,17 +6,11 @@ import (
 	"gorm.io/gorm"
 )
 
-// Deps 模块依赖
-type Deps struct {
-	DB     *gorm.DB
-	Binder *bind.Binder
-}
-
 // Register 注册区划模块路由
-func Register(rg *gin.RouterGroup, deps Deps) {
-	repo := NewRepository(deps.DB)
+func Register(rg *gin.RouterGroup, db *gorm.DB, binder *bind.Binder) {
+	repo := NewRepository(db)
 	svc := NewService(repo)
-	h := newHandler(deps.Binder, svc)
+	h := newHandler(binder, svc)
 
 	rg.POST("/region/tree", h.Tree)
 }

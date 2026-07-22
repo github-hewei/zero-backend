@@ -18,16 +18,16 @@ func main() {
 	config.Init()
 
 	conn := mongodb.MustNewConn(provider.LoadMongoConfig())
-	l := provider.NewLogger(conn.DB, "cli.log")
+	log := provider.NewLogger(conn.DB, "cli.log")
 
 	rdb := redis.New(provider.LoadRedisConfig())
 
-	gormLog := gormutil.NewLogger(l)
+	gormLog := gormutil.NewLogger(log)
 	db := mysql.MustNewDB(provider.LoadMySQLConfig(), gormLog)
 
-	cliApp := cli.New(l, rdb)
-	cliApp.AddCommand(cli.MigrateCmd(db, l))
-	cliApp.AddCommand(cli.QueueCmd(queue.NewQueueManager(rdb)))
-	cliApp.AddCommand(cli.SyncApiCmd(runner.NewSyncApiRunner(l, rbac.NewRbacApiRepository(db))))
-	cliApp.Run()
+	app := cli.New(log, rdb)
+	app.AddCommand(cli.MigrateCmd(db, log))
+	app.AddCommand(cli.QueueCmd(queue.NewQueueManager(rdb)))
+	app.AddCommand(cli.SyncApiCmd(runner.NewSyncApiRunner(log, rbac.NewRbacApiRepository(db))))
+	app.Run()
 }

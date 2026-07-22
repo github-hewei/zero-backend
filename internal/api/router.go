@@ -21,7 +21,6 @@ func NewGin(
 	db *gorm.DB,
 	binder *bind.Binder,
 	rdb *redis.Client,
-	authCfg user.Config,
 ) *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.CORS(provider.LoadApiCorsConfig()))
@@ -31,18 +30,12 @@ func NewGin(
 	apiGroup := r.Group("/api")
 	protected := apiGroup.Group("")
 
-	user.RegisterApi(apiGroup, protected, user.ApiDeps{
-		DB:      db,
-		Binder:  binder,
-		AuthCfg: authCfg,
-		RDB:     rdb,
-	})
-
+	cfg := user.MustLoadConfig()
+	user.RegisterApi(apiGroup, protected, db, binder, rdb, cfg)
 	settingSvc := provider.NewSettingService(db)
-
-	upload.RegisterApi(protected, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
-	setting.RegisterApi(protected, setting.Deps{DB: db, Binder: binder})
-	region.Register(protected, region.Deps{DB: db, Binder: binder})
+	upload.RegisterApi(protected, db, binder, settingSvc)
+	setting.RegisterApi(protected, db, binder)
+	region.Register(protected, db, binder)
 
 	return r
 }

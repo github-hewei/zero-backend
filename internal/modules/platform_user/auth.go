@@ -40,7 +40,7 @@ func NewAuthService(repo *PlatformUserRepository, cfg Config, rdb *redis.Client,
 }
 
 // Login 平台登录
-func (s *AuthService) Login(ctx context.Context, req *PlatformLoginRequest) (*PlatformLoginResponse, string, error) {
+func (s *AuthService) Login(ctx context.Context, req *LoginRequest) (*LoginResponse, string, error) {
 	if err := s.captcha.Verify(ctx, req.CaptchaID, req.CaptchaCode); err != nil {
 		return nil, "", err
 	}
@@ -89,7 +89,7 @@ func (s *AuthService) Login(ctx context.Context, req *PlatformLoginRequest) (*Pl
 		return nil, "", apperror.Wrap(errcode.Internal, err, apperror.WithMsg("登录失败"))
 	}
 
-	return &PlatformLoginResponse{
+	return &LoginResponse{
 		Token: tokenString,
 		Ttl:   s.cfg.RefreshTokenTtl,
 		User:  item,
@@ -97,7 +97,7 @@ func (s *AuthService) Login(ctx context.Context, req *PlatformLoginRequest) (*Pl
 }
 
 // RefreshToken 刷新Token
-func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*PlatformLoginResponse, error) {
+func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*LoginResponse, error) {
 	itemBytes, err := s.rdb.Get(ctx,
 		fmt.Sprintf("%s:%s", redisPlatformRefreshTokenKey, refreshToken)).Bytes()
 	if err != nil {
@@ -114,7 +114,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*P
 		return nil, apperror.Wrap(errcode.Internal, err, apperror.WithMsg("刷新令牌失败"))
 	}
 
-	return &PlatformLoginResponse{
+	return &LoginResponse{
 		Token: token,
 		Ttl:   s.cfg.AccessTokenTtl,
 		User:  nil,

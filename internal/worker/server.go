@@ -6,9 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/241x/zero-kit/queue"
-
 	"github.com/241x/zero-kit/logger"
+	"github.com/241x/zero-kit/queue"
 )
 
 const (

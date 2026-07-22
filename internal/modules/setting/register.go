@@ -6,24 +6,18 @@ import (
 	"gorm.io/gorm"
 )
 
-// Deps 模块依赖
-type Deps struct {
-	DB     *gorm.DB
-	Binder *bind.Binder
-}
-
 // buildHandler 创建设置模块处理器
-func buildHandler(deps Deps) *Handler {
-	repo := NewRepository(deps.DB)
-	defaultRepo := NewDefaultRepository(deps.DB)
+func buildHandler(db *gorm.DB, binder *bind.Binder) *Handler {
+	repo := NewRepository(db)
+	defaultRepo := NewDefaultRepository(db)
 	svc := NewService(repo, defaultRepo)
 	defaultSvc := NewDefaultService(defaultRepo)
-	return newHandler(deps.Binder, svc, defaultSvc)
+	return newHandler(binder, svc, defaultSvc)
 }
 
 // RegisterAdmin 注册设置模块路由（管理端）。仅暴露租户级设置和工具接口，不暴露系统级默认设置。
-func RegisterAdmin(rg *gin.RouterGroup, deps Deps) {
-	h := buildHandler(deps)
+func RegisterAdmin(rg *gin.RouterGroup, db *gorm.DB, binder *bind.Binder) {
+	h := buildHandler(db, binder)
 	rg.POST("/setting/list", h.List)
 	rg.POST("/setting/create", h.Create)
 	rg.POST("/setting/update", h.Update)
@@ -33,8 +27,8 @@ func RegisterAdmin(rg *gin.RouterGroup, deps Deps) {
 }
 
 // RegisterPlatform 注册设置模块路由（平台端）。暴露系统级默认设置和工具接口。
-func RegisterPlatform(rg *gin.RouterGroup, deps Deps) {
-	h := buildHandler(deps)
+func RegisterPlatform(rg *gin.RouterGroup, db *gorm.DB, binder *bind.Binder) {
+	h := buildHandler(db, binder)
 	rg.POST("/setting/default/list", h.DefaultList)
 	rg.POST("/setting/default/create", h.DefaultCreate)
 	rg.POST("/setting/default/update", h.DefaultUpdate)
@@ -44,7 +38,7 @@ func RegisterPlatform(rg *gin.RouterGroup, deps Deps) {
 }
 
 // RegisterApi 注册设置模块路由（API端）
-func RegisterApi(rg *gin.RouterGroup, deps Deps) {
-	h := buildHandler(deps)
+func RegisterApi(rg *gin.RouterGroup, db *gorm.DB, binder *bind.Binder) {
+	h := buildHandler(db, binder)
 	rg.POST("/setting/qiniu-token", h.QiniuToken)
 }

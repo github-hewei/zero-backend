@@ -8,33 +8,25 @@ import (
 	"gorm.io/gorm"
 )
 
-// Deps 模块依赖
-type Deps struct {
-	DB      *gorm.DB
-	Binder  *bind.Binder
-	Config  Config
-	RDB     *redis.Client
-	Captcha CaptchaVerifier
-}
-
-func buildAll(deps Deps) (*handler, *AuthMiddleware) {
-	repo := NewPlatformUserRepository(deps.DB)
-	authServ := NewAuthService(repo, deps.Config, deps.RDB, deps.Captcha)
-	authMid := NewAuthMiddleware(deps.Config, authServ)
+// buildAll 构建所有依赖
+func buildAll(db *gorm.DB, binder *bind.Binder, config Config, rdb *redis.Client, captcha CaptchaVerifier) (*handler, *AuthMiddleware) {
+	repo := NewPlatformUserRepository(db)
+	authServ := NewAuthService(repo, config, rdb, captcha)
+	authMid := NewAuthMiddleware(config, authServ)
 	userServ := NewPlatformUserService(repo)
 
-	h := newHandler(deps.Binder, authServ, deps.Config, userServ)
+	h := newHandler(binder, authServ, config, userServ)
 	return h, authMid
 }
 
 // Register 注册平台模块路由。public 注册公开路由，protected 注册需认证的路由并挂载 JWT + 角色中间件。
-func Register(public, protected *gin.RouterGroup, deps Deps) *AuthMiddleware {
-	h, authMid := buildAll(deps)
+func Register(public, protected *gin.RouterGroup, db *gorm.DB, binder *bind.Binder, config Config, rdb *redis.Client, captcha CaptchaVerifier) *AuthMiddleware {
+	h, authMid := buildAll(db, binder, config, rdb, captcha)
 
 	public.POST("/login", h.login)
 	public.POST("/refresh-token", h.refreshToken)
 
-	protected.Use(middleware.JWTGuard(deps.Config.HmacSecret))
+	protected.Use(middleware.JWTGuard(config.HmacSecret))
 	protected.Use(authMid.LoadUser())
 
 	protected.POST("/logout", h.logout)

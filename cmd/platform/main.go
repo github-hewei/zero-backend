@@ -22,13 +22,13 @@ func main() {
 	gormLog := gormutil.NewLogger(log)
 	db := mysql.MustNewDB(provider.LoadMySQLConfig(), gormLog)
 
-	v := bind.NewValidate()
-	t := bind.MustNewTrans(v)
-	binder := bind.New(v, t, provider.ProvideBindErrCode())
+	validate := bind.NewValidate()
+	trans := bind.MustNewTrans(validate)
+	binder := bind.New(validate, trans, provider.ProvideBindErrCode())
 
 	rdb := redis.New(provider.LoadRedisConfig())
 	engine := platform.NewGin(log, db, binder, rdb)
 
-	srv := server.New(provider.LoadPlatformServerConfig(), engine, log, provider.ProvideServerOptions()...)
-	srv.Run()
+	// 启动服务
+	server.New(provider.LoadPlatformServerConfig(), engine, log, provider.ProvideServerOptions()...).Run()
 }

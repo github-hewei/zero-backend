@@ -135,7 +135,7 @@ func (s *Service) GetSettingValue(ctx context.Context, key string, out any) erro
 
 // FormConfigs 获取表单配置
 func (s *Service) FormConfigs(ctx context.Context, req *FormConfigsRequest) ([]FormGroup, error) {
-	configs := GetFormConfigs()
+	configs := FormConfigs()
 	if req.OnlyPlatform {
 		filtered := make([]FormGroup, 0)
 		for _, config := range configs {

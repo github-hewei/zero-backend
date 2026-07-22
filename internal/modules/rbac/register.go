@@ -8,124 +8,100 @@ import (
 	"gorm.io/gorm"
 )
 
-// Deps 模块依赖
-type Deps struct {
-	DB      *gorm.DB
-	Binder  *bind.Binder
-	Config  Config
-	RDB     *redis.Client
-	Captcha CaptchaVerifier
-}
-
-// PlatformDeps 平台端模块依赖（不含 Captcha，不挂 RBAC 中间件）
-type PlatformDeps struct {
-	DB     *gorm.DB
-	Binder *bind.Binder
-	Config Config
-	RDB    *redis.Client
-}
-
-func buildAll(deps Deps) (*handler, *AuthMiddleware) {
-	userRepo := NewRbacUserRepository(deps.DB)
-	userRoleRepo := NewRbacUserRoleRepository(deps.DB)
-	menuRepo := NewRbacMenuRepository(deps.DB)
-	menuApiRepo := NewRbacMenuApiRepository(deps.DB)
-	apiRepo := NewRbacApiRepository(deps.DB)
-	roleRepo := NewRbacRoleRepository(deps.DB)
-	roleMenuRepo := NewRbacRoleMenuRepository(deps.DB)
-	storeRepo := NewRbacStoreRepository(deps.DB)
+// buildAll 构建 rbac 模块所有服务。
+func buildAll(db *gorm.DB, binder *bind.Binder, config Config, rdb *redis.Client, captcha CaptchaVerifier) (*handler, *AuthMiddleware) {
+	userRepo := NewRbacUserRepository(db)
+	userRoleRepo := NewRbacUserRoleRepository(db)
+	menuRepo := NewRbacMenuRepository(db)
+	menuApiRepo := NewRbacMenuApiRepository(db)
+	apiRepo := NewRbacApiRepository(db)
+	roleRepo := NewRbacRoleRepository(db)
+	roleMenuRepo := NewRbacRoleMenuRepository(db)
+	storeRepo := NewRbacStoreRepository(db)
 
 	authServ := NewAuthService(
 		userRepo, apiRepo, roleRepo, menuRepo,
 		roleMenuRepo, userRoleRepo, menuApiRepo,
-		deps.Config, deps.RDB, deps.Captcha,
+		config, rdb, captcha,
 	)
 
-	authMid := NewAuthMiddleware(deps.Config, authServ)
-
-	menuServ := NewRbacMenuService(menuRepo, menuApiRepo, deps.DB)
+	authMid := NewAuthMiddleware(config, authServ)
+	menuServ := NewRbacMenuService(menuRepo, menuApiRepo, db)
 	apiServ := NewRbacApiService(apiRepo)
-	roleServ := NewRbacRoleService(roleRepo, roleMenuRepo, deps.DB)
-	userServ := NewRbacUserService(deps.DB, userRepo, userRoleRepo)
+	roleServ := NewRbacRoleService(roleRepo, roleMenuRepo, db)
+	userServ := NewRbacUserService(db, userRepo, userRoleRepo)
 	storeServ := NewRbacStoreService(storeRepo)
 
-	h := newHandler(deps.Binder, authServ, deps.Config, menuServ, apiServ, roleServ, userServ, storeServ, authMid)
+	h := newHandler(binder, authServ, config, menuServ, apiServ, roleServ, userServ, storeServ, authMid)
 
 	return h, authMid
 }
 
-// Register 注册 rbac 模块路由。public 注册公开路由，protected 注册需认证的路由并挂载 JWT 中间件。
-// admin 端仅管理自身租户的角色和用户，store/menu/api 管理已迁移到平台端。
-func Register(public, protected *gin.RouterGroup, deps Deps) {
-	h, authMid := buildAll(deps)
+// RegisterAdmin 注册 rbac 模块路由。public 注册公开路由，protected 注册需认证的路由并挂载 JWT 中间件。
+func RegisterAdmin(public, r *gin.RouterGroup, db *gorm.DB, binder *bind.Binder, config Config, rdb *redis.Client, captcha CaptchaVerifier) {
+	h, authMid := buildAll(db, binder, config, rdb, captcha)
 
 	public.POST("/login", h.login)
 	public.POST("/refresh-token", h.refreshToken)
 
-	protected.Use(middleware.JWTGuard(deps.Config.HmacSecret))
-	protected.Use(authMid.LoadUser())
-	protected.Use(authMid.CheckAPIPermission())
+	r.Use(middleware.JWTGuard(config.HmacSecret))
+	r.Use(authMid.LoadUser())
+	r.Use(authMid.CheckAPIPermission())
 
-	protected.POST("/logout", h.logout)
-	protected.POST("/change-password", h.changePassword)
-	protected.POST("/permissions", h.permissions)
+	r.POST("/logout", h.logout)
+	r.POST("/change-password", h.changePassword)
+	r.POST("/permissions", h.permissions)
 
-	protected.POST("/rbac/role/list", h.roleList)
-	protected.POST("/rbac/role/create", h.roleCreate)
-	protected.POST("/rbac/role/update", h.roleUpdate)
-	protected.POST("/rbac/role/delete", h.roleDelete)
-	protected.POST("/rbac/role/set-menus", h.roleSetMenus)
+	r.POST("/rbac/role/list", h.roleList)
+	r.POST("/rbac/role/create", h.roleCreate)
+	r.POST("/rbac/role/update", h.roleUpdate)
+	r.POST("/rbac/role/delete", h.roleDelete)
+	r.POST("/rbac/role/set-menus", h.roleSetMenus)
 
-	protected.POST("/rbac/user/list", h.userList)
-	protected.POST("/rbac/user/create", h.userCreate)
-	protected.POST("/rbac/user/update", h.userUpdate)
-	protected.POST("/rbac/user/delete", h.userDelete)
-	protected.POST("/rbac/user/set-roles", h.userSetRoles)
-	protected.POST("/rbac/user/reset-password", h.userResetPassword)
+	r.POST("/rbac/user/list", h.userList)
+	r.POST("/rbac/user/create", h.userCreate)
+	r.POST("/rbac/user/update", h.userUpdate)
+	r.POST("/rbac/user/delete", h.userDelete)
+	r.POST("/rbac/user/set-roles", h.userSetRoles)
+	r.POST("/rbac/user/reset-password", h.userResetPassword)
 }
 
 // RegisterPlatform 注册平台端路由。不挂载 RBAC 权限中间件，由平台端的 RequireRole 中间件控制访问权限。
-func RegisterPlatform(rg *gin.RouterGroup, deps PlatformDeps) {
-	fullDeps := Deps{
-		DB:     deps.DB,
-		Binder: deps.Binder,
-		Config: deps.Config,
-		RDB:    deps.RDB,
-	}
-	h, authMid := buildAll(fullDeps)
+func RegisterPlatform(r *gin.RouterGroup, db *gorm.DB, binder *bind.Binder, config Config, rdb *redis.Client) {
+	h, authMid := buildAll(db, binder, config, rdb, nil)
 
-	rg.Use(middleware.JWTGuard(deps.Config.HmacSecret))
-	rg.Use(authMid.LoadUser())
+	r.Use(middleware.JWTGuard(config.HmacSecret))
+	r.Use(authMid.LoadUser())
 
-	rg.POST("/rbac/menu/list", h.menuList)
-	rg.POST("/rbac/menu/create", h.menuCreate)
-	rg.POST("/rbac/menu/update", h.menuUpdate)
-	rg.POST("/rbac/menu/delete", h.menuDelete)
-	rg.POST("/rbac/menu/sync", h.menuSync)
-	rg.POST("/rbac/menu/api/list", h.menuApiList)
-	rg.POST("/rbac/menu/api/save", h.menuApiSave)
+	r.POST("/rbac/menu/list", h.menuList)
+	r.POST("/rbac/menu/create", h.menuCreate)
+	r.POST("/rbac/menu/update", h.menuUpdate)
+	r.POST("/rbac/menu/delete", h.menuDelete)
+	r.POST("/rbac/menu/sync", h.menuSync)
+	r.POST("/rbac/menu/api/list", h.menuApiList)
+	r.POST("/rbac/menu/api/save", h.menuApiSave)
 
-	rg.POST("/rbac/api/list", h.apiList)
-	rg.POST("/rbac/api/create", h.apiCreate)
-	rg.POST("/rbac/api/update", h.apiUpdate)
-	rg.POST("/rbac/api/delete", h.apiDelete)
+	r.POST("/rbac/api/list", h.apiList)
+	r.POST("/rbac/api/create", h.apiCreate)
+	r.POST("/rbac/api/update", h.apiUpdate)
+	r.POST("/rbac/api/delete", h.apiDelete)
 
-	rg.POST("/rbac/store/list", h.storeList)
-	rg.POST("/rbac/store/create", h.storeCreate)
-	rg.POST("/rbac/store/update", h.storeUpdate)
-	rg.POST("/rbac/store/delete", h.storeDelete)
-	rg.POST("/rbac/store/recycle", h.storeRecycle)
-	rg.POST("/rbac/store/restore", h.storeRestore)
+	r.POST("/rbac/store/list", h.storeList)
+	r.POST("/rbac/store/create", h.storeCreate)
+	r.POST("/rbac/store/update", h.storeUpdate)
+	r.POST("/rbac/store/delete", h.storeDelete)
+	r.POST("/rbac/store/recycle", h.storeRecycle)
+	r.POST("/rbac/store/restore", h.storeRestore)
 
-	rg.POST("/rbac/role/list", h.roleList)
-	rg.POST("/rbac/role/create", h.roleCreate)
-	rg.POST("/rbac/role/update", h.roleUpdate)
-	rg.POST("/rbac/role/delete", h.roleDelete)
-	rg.POST("/rbac/role/set-menus", h.roleSetMenus)
+	r.POST("/rbac/role/list", h.roleList)
+	r.POST("/rbac/role/create", h.roleCreate)
+	r.POST("/rbac/role/update", h.roleUpdate)
+	r.POST("/rbac/role/delete", h.roleDelete)
+	r.POST("/rbac/role/set-menus", h.roleSetMenus)
 
-	rg.POST("/rbac/user/list", h.userList)
-	rg.POST("/rbac/user/create", h.userCreate)
-	rg.POST("/rbac/user/update", h.userUpdate)
-	rg.POST("/rbac/user/delete", h.userDelete)
-	rg.POST("/rbac/user/reset-password", h.userResetPassword)
+	r.POST("/rbac/user/list", h.userList)
+	r.POST("/rbac/user/create", h.userCreate)
+	r.POST("/rbac/user/update", h.userUpdate)
+	r.POST("/rbac/user/delete", h.userDelete)
+	r.POST("/rbac/user/reset-password", h.userResetPassword)
 }

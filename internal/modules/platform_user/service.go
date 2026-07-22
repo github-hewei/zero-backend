@@ -21,7 +21,7 @@ func NewPlatformUserService(repo *PlatformUserRepository) *PlatformUserService {
 }
 
 // FindList 获取平台用户列表
-func (s *PlatformUserService) FindList(ctx context.Context, req *PlatformUserListRequest) (*ListResult, error) {
+func (s *PlatformUserService) FindList(ctx context.Context, req *UserListRequest) (*ListResult, error) {
 	result := &ListResult{List: []*PlatformUser{}, Total: 0}
 
 	filter := &PlatformUserFilterField{
@@ -52,7 +52,7 @@ func (s *PlatformUserService) FindList(ctx context.Context, req *PlatformUserLis
 }
 
 // Create 创建平台用户
-func (s *PlatformUserService) Create(ctx context.Context, req *PlatformUserCreateRequest) error {
+func (s *PlatformUserService) Create(ctx context.Context, req *UserCreateRequest) error {
 	if err := s.checkUsername(ctx, req.Username); err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (s *PlatformUserService) Create(ctx context.Context, req *PlatformUserCreat
 }
 
 // Update 更新平台用户
-func (s *PlatformUserService) Update(ctx context.Context, req *PlatformUserUpdateRequest) error {
+func (s *PlatformUserService) Update(ctx context.Context, req *UserUpdateRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
@@ -115,7 +115,7 @@ func (s *PlatformUserService) Update(ctx context.Context, req *PlatformUserUpdat
 }
 
 // Delete 删除平台用户
-func (s *PlatformUserService) Delete(ctx context.Context, req *PlatformUserDeleteRequest) error {
+func (s *PlatformUserService) Delete(ctx context.Context, req *UserDeleteRequest) error {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
 		if errors.Is(err, baserepo.ErrRecordNotFound) {
@@ -131,7 +131,7 @@ func (s *PlatformUserService) Delete(ctx context.Context, req *PlatformUserDelet
 }
 
 // ResetPassword 重置平台用户密码
-func (s *PlatformUserService) ResetPassword(ctx context.Context, req *PlatformUserResetPasswordRequest) (string, error) {
+func (s *PlatformUserService) ResetPassword(ctx context.Context, req *UserResetPasswordRequest) (string, error) {
 	item, err := s.repo.FindOne(ctx, req.ID, baserepo.WithScopes(nil))
 	if err != nil {
 		if errors.Is(err, baserepo.ErrRecordNotFound) {

@@ -6,21 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
-// Deps 模块依赖
-type Deps struct {
-	DB     *gorm.DB
-	Binder *bind.Binder
-}
-
-// Register 注册文章模块路由
-func Register(rg *gin.RouterGroup, deps Deps) {
-	categoryRepo := NewCategoryRepository(deps.DB)
+// RegisterAdmin 注册文章模块路由
+func RegisterAdmin(rg *gin.RouterGroup, db *gorm.DB, binder *bind.Binder) {
+	categoryRepo := NewCategoryRepository(db)
 	categorySvc := NewCategoryService(categoryRepo)
 
-	articleRepo := NewRepository(deps.DB)
+	articleRepo := NewRepository(db)
 	articleSvc := NewService(articleRepo)
 
-	h := NewHandler(deps.Binder, categorySvc, articleSvc)
+	h := NewHandler(binder, categorySvc, articleSvc)
 
 	rg.POST("/article/category/list", h.ListCategory)
 	rg.POST("/article/category/create", h.CreateCategory)

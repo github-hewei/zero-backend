@@ -33,7 +33,7 @@ func newHandler(
 
 // login 平台登录
 func (h *handler) login(ctx *gin.Context) {
-	req := &PlatformLoginRequest{}
+	req := &LoginRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -83,7 +83,7 @@ func (h *handler) changePassword(ctx *gin.Context) {
 
 // userList 平台用户列表
 func (h *handler) userList(ctx *gin.Context) {
-	req := &PlatformUserListRequest{}
+	req := &UserListRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -98,7 +98,7 @@ func (h *handler) userList(ctx *gin.Context) {
 
 // userCreate 创建平台用户
 func (h *handler) userCreate(ctx *gin.Context) {
-	req := &PlatformUserCreateRequest{}
+	req := &UserCreateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -112,7 +112,7 @@ func (h *handler) userCreate(ctx *gin.Context) {
 
 // userUpdate 更新平台用户
 func (h *handler) userUpdate(ctx *gin.Context) {
-	req := &PlatformUserUpdateRequest{}
+	req := &UserUpdateRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -126,7 +126,7 @@ func (h *handler) userUpdate(ctx *gin.Context) {
 
 // userDelete 删除平台用户
 func (h *handler) userDelete(ctx *gin.Context) {
-	req := &PlatformUserDeleteRequest{}
+	req := &UserDeleteRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
 		response.Error(ctx, err)
 		return
@@ -140,7 +140,7 @@ func (h *handler) userDelete(ctx *gin.Context) {
 
 // userResetPassword 重置平台用户密码
 func (h *handler) userResetPassword(ctx *gin.Context) {
-	req := &PlatformUserResetPasswordRequest{}
+	req := &UserResetPasswordRequest{}
 	if err := h.binder.ShouldBindJSON(ctx, req); err != nil {
 		response.Error(ctx, err)
 		return

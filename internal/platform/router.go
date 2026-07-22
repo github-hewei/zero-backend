@@ -34,29 +34,13 @@ func NewGin(
 	captcha.Register(public, binder, captchaSvc)
 
 	authCfg := platform_user.MustLoadConfig()
-	authMid := platform_user.Register(public, protected, platform_user.Deps{
-		DB:      db,
-		Binder:  binder,
-		Config:  authCfg,
-		RDB:     rdb,
-		Captcha: captchaSvc,
-	})
+	authMid := platform_user.Register(public, protected, db, binder, authCfg, rdb, captchaSvc)
 
-	platformGroup := protected.Group("")
-	platformGroup.Use(authMid.RequireRole(platform_user.RoleSuperAdmin, platform_user.RoleOperator))
+	protected.Use(authMid.RequireRole(platform_user.RoleSuperAdmin, platform_user.RoleOperator))
 
-	rbac.RegisterPlatform(platformGroup, rbac.PlatformDeps{
-		DB:     db,
-		Binder: binder,
-		Config: rbac.Config{
-			HmacSecret:      authCfg.HmacSecret,
-			AccessTokenTtl:  authCfg.AccessTokenTtl,
-			RefreshTokenTtl: authCfg.RefreshTokenTtl,
-		},
-		RDB: rdb,
-	})
-
-	setting.RegisterPlatform(platformGroup, setting.Deps{DB: db, Binder: binder})
+	cfg := rbac.MustLoadPlatformConfig()
+	rbac.RegisterPlatform(protected, db, binder, cfg, rdb)
+	setting.RegisterPlatform(protected, db, binder)
 
 	return r
 }

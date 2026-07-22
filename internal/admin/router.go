@@ -39,33 +39,33 @@ func NewGin(
 	captchaSvc := provider.MustNewCaptchaService(rdb, provider.LoadAdminCaptchaConfig())
 	captcha.Register(public, binder, captchaSvc)
 
-	authCfg := rbac.MustLoadConfig()
-	rbac.Register(public, protected, rbac.Deps{
-		DB:      db,
-		Binder:  binder,
-		Config:  authCfg,
-		RDB:     rdb,
-		Captcha: captchaSvc,
-	})
+	authCfg := rbac.MustLoadAdminConfig()
+	rbac.RegisterAdmin(public, protected, db, binder, authCfg, rdb, captchaSvc)
+
+	setting.RegisterAdmin(protected, db, binder)
+	article.RegisterAdmin(protected, db, binder)
+	user.RegisterAdmin(protected, db, binder)
+	region.Register(protected, db, binder)
 
 	settingSvc := provider.NewSettingService(db)
-
-	setting.RegisterAdmin(protected, setting.Deps{DB: db, Binder: binder})
-	article.Register(protected, article.Deps{DB: db, Binder: binder})
-	upload.RegisterAdmin(protected, upload.Deps{DB: db, Binder: binder, Settings: settingSvc})
-	user.Register(protected, user.Deps{DB: db, Binder: binder})
-	region.Register(protected, region.Deps{DB: db, Binder: binder})
+	upload.RegisterAdmin(protected, db, binder, settingSvc)
 
 	health.Register(r)
 
 	r.LoadHTMLGlob("./views/*.html")
 	r.Static("/assets", "./views/assets")
 	r.Static("/uploads", "./uploads")
-
-	r.GET("/favicon.ico", func(c *gin.Context) { c.File("./views/favicon.ico") })
-	r.GET("/logo.svg", func(c *gin.Context) { c.File("./views/logo.svg") })
-	r.GET("/", func(c *gin.Context) { c.HTML(http.StatusOK, "index.html", nil) })
-	r.NoRoute(func(c *gin.Context) { c.HTML(http.StatusOK, "index.html", nil) })
-
+	r.GET("/favicon.ico", func(c *gin.Context) {
+		c.File("./views/favicon.ico")
+	})
+	r.GET("/logo.svg", func(c *gin.Context) {
+		c.File("./views/logo.svg")
+	})
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
+	r.NoRoute(func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
 	return r
 }

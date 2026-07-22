@@ -6,25 +6,18 @@ import (
 	"gorm.io/gorm"
 )
 
-// Deps 模块依赖
-type Deps struct {
-	DB       *gorm.DB
-	Binder   *bind.Binder
-	Settings SettingProvider
-}
-
 // buildHandler 创建上传模块处理器
-func buildHandler(deps Deps) *Handler {
-	groupRepo := NewGroupRepository(deps.DB)
+func buildHandler(db *gorm.DB, binder *bind.Binder, settings SettingProvider) *Handler {
+	groupRepo := NewGroupRepository(db)
 	groupSvc := NewGroupService(groupRepo)
-	fileRepo := NewFileRepository(deps.DB)
-	fileSvc := NewFileService(fileRepo, deps.Settings)
-	return newHandler(deps.Binder, groupSvc, fileSvc)
+	fileRepo := NewFileRepository(db)
+	fileSvc := NewFileService(fileRepo, settings)
+	return newHandler(binder, groupSvc, fileSvc)
 }
 
 // RegisterAdmin 注册上传模块路由（管理端）
-func RegisterAdmin(rg *gin.RouterGroup, deps Deps) {
-	h := buildHandler(deps)
+func RegisterAdmin(rg *gin.RouterGroup, db *gorm.DB, binder *bind.Binder, settings SettingProvider) {
+	h := buildHandler(db, binder, settings)
 	rg.POST("/upload/group/list", h.ListGroup)
 	rg.POST("/upload/group/create", h.CreateGroup)
 	rg.POST("/upload/group/update", h.UpdateGroup)
@@ -35,8 +28,8 @@ func RegisterAdmin(rg *gin.RouterGroup, deps Deps) {
 }
 
 // RegisterApi 注册上传模块路由（API端）
-func RegisterApi(rg *gin.RouterGroup, deps Deps) {
-	h := buildHandler(deps)
+func RegisterApi(rg *gin.RouterGroup, db *gorm.DB, binder *bind.Binder, settings SettingProvider) {
+	h := buildHandler(db, binder, settings)
 	rg.POST("/upload/file/list", h.ListFile)
 	rg.POST("/upload/file/upload", h.UploadFile)
 	rg.POST("/upload/file/delete", h.DeleteFile)

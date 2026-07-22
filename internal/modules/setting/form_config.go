@@ -1,7 +1,7 @@
 package setting
 
-// GetFormConfigs 获取系统设置表单配置
-func GetFormConfigs() []FormGroup {
+// FormConfigs 获取系统设置表单配置
+func FormConfigs() []FormGroup {
 	return []FormGroup{
 		{Key: "site", Label: "站点信息", Description: "系统站点基本配置", OnlyPlatform: true, Fields: []FormField{
 			{Key: "site_name", Label: "站点名称", Type: "text", Required: true},

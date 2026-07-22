@@ -14,13 +14,14 @@ func main() {
 	config.Init()
 
 	rdb := redis.New(provider.LoadRedisConfig())
-	mgr := queue.NewQueueManager(rdb)
+	manager := queue.NewQueueManager(rdb)
 
 	conn := mongodb.MustNewConn(provider.LoadMongoConfig())
-	l := provider.NewLogger(conn.DB, "worker.log")
+	log := provider.NewLogger(conn.DB, "worker.log")
 
-	registry := worker.NewRegistry(l)
-	registry.Register("example", &worker.ExampleHandler{L: l})
+	registry := worker.NewRegistry(log)
+	registry.Register("example", worker.NewExampleHandler(log))
 
-	worker.NewServer(mgr, registry, l).Run()
+	// 启动服务
+	worker.NewServer(manager, registry, log).Run()
 }

@@ -46,6 +46,7 @@ func LoadConfig() (Config, error) {
 	return c, nil
 }
 
+// MustLoadConfig 从全局配置加载模块配置，校验失败 panic。
 func MustLoadConfig() Config {
 	cfg, err := LoadConfig()
 	if err != nil {
