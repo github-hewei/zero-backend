@@ -1,4 +1,4 @@
-package platform_user
+package user
 
 import (
 	"errors"
@@ -15,13 +15,13 @@ type Config struct {
 // Validate 校验配置有效性。
 func (c Config) Validate() error {
 	if c.HmacSecret == "" {
-		return errors.New("platform_user: platform.auth.hmac_secret is required")
+		return errors.New("platform.auth.hmac_secret is required")
 	}
 	if c.AccessTokenTtl <= 0 {
-		return errors.New("platform_user: platform.auth.access_token_ttl must be positive")
+		return errors.New("platform.auth.access_token_ttl must be positive")
 	}
 	if c.RefreshTokenTtl <= 0 {
-		return errors.New("platform_user: platform.auth.refresh_token_ttl must be positive")
+		return errors.New("platform.auth.refresh_token_ttl must be positive")
 	}
 	return nil
 }

@@ -1,4 +1,4 @@
-package platform_user
+package user
 
 import (
 	"github.com/241x/zero-kit/baserepo"

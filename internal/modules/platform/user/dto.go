@@ -1,4 +1,4 @@
-package platform_user
+package user
 
 // LoginRequest 平台登录请求
 type LoginRequest struct {

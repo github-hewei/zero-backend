@@ -2,7 +2,7 @@ package platform
 
 import (
 	"zero-backend/internal/modules/captcha"
-	"zero-backend/internal/modules/platform_user"
+	"zero-backend/internal/modules/platform/user"
 	"zero-backend/internal/modules/rbac"
 	"zero-backend/internal/modules/setting"
 	"zero-backend/internal/provider"
@@ -33,10 +33,10 @@ func NewGin(
 	captchaSvc := provider.MustNewCaptchaService(rdb, provider.LoadPlatformCaptchaConfig())
 	captcha.Register(public, binder, captchaSvc)
 
-	authCfg := platform_user.MustLoadConfig()
-	authMid := platform_user.Register(public, protected, db, binder, authCfg, rdb, captchaSvc)
+	authCfg := user.MustLoadConfig()
+	authMid := user.Register(public, protected, db, binder, authCfg, rdb, captchaSvc)
 
-	protected.Use(authMid.RequireRole(platform_user.RoleSuperAdmin, platform_user.RoleOperator))
+	protected.Use(authMid.RequireRole(user.RoleSuperAdmin, user.RoleOperator))
 
 	cfg := rbac.MustLoadPlatformConfig()
 	rbac.RegisterPlatform(protected, db, binder, cfg, rdb)
